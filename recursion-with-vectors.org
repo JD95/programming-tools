@@ -247,62 +247,62 @@ vector<int> range(int start, int stop) {
 #+END_SRC
 
 #+REVEAL: split
-[[./images/new-recursion/range-example/range-example-1.png]]
+[[./images/recursion-with-vectors/range-example/range-example-1.png]]
 start with the inital function call
 #+REVEAL: split
-[[./images/new-recursion/range-example/range-example-2.png]]
+[[./images/recursion-with-vectors/range-example/range-example-2.png]]
 replace the call with range's definition, fill in the variables
 #+REVEAL: split
-[[./images/new-recursion/range-example/range-example-3.png]]
+[[./images/recursion-with-vectors/range-example/range-example-3.png]]
 expand out the recursive call for range by again replacing it with the definition
 #+REVEAL: split
-[[./images/new-recursion/range-example/range-example-4.png]]
+[[./images/recursion-with-vectors/range-example/range-example-4.png]]
 one more time, we can stop here because we know it will be 3 long
 #+REVEAL: split
-[[./images/new-recursion/range-example/range-example-5.png]]
+[[./images/recursion-with-vectors/range-example/range-example-5.png]]
 start evaluating the tree
 #+REVEAL: split
-[[./images/new-recursion/range-example/range-example-6.png]]
+[[./images/recursion-with-vectors/range-example/range-example-6.png]]
 result is true
 #+REVEAL: split
-[[./images/new-recursion/range-example/range-example-7.png]]
+[[./images/recursion-with-vectors/range-example/range-example-7.png]]
 pick the first value
 #+REVEAL: split
-[[./images/new-recursion/range-example/range-example-8.png]]
+[[./images/recursion-with-vectors/range-example/range-example-8.png]]
 eliminate the other path
 #+REVEAL: split
-[[./images/new-recursion/range-example/range-example-9.png]]
+[[./images/recursion-with-vectors/range-example/range-example-9.png]]
 evaluate the second choice
 #+REVEAL: split
-[[./images/new-recursion/range-example/range-example-10.png]]
+[[./images/recursion-with-vectors/range-example/range-example-10.png]]
 result is true
 #+REVEAL: split
-[[./images/new-recursion/range-example/range-example-11.png]]
+[[./images/recursion-with-vectors/range-example/range-example-11.png]]
 pick the first value
 #+REVEAL: split
-[[./images/new-recursion/range-example/range-example-12.png]]
+[[./images/recursion-with-vectors/range-example/range-example-12.png]]
 eliminate the second choice
 #+REVEAL: split
-[[./images/new-recursion/range-example/range-example-13.png]]
+[[./images/recursion-with-vectors/range-example/range-example-13.png]]
 evaluate the third choice
 #+REVEAL: split
-[[./images/new-recursion/range-example/range-example-14.png]]
+[[./images/recursion-with-vectors/range-example/range-example-14.png]]
 result is false
 #+REVEAL: split
-[[./images/new-recursion/range-example/range-example-15.png]]
+[[./images/recursion-with-vectors/range-example/range-example-15.png]]
 pick the second value
 #+REVEAL: split
-[[./images/new-recursion/range-example/range-example-16.png]]
+[[./images/recursion-with-vectors/range-example/range-example-16.png]]
 eliminate the first path
 #+REVEAL: split
-[[./images/new-recursion/range-example/range-example-17.png]]
+[[./images/recursion-with-vectors/range-example/range-example-17.png]]
 start evaluating the inserts
 #+REVEAL: split
-[[./images/new-recursion/range-example/range-example-18.png]]
+[[./images/recursion-with-vectors/range-example/range-example-18.png]]
 #+REVEAL: split
-[[./images/new-recursion/range-example/range-example-19.png]]
+[[./images/recursion-with-vectors/range-example/range-example-19.png]]
 #+REVEAL: split
-[[./images/new-recursion/range-example/range-example-20.png]]
+[[./images/recursion-with-vectors/range-example/range-example-20.png]]
 
 ** generalizing range
 
