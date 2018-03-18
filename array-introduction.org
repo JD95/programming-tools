@@ -16,7 +16,7 @@ in C++, arrays represent fixed length collections
 char letters[5] = {'a','b','c','d','e'};
 #+END_SRC
 
-[[./images/array-in-memory.png]]
+[[./images/array-introduction/array-in-memory.png]]
 
 #+REVEAL: split
 Previously, if we wanted to talk about a collecction, we'd have to make a big struct
@@ -79,11 +79,11 @@ second_of_five(truths); // false
 - the index represents spaces from the start
 
 #+REVEAL: split
-[[./images/array-assignment-1.png]]
+[[./images/array-introduction/array-assignment-1.png]]
 #+REVEAL: split
-[[./images/array-assignment-2.png]]
+[[./images/array-introduction/array-assignment-2.png]]
 #+REVEAL: split
-[[./images/array-assignment-3.png]]
+[[./images/array-introduction/array-assignment-3.png]]
 
 ** modifying array elements
 #+BEGIN_SRC cpp
@@ -94,13 +94,13 @@ letters[i] = letters[j];
 #+END_SRC
 
 #+REVEAL: split
-[[./images/modifying-array-1.png]]
+[[./images/array-introduction/modifying-array-1.png]]
 #+REVEAL: split
-[[./images/modifying-array-2.png]]
+[[./images/array-introduction/modifying-array-2.png]]
 #+REVEAL: split
-[[./images/modifying-array-3.png]]
+[[./images/array-introduction/modifying-array-3.png]]
 #+REVEAL: split
-[[./images/modifying-array-4.png]]
+[[./images/array-introduction/modifying-array-4.png]]
 
 ** warning
 - arrays are always passed by reference
