@@ -1,0 +1,343 @@
+#+TITLE: Variables and Scope
+#+STARTUP: hidestar
+#+STARTUP: indent
+
+# latex options
+#+OPTIONS: author:nil date:nil num:nil html-postamble:nil 
+#+LATEX_HEADER: \usepackage[margin=1.5in]{geometry}
+#+LATEX_HEADER: \usepackage{apacite}
+#+LATEX_HEADER: \usepackage{setspace}
+
+We need to understand how C++ goes about representing the values which are passed back and forth between functions.
+
+** A Name and a Box 
+
+In mathematics, a variable is simply a name for a value which has not been given yet.
+
+Examples:
+- area of circle: \[area(r) = \pi r^2\]
+- area of triangle: \[area(b,h) = \frac{1}{2} bh\]
+- line formula: \[y(m,x,b) = mx + b\]
+
+In all of these examples, the names $x$, $r$, $b$, etc. are all placeholders which are swapped out when the values are eventually known. Functions are simply names for expressions and can be swapped out with their definitions. While this method is simple for humans to understand and work with, it is inefficent for a computer to perfectly emulate.
+
+On a computer, a variable is name which refers to a box holding a value of some type.
+
+#+REVEAL: split
+#+BEGIN_SRC cpp
+int x = 5;
+#+END_SRC
+
+[[./images/variables-and-scope/variable-with-type-with-value.png]]
+
+There are three parts to defining a variable to work with in C++:
+- The type of the variables (int, bool, float, string, etc.)
+- The name of the variable
+- The value in the box (must match the type)
+
+** The auto Keyword
+
+Writing out the types can be annoying (sometimes impossible). An alternative to explicitly writing out the type for a variable is to use the keyword =auto= in place of the actual type.
+
+#+BEGIN_SRC cpp
+
+struct MySuperLongAnnoyingNameForMyType {
+  int thing1;
+  int thing2;
+};
+
+MySuperLongAnnoyingNameForMyType add_numbers(...) { ... } 
+
+int main() {
+  auto x = 5;
+  auto word = true;
+  auto result = add_numbers(...);
+  ...
+}
+#+END_SRC
+
+In the above example, the function =add_numbers= returns a =MySuperLongAnnoyingNameForMyType=. Instead of having to write out the type for the variable, =auto= will tell C++ to look at the return type of =add_numbers= to figure out what the type of =result= is. 
+
+** Assignment
+Unlike in maths, once the box has been filled with a value it can be changed as many times as we want.
+
+#+BEGIN_SRC cpp
+int x = 5;
+cout << "before: " << x << "\n";
+x = 6;
+cout << "after: " << x << "\n";
+#+END_SRC
+
+[[./images/variables-and-scope/assignment.png]]
+
+** Variables can be Assigned to Eachother
+
+Because the variable is a name which refers to a value, these names can be used anywhere a value of that type would have been accepted. For example, if we wanted to fill one variable's box with a value, we could use the value of another variable to fill it.
+
+#+BEGIN_SRC cpp
+int x = 5;
+int y = 10;
+x = y;
+cout << x << " " << y << "\n";
+#+END_SRC
+
+[[./images/variables-and-scope/assignment-with-another-variable.png]]
+
+Notice that after the assignment there remains two separate boxes. With normal variables, *assignment does not result in two names refering to the same box*. The contents of one box is copied into the other box. If $y$ is assigned to $x$, later changing $x$ does not affect $y$.
+
+** Function Evaluation and Scope
+
+#+BEGIN_SRC cpp -n
+int line(int m, int x, int b){
+  return (m * x) + b;
+}
+
+int main() {
+  int m = 5;
+  int x = 4;
+  int b = 3;
+  cout << line(m,x,b);
+  return 0;
+}
+#+END_SRC
+
+When the program is evaluated it starts from the first line of =main()= and runs the program, line by line, until it reaches the =return 0;=. Every line with a variable creates a new box which the name refers to. When a function is called, we jump to the first line of that function (in this case =line()=). New variables are created for each of the inputs and filled with the values passed in when the function was called.
+
+What happens if the inputs to a function have the same names as existing variables? Fortunately, this isn't a problem because functions create their own *scope*.
+
+[[./images/variables-and-scope/line-example/line-example.png]]
+
+A scope can be thought of as a room. Imagine a school with multiple people who have the same name. If all of the students were looking down and they heard their name called, they would be confused as to whether it was them being called on. However, this isn't a problem if none of them are in the same room.
+
+This is how the problem of many variables with the same name is solved. A name can only be used by one variable at a time in each scope. So long as variables are in different scopes, their names do not conflict.
+
+** References
+
+While the default for variables is for a name to refer to its own unique box, it is possible for a name to refer to an existing box.
+
+#+BEGIN_SRC cpp -n
+int line(int m, int& x, int b){
+  return (m * x) + b;
+}
+
+int main() {
+  int m = 5;
+  int x = 4;
+  int b = 3;
+  cout << line(m,x,b);
+  return 0;
+}
+#+END_SRC
+
+[[./images/variables-and-scope/line-example/line-example-reference-1.png]]
+
+This means that what ever operations are done to the name $x$ within line will also affect the box of the $x$ inside of main.
+
+#+BEGIN_SRC cpp -n
+int line(int m, int& x, int& b){
+  return (m * x) + b;
+}
+
+int main() {
+  int m = 5;
+  int x = 4;
+  int b = 3;
+  cout << line(m,b,b);
+  return 0;
+}
+#+END_SRC
+
+[[./images/variables-and-scope/line-example/line-example-reference-2.png]]
+
+If the same box is passed in for both references, the names $x$ and $b$ will refer to the *same* box.
+
+** Pointers
+
+While references can refer to existing boxes, pointers are special variables which have a box that holds *references* to other values. 
+
+#+BEGIN_SRC cpp
+int main() {
+  int x = 5;
+  int* y = &x;
+  return 0;
+}
+#+END_SRC
+
+[[./images/variables-and-scope/pointer-example/1.png]]
+
+Pointers cannot be used as normal variables unless they are dereferenced.
+
+#+BEGIN_SRC cpp
+int add(int a, int b) {
+  return a + b;
+}
+
+int main() {
+  int x = 5;
+  int* y = &x;
+  cout << add(x, (*y));
+  return 0;
+}
+#+END_SRC
+
+Dereferencing a pointer tells C++ to "follow" the reference to the box it's pointing at. This is what happens with normal variables and references, except neither can actually change which box they are refering to.
+
+#+BEGIN_SRC cpp
+int add(int a, int b) {
+  return a + b;
+}
+
+int main() {
+  int x = 5;
+  int* y = &x;
+  int z = 10;
+  y = &z;
+  cout << add(x, (*y));
+  return 0;
+}
+#+END_SRC
+
+[[./images/variables-and-scope/pointer-example/2.png]]
+
+Pointers are needed when unknown amounts of data are created at runtime. For example, if a file is loaded into memory, the program can't know ahead of time how the contents are. If the size cannot be known ahead of time, then it is impossible to use a normal variable for it. To get around this, the memory is reserved when the file is loaded and the result is a pointer to this data.
+
+When initially created, pointers will refer to a speciall value called =Null=. If a pointer is set to =Null= it means it does not currently refer to any existing value. If you attempt to dereference a null pointer it will cause the program to crash.
+
+** Side effects
+
+References and pointers are dangerous to work with given that they can manipulate values which are outside of the scope they exist in. Misuse of these tools can lead to problems that are difficult to track down *if* you can even correctly detect where the problem is happening. Pointers especially have a tendency to blow up some time after they are actually created due to the =Null= value.
+
+| variable type | symbol | example | when to use                                             |
+|---------------+--------+---------+---------------------------------------------------------|
+| value         | (none) | int     | most of the time, it is the safest option               |
+| reference     | &      | int&    | with *big* values that are too expensive to be copied   |
+| pointers      | *      | int*    | when working with data whose size is unknown beforehand |
+
+In modern practice, there are several alternatives to using "raw" pointers. While they will not be discussed here, you can find more information about "smart pointers" at these links:
+- https://stackoverflow.com/questions/106508/what-is-a-smart-pointer-and-when-should-i-use-one
+- http://en.cppreference.com/w/cpp/memory/unique_ptr
+- http://en.cppreference.com/w/cpp/memory/shared_ptr
+
+** When to use Variables? 
+
+Variables can come in handy when writing functions that use the same result in more than one place.
+
+Lets write a function that transforms names from first, middle, then last to last, first middle with a comma after the last name.
+#+BEGIN_SRC 
+"Robert Milton Jones" -> "Jones, Robert Milton"
+"Tom Marvolo Riddle" -> "Riddle, Tom Marvolo"
+"John Jacob Jingleheimer" -> "Jingleheimer, Jon Jacob"
+#+END_SRC
+
+#+REVEAL: split
+#+BEGIN_SRC cpp
+string name_swap(string name){
+  return (name.substr(name.find(' ') + 1, name.length() - 1))
+         .substr(
+           (name.substr(name.find(' ') + 1, name.length()-1)
+             .find(' ') + 1), 
+           (name.substr(name.find(' ') + 1, name.length()-1))
+             .length() - 1)
+       + ", "
+       + (name.substr(0, name.find(' ') - 1))
+       + " "
+       + (name.substr(name.find(' ') + 1, name.length() - 1))
+         .substr(
+           0, 
+           ((name.substr(name.find(' ') + 1, name.length() - 1))
+         .find(' ') - 1))
+       ;
+}
+#+END_SRC
+if we follow the normal algorithm, we get this disgusting mess
+#+REVEAL: split
+#+BEGIN_SRC cpp
+string first_name(string name) {
+  return name.substr(0, name.find(' ') - 1);
+}
+string middle_name(string name) {
+  return (name.substr(name.find(' ') + 1, name.length() - 1))
+         .substr(
+           0, 
+           ((name.substr(name.find(' ') + 1, name.length() - 1))
+         .find(' ') - 1;
+}
+string last_name(string name) {
+  return (name.substr(name.find(' ') + 1, name.length() - 1))
+         .substr(
+           (name.substr(name.find(' ') + 1, name.length()-1)
+             .find(' ') + 1), 
+           (name.substr(name.find(' ') + 1, name.length()-1))
+             .length() - 1);
+}
+string name_swap(string name){
+  return last_name(name) 
+       + ", "
+       + first_name(name)
+       + " "
+       + middle_name(name);
+}
+#+END_SRC
+we could try making seperate functions to get each name, but that just moves the problem
+
+#+REVEAL: split
+#+BEGIN_SRC cpp
+string first_name(string name) {
+  return name.substr(0, name.find(' ') - 1);
+}
+string middle_last(string name) {
+  return name.substr(name.find(' ') + 1, name.length() - 1);
+}
+string middle_name(string name) {
+  return middle_last(name) 
+         .substr(0, middle_last(name).find(' ') - 1);
+}
+string last_name(string name) {
+  return middle_last(name).substr(
+           middle_last(name).find(' ') + 1, 
+           middle_last(name).length() - 1);
+}
+string name_swap(string name){
+  return last_name(name) 
+       + ", "
+       + first_name(name)
+       + " "
+       + middle_name(name);
+}
+#+END_SRC
+
+If you see the same pattern more than twice, you should make a function, however it's a bit annoying to have to write out new functions in C++'s bulky syntax all the time. If these functions will never be used again, then it would be preferable to just define variables within the function to hold onto the intermediate results.
+
+#+REVEAL: split
+#+BEGIN_SRC cpp
+string name_swap(string name){
+
+  string first_name = name.substr(0, name.find(' ') - 1);
+  
+  string middle_last = 
+    name.substr(name.find(' ') + 1, name.length() - 1);
+  
+  string middle_name = 
+    middle_last.substr(0, middle_last.find(' ') - 1);
+  
+  string last_name = 
+    middle_last.substr(
+       middle_last.find(' ') + 1, 
+       middle_last.length() - 1);
+
+  return last_name + ", " + first_name + " " + middle_name; 
+}
+#+END_SRC
+
+This is safe so long as we don't change what the variables hold and if the order in which the results are used doesn't matter.
+
+** When to not use Variables
+
+#+BEGIN_SRC cpp
+string division(int x, int y){
+  int result = x / y;
+  return y == 0 ? "fail!" : to_string(result);
+}
+#+END_SRC
+
+In this case it is unsafe to store the result in a variable because it is calculated before the safety check! Remember that programs execute statements in order, so if $y$ happens to be zero, it will attempt the division and crash the program before the check can catch it.

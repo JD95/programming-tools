@@ -1,0 +1,519 @@
+#+TITLE: Recursion with Vectors
+#+STARTUP: hidestar
+#+STARTUP: indent
+
+# latex options
+#+OPTIONS: author:nil date:nil num:nil 
+#+LATEX_HEADER: \usepackage[margin=1.5in]{geometry}
+#+LATEX_HEADER: \usepackage{apacite}
+#+LATEX_HEADER: \usepackage{setspace}
+
+- Recursion is hard
+- It's complicated
+- Can we do better?
+
+** Examining past problems
+
+#+REVEAL: split
+#+BEGIN_SRC cpp
+int sum(vector<int> nums) {
+  auto combine = [nums]() mutable {
+   int n = nums.front();
+   nums.erase(nums.begin());
+   return n + sum(nums);
+  };
+  return !nums.empty() ? combine() : 0;
+}
+#+END_SRC
+
+#+BEGIN_SRC cpp
+int product(vector<int> nums) mutable {
+  auto combine = [nums]() {
+   int n = nums.front();
+   nums.erase(nums.begin());
+   return n * sum(nums);
+  };
+  return !nums.empty() ? combine() : 0;
+}
+#+END_SRC
+
+#+REVEAL: split
+The functions only differ by the operation that combines the elements of the collection.
+
+#+REVEAL: split
+Can this be generalized?
+
+** Generalizing sum
+
+#+BEGIN_SRC cpp
+int sum(vector<int> nums) {
+  auto combine = [nums]() mutable {
+   int n = nums.front();
+   nums.erase(nums.begin());
+   return n + sum(nums);
+  };
+  return !nums.empty() ? combine() : 0;
+}
+#+END_SRC
+This is the original
+
+#+REVEAL: split
+#+BEGIN_SRC cpp
+template <typename F>
+int sum(vector<int> nums, F f) mutable {
+  auto combine = [nums, f]() {
+   int n = nums.front();
+   nums.erase(nums.begin());
+   return f(n, sum(nums, f));
+  };
+  return !nums.empty() ? combine() : 0;
+}
+#+END_SRC
+- start by pulling out the operation as a new function input
+- the template will figure out that F needs to be a function
+
+#+REVEAL: split
+#+BEGIN_SRC cpp
+template <typename F>
+int sum(vector<int> nums, int init, F f) {
+  auto combine = [nums, f]() mutable {
+   int n = nums.front();
+   nums.erase(nums.begin());
+   return sum(nums, f(n, init), f));
+  };
+  return !nums.empty() ? combine() : init;
+}
+#+END_SRC
+- next, pull out the zero as the default
+- the default on recursive calls becomes the previous result
+
+#+REVEAL: split
+#+BEGIN_SRC cpp
+template <typename A, typename F>
+A sum(vector<A, allocator<A>> nums, A init, F f) {
+  auto combine = [nums]() {
+   A n = nums.front();
+   nums.erase(nums.begin());
+   return sum(nums, f(n, init), f));
+  };
+  return !nums.empty() ? combine() : init;
+}
+#+END_SRC
+- generalize over the type in the vector
+- the allocator<A> needs to be there because C++ is stupid
+
+#+REVEAL: split
+#+BEGIN_SRC cpp
+template <typename B, typename A, typename F>
+B sum(vector<A, allocator<A>> nums, B init, F f) {
+  auto combine = [nums, init, f]() mutable {
+   A n = nums.front();
+   nums.erase(nums.begin());
+   return sum(nums, f(n, init), f);
+  };
+  return !nums.empty() ? combine() : init;
+}
+#+END_SRC
+- allow the vector to be folded into a new type
+
+#+REVEAL: split
+#+BEGIN_SRC cpp
+template <typename B, typename A, typename F>
+B accumulate(vector<A, allocator<A>> nums, B init, F f) {
+  auto combine = [nums, init, f]() mutable {
+   A n = nums.front();
+   nums.erase(nums.begin());
+   return accumulate(nums, f(n, init), f);
+  };
+  return !nums.empty() ? combine() : init;
+}
+#+END_SRC
+- give it a more general sounding name
+- done! 
+
+** accumulate example
+
+#+BEGIN_SRC cpp
+vector<int> numbers = {1,2,3,4,5};
+
+int result = accumulate<int>(numbers, 0,
+  [](int x, int y) { return x + y });
+// result = 15
+
+#+END_SRC
+
+** intersperse
+
+#+BEGIN_SRC cpp
+template <typename T>
+auto intersperse(vector<T, allocator<T>> elems, T item) 
+->vector<T, allocator<T>>
+{
+  return accumulate(elems, vector<T, allocator<T>>{},
+   [item](auto elem, auto result) {
+      auto add = [elem, result, item]() mutable {
+	      result.insert(result.begin(), item);
+	      result.insert(result.begin(), elem);
+	      return result;
+         };
+       
+      // We need case to not add the item to the end
+      auto dont_add = [elem, result]() mutable {
+          result.insert(result.begin(), elem);
+          return result;
+          
+      };
+      
+      return result.empty() ? dont_add() : add();
+  });
+}
+#+END_SRC
+
+** intersperse example
+#+BEGIN_SRC cpp
+vector<string> words = { "hello", "there", "my", "friend" };
+auto commas = intersperse<string>(words, ", ");
+auto result = accumulate(commas, string(""),
+	[](string x, string y) { return x + y; });
+// result = "hello, there, my, friend"
+#+END_SRC
+
+** map
+#+BEGIN_SRC cpp
+template<typename A, typename B, typename F>
+auto map(vector<A, allocator<A>> elems, F f) 
+	-> vector<B, allocator<B>> 
+{
+  return accumulate(elems, vector<B,allocator<B>> {}, 
+    [f](auto elem, auto result) {
+      result.insert(result.end(), f(elem));
+      return result;
+  });
+}	
+#+END_SRC
+
+** map example
+#+BEGIN_SRC cpp
+vector<string> words = { "hello", "there", "my", "friend" };
+auto excited = map<string>(words, [](string s) { return s + "!"; });
+auto commas = intersperse<string>(words, ", ");
+auto result = accumulate(commas, string(""),
+	[](string x, string y) { return x + y; });
+// result is "hello!,there!, my!, friend!
+#+END_SRC
+
+** filter
+#+BEGIN_SRC cpp
+template<typename A, typename F>
+auto filter(vector<A, allocator<A>> elems, F f) 
+	-> vector<A, allocator<A>> 
+{
+  return accumulate(elems, vector<A, allocator<A>>{},
+    [f](auto elem, auto result) {
+      auto pass = [elem, result]() mutable {
+        result.insert(result.end(), elem);
+        return result;
+      };
+      return f(elem) ? pass() : result;
+  });
+}
+#+END_SRC
+
+** filter example
+#+BEGIN_SRC cpp
+vector<int> numbers = { 1, 2, 3, 4, 5 };
+auto evens = filter(numbers
+  [](int n) { return n % 2 == 0; });
+// evens = { 2, 4 }
+#+END_SRC
+
+** range
+#+BEGIN_SRC cpp
+vector<int> range(int start, int stop) {
+	auto continue_range = [start, stop]() {
+
+		// Calculate the rest of the range
+		auto rest = range(start + 1, stop);
+
+		// Insert the current number before
+		// the rest
+		rest.insert(rest.begin(), start);
+
+		return rest;
+	};
+
+	return start < stop ? continue_range() : vector<int> {start};
+}
+#+END_SRC
+
+#+REVEAL: split
+[[./images/recursion-with-vectors/range-example/range-example-1.png]]
+start with the inital function call
+#+REVEAL: split
+[[./images/recursion-with-vectors/range-example/range-example-2.png]]
+replace the call with range's definition, fill in the variables
+#+REVEAL: split
+[[./images/recursion-with-vectors/range-example/range-example-3.png]]
+expand out the recursive call for range by again replacing it with the definition
+#+REVEAL: split
+[[./images/recursion-with-vectors/range-example/range-example-4.png]]
+one more time, we can stop here because we know it will be 3 long
+#+REVEAL: split
+[[./images/recursion-with-vectors/range-example/range-example-5.png]]
+start evaluating the tree
+#+REVEAL: split
+[[./images/recursion-with-vectors/range-example/range-example-6.png]]
+result is true
+#+REVEAL: split
+[[./images/recursion-with-vectors/range-example/range-example-7.png]]
+pick the first value
+#+REVEAL: split
+[[./images/recursion-with-vectors/range-example/range-example-8.png]]
+eliminate the other path
+#+REVEAL: split
+[[./images/recursion-with-vectors/range-example/range-example-9.png]]
+evaluate the second choice
+#+REVEAL: split
+[[./images/recursion-with-vectors/range-example/range-example-10.png]]
+result is true
+#+REVEAL: split
+[[./images/recursion-with-vectors/range-example/range-example-11.png]]
+pick the first value
+#+REVEAL: split
+[[./images/recursion-with-vectors/range-example/range-example-12.png]]
+eliminate the second choice
+#+REVEAL: split
+[[./images/recursion-with-vectors/range-example/range-example-13.png]]
+evaluate the third choice
+#+REVEAL: split
+[[./images/recursion-with-vectors/range-example/range-example-14.png]]
+result is false
+#+REVEAL: split
+[[./images/recursion-with-vectors/range-example/range-example-15.png]]
+pick the second value
+#+REVEAL: split
+[[./images/recursion-with-vectors/range-example/range-example-16.png]]
+eliminate the first path
+#+REVEAL: split
+[[./images/recursion-with-vectors/range-example/range-example-17.png]]
+start evaluating the inserts
+#+REVEAL: split
+[[./images/recursion-with-vectors/range-example/range-example-18.png]]
+#+REVEAL: split
+[[./images/recursion-with-vectors/range-example/range-example-19.png]]
+#+REVEAL: split
+[[./images/recursion-with-vectors/range-example/range-example-20.png]]
+
+** generalizing range
+
+#+BEGIN_SRC cpp
+vector<int> range(int start, int stop) {
+	auto continue_range = [start, stop]() {
+
+		// Calculate the rest of the range
+		auto rest = range(start + 1, stop);
+
+		// Insert the current number before
+		// the rest
+		rest.insert(rest.begin(), start);
+
+		return rest;
+	};
+
+	return start < stop ? continue_range() : vector<int> {start};
+}
+#+END_SRC
+- Original
+
+#+REVEAL: split
+#+BEGIN_SRC cpp
+template <typename Check>
+vector<int> range(Check cond, int start, int stop) {
+	auto continue_range = [start, stop]() {
+
+		// Calculate the rest of the range
+		auto rest = range(start + 1, stop);
+
+		// Insert the current number before
+		// the rest
+		rest.insert(rest.begin(), start);
+
+		return rest;
+	};
+
+	return cond(start, stop) ? continue_range() : vector<int> {start};
+}
+#+END_SRC
+- pull out the condition 
+
+#+REVEAL: split
+#+BEGIN_SRC cpp
+template <typename Check>
+vector<int> range(Check cond, int start) {
+	auto continue_range = [cond, start]() {
+
+		// Calculate the rest of the range
+		auto rest = range(start + 1);
+
+		// Insert the current number before
+		// the rest
+		rest.insert(rest.begin(), start);
+
+		return rest;
+	};
+
+	return cond(start) ? continue_range() : vector<int> {start};
+}
+#+END_SRC
+- stop can be hard coded into cond since it never changes 
+
+#+REVEAL: split
+#+BEGIN_SRC cpp
+template <typename Check>
+vector<int> range(Check cond, int start) {
+	auto continue_range = [cond, start]() {
+
+            int next_start = start + 1;
+            
+		// Calculate the rest of the range
+		auto rest = range(cond, next_start);
+
+		// Insert the current number before
+		// the rest
+		rest.insert(rest.begin(), start);
+
+		return rest;
+	};
+
+	return cond(start) ? continue_range() : vector<int> {start};
+}
+#+END_SRC
+- pull creating the next start into it's own step 
+
+#+REVEAL: split
+#+BEGIN_SRC cpp
+template <typename Expand, typename Check>
+vector<int> range(Expand f, Check cond, int start) {
+	auto continue_range = [f, cond, start]() {
+
+            int next_start = f(start);
+            
+		// Calculate the rest of the range
+		auto rest = range(cond, next_start);
+
+		// Insert the current number before
+		// the rest
+		rest.insert(rest.begin(), start);
+
+		return rest;
+	};
+
+	return cond(start) ? continue_range() : vector<int> {start};
+}
+#+END_SRC
+- generalize over the operation to make the next start 
+
+#+REVEAL: split
+#+BEGIN_SRC cpp
+template <typename A, typename Expand, typename Check>
+vector<A, allocator<A>> range(Expand f, Check cond, A start) {
+	auto continue_range = [f, cond, start]() {
+
+            A next_start = f(start);
+            
+		// Calculate the rest of the range
+		auto rest = range(f, cond, next_start);
+
+		// Insert the current A before
+		// the rest
+		rest.insert(rest.begin(), start);
+
+		return rest;
+	};
+
+	return cond(start) ? continue_range() : 
+        vector<A, allocator<A>> {start};
+}
+#+END_SRC
+- generalize over the type of the container
+- again, allocator<A> must be added because C++
+
+#+REVEAL: split
+#+BEGIN_SRC cpp
+template <typename B, typename A, typename Expand, typename Check>
+vector<B, allocator<B>> range(Expand f, Check cond, A start) {
+	auto continue_range = [f, cond, start]() {
+
+            pair<B,A> next_start = f(start);
+            
+		// Calculate the rest of the range
+		auto rest = range<B>(f, cond, get<1>(next_start));
+
+		// Insert the current B before
+		// the rest
+		rest.insert(rest.begin(), get<0>(next_start));
+
+		return rest;
+	};
+
+	return cond(start) ? continue_range() : 
+        vector<B, allocator<B>> {start};
+}
+#+END_SRC
+- generalize over what the expansion step generates
+- make it create a new element for the list *and* a new start
+- get<n> lets you grab the nth item from a tuple or pair
+- we need to tell range what the resulting type is cause C++
+
+#+REVEAL: split
+#+BEGIN_SRC cpp
+template<typename B, typename A, typename Expand, typename Check>
+vector<B, allocator<B>> unfold(Expand f, Check cond, A seed) {
+	auto expand = [f, cond, seed]() {
+		pair<B, A> result = f(seed);
+		auto rest = unfold<B>(f, cond, get<1>(result));
+		rest.insert(rest.begin(), get<0>(result));
+		return rest;
+	};
+	return cond(seed) ? expand() : 
+        vector<B, allocator<B>>{};
+}
+#+END_SRC
+- and finally, make the names a bit more generic
+- done!
+
+** unfold example
+#+BEGIN_SRC cpp
+vector<int> range = unfold<int>(
+  [](int x) { return make_pair(x, x+1); },
+  [](int x) { return x <= 10; },
+  1);
+
+// range = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+#+END_SRC
+
+** using everything
+
+generate a string which contains a comma seperated list of all of the even multiples of three from 0 to 50 
+
+#+BEGIN_SRC cpp
+auto numbers = unfold<int>(
+	[](int x) { return make_pair(x, x + 1); },
+	[](int x) { return x < 50; },
+	1);
+
+auto threes = map<int>(numbers,
+	[](int n) { return n * 3; }); 
+
+auto evens = filter(threes,
+	[](int n) { return n % 2 == 0; });
+
+auto str_nums = map<string>(threes, to_string);
+
+auto commas = intersperse<string>(str_nums, ", ");
+
+auto result = accumulate(commas, string(""),
+  [](string s, string result) { return s + result; });
+
+// result 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, ... 
+#+END_SRC
