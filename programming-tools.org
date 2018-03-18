@@ -4,7 +4,7 @@
 #+STARTUP: indent
 
 # latex options
-#+OPTIONS: date:nil timestamp:nil
+#+OPTIONS: date:nil timestamp:nil html-postamble:nil
 #+LATEX_HEADER: \usepackage[margin=1.5in]{geometry}
 #+LATEX_HEADER: \usepackage{apacite}
 #+LATEX_HEADER: \usepackage{setspace}
