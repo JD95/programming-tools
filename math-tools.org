@@ -1,0 +1,46 @@
+#+TITLE: Math Tools
+#+STARTUP: hidestar
+#+STARTUP: indent
+
+# latex options
+#+OPTIONS: author:nil date:nil num:nil 
+#+LATEX_HEADER: \usepackage[margin=1.5in]{geometry}
+#+LATEX_HEADER: \usepackage{apacite}
+#+LATEX_HEADER: \usepackage{setspace}
+  
+** basic math functions
+ | function | meaning        |
+ |----------+----------------|
+ | +        | addition       |
+ | -        | subtraction    |
+ | =*=      | multiplication |
+ | =/=      | division       |
+ | %        | modulus        |
+
+ #+REVEAL: split
+ - note that the word "operator" might show up in the place of function at some point.
+ - an operator is just a function with a funny symbol instead of a word for a name.
+   
+** char math
+ - remember that characters are represented as numbers in an ascii table
+ - every value of =char= is a number that corresponds to a symbol
+ - because =char= values are secretly numbers, you can actually do math with them
+ #+BEGIN_SRC cpp
+ // This converts a character letter (between 'A-Z') to its lower case
+ // version by adding the difference between 'a' and 'A' since the number
+ // for 'a' is greater than for 'A'
+ char lower_case(char c) {
+   return c + ('a' - 'A');
+ }
+ #+END_SRC
+ 
+** string math
+ - strings can be combined using =+=
+ #+BEGIN_SRC cpp
+ // combine("pop", "tart") would return "poptart"
+ string combine(string first, string second) {
+   return first + second;
+ }
+ #+END_SRC
+
+ 
