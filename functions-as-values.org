@@ -14,7 +14,7 @@
 auto add = [] (int x, int y)  { return  x + y; };
 #+END_SRC
 
-[[./images/lambda-value.png]]
+[[./images/functions-as-values/lambda-value.png]]
 
 #+REVEAL: split
 #+BEGIN_SRC cpp
@@ -22,19 +22,19 @@ auto add = [] (int x, int y)  { return  x + y; };
 int x = add(5,5);
 #+END_SRC
 
-[[./images/lambda-no-capture-eval-1.png]]
+[[./images/functions-as-values/lambda-no-capture-eval-1.png]]
 
 #+REVEAL: split
-[[./images/lambda-no-capture-eval-2.png]]
+[[./images/functions-as-values/lambda-no-capture-eval-2.png]]
 
 #+REVEAL: split
-[[./images/lambda-no-capture-eval-3.png]]
+[[./images/functions-as-values/lambda-no-capture-eval-3.png]]
 
 #+REVEAL: split
-[[./images/lambda-no-capture-eval-4.png]]
+[[./images/functions-as-values/lambda-no-capture-eval-4.png]]
 
 #+REVEAL: split
-[[./images/lambda-no-capture-eval-5.png]]
+[[./images/functions-as-values/lambda-no-capture-eval-5.png]]
 
 ** lambda capture
 #+BEGIN_SRC cpp
@@ -42,7 +42,7 @@ int x = 10;
 auto addX = [x](int y) { return x + y; };
 #+END_SRC
 
-[[./images/lambda-capture-by-value.png]]
+[[./images/functions-as-values/lambda-capture-by-value.png]]
 
 #+REVEAL: split
 #+BEGIN_SRC cpp
@@ -50,7 +50,7 @@ int x = 10;
 auto addX = [&x](int y) { return x + y; };
 #+END_SRC
 
-[[./images/lambda-capture-by-reference.png]]
+[[./images/functions-as-values/lambda-capture-by-reference.png]]
 
 *** Capture Practice 1
 #+BEGIN_SRC cpp
@@ -118,17 +118,17 @@ do_math(add, 7, 3); // 10
 #+END_SRC
 
 #+REVEAL: split
-[[./images/passing-functions-1.png]]
+[[./images/functions-as-values/passing-functions-1.png]]
 #+REVEAL: split
-[[./images/passing-functions-2.png]]
+[[./images/functions-as-values/passing-functions-2.png]]
 #+REVEAL: split
-[[./images/passing-functions-3.png]]
+[[./images/functions-as-values/passing-functions-3.png]]
 #+REVEAL: split
-[[./images/passing-functions-4.png]]
+[[./images/functions-as-values/passing-functions-4.png]]
 #+REVEAL: split
-[[./images/passing-functions-5.png]]
+[[./images/functions-as-values/passing-functions-5.png]]
 #+REVEAL: split
-[[./images/passing-functions-6.png]]
+[[./images/functions-as-values/passing-functions-6.png]]
 
 ** what are the uses of lambdas?
 
