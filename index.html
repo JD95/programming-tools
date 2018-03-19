@@ -222,62 +222,18 @@ MathJax.Hub.Config({
 <div id="outline-container-sec-1" class="outline-2">
 <h2 id="sec-1"><span class="section-number-2">1</span> Representing Data</h2>
 <div class="outline-text-2" id="text-1">
-</div><div id="outline-container-sec-1-1" class="outline-3">
-<h3 id="sec-1-1"><span class="section-number-3">1.1</span> using a programming language</h3>
-<div class="outline-text-3" id="text-1-1">
-<ul class="org-ul">
-<li>in order to program, we have to talk to the computer in a language it understands
-</li>
-<li>trying to directly state our problems in programming languages is usually impossible
-</li>
-<li>we need a way to change how we talk about problems in order to make them fit into programming languages
-</li>
-</ul>
-</div>
-</div>
+<p>
+Programming is the process of breaking down problems into pieces that a computer can understand. The most challenging aspect of this process is changing the way we thinking about problems and, on a more philosophical note, the world around us. Computers have no concept of what a tree is or how to render a webpage until we as the programmers define what these terms mean. In many ways, this is similar to translating from your native language into another, more formal, one.
+</p>
 
-<div id="outline-container-sec-1-2" class="outline-3">
-<h3 id="sec-1-2"><span class="section-number-3">1.2</span> how is information represented?</h3>
-<div class="outline-text-3" id="text-1-2">
-</div><div id="outline-container-sec-1-2-1" class="outline-4">
-<h4 id="sec-1-2-1"><span class="section-number-4">1.2.1</span> information</h4>
-<div class="outline-text-4" id="text-1-2-1">
-<ol class="org-ol">
-<li>facts provided or learned about something or someone. 
-</li>
-<li>what is conveyed or represented by a particular arrangement or sequence of things.
-</li>
-</ol>
-</div>
-</div>
+<p>
+At its most basic level, programming can be summed up in two questions: how can we represent the problem's nouns and how can we represent the problem's verbs? Nouns tell us <b>what</b> we're working with. Verbs tell us <b>what to do</b> with the nouns or how to make them.
+</p>
 
-<div id="outline-container-sec-1-2-2" class="outline-4">
-<h4 id="sec-1-2-2"><span class="section-number-4">1.2.2</span> instructions break down into verbs and nouns</h4>
-<div class="outline-text-4" id="text-1-2-2">
-<ul class="org-ul">
-<li>nouns tell us <b>what</b> we're working with
-</li>
-<li>verbs tell us <b>what to do</b> with the nouns
-</li>
-</ul>
-</div>
-</div>
+<p>
+More generally, there are quite a few useful similarities between langauge and programming:
+</p>
 
-<div id="outline-container-sec-1-2-3" class="outline-4">
-<h4 id="sec-1-2-3"><span class="section-number-4">1.2.3</span> programming has two parts</h4>
-<div class="outline-text-4" id="text-1-2-3">
-<ul class="org-ul">
-<li>take the parts of speech and break into simplier terms until directly expressible in a programming language
-</li>
-<li>use the programming language to put the pieces back together into the final program
-</li>
-</ul>
-</div>
-</div>
-
-<div id="outline-container-sec-1-2-4" class="outline-4">
-<h4 id="sec-1-2-4"><span class="section-number-4">1.2.4</span> language vs programming</h4>
-<div class="outline-text-4" id="text-1-2-4">
 <table class="table table-striped table-bordered table-hover table-condensed">
 
 
@@ -299,16 +255,6 @@ MathJax.Hub.Config({
 </tr>
 
 <tr>
-<td class="text-left">pronoun</td>
-<td class="text-left">object</td>
-</tr>
-
-<tr>
-<td class="text-left">adjective</td>
-<td class="text-left">interface</td>
-</tr>
-
-<tr>
 <td class="text-left">verb</td>
 <td class="text-left">function</td>
 </tr>
@@ -317,26 +263,39 @@ MathJax.Hub.Config({
 <td class="text-left">adverb</td>
 <td class="text-left">higher order function</td>
 </tr>
+
+<tr>
+<td class="text-left">pronoun</td>
+<td class="text-left">object</td>
+</tr>
+
+<tr>
+<td class="text-left">adjective</td>
+<td class="text-left">interface</td>
+</tr>
 </tbody>
 </table>
 </div>
+
+<div id="outline-container-sec-1-1" class="outline-3">
+<h3 id="sec-1-1"><span class="section-number-3">1.1</span> Nouns</h3>
+<div class="outline-text-3" id="text-1-1">
+<p>
+In programming nouns can take several forms depending on how much you know about the noun beforehand. 
+</p>
 </div>
 
-<div id="outline-container-sec-1-2-5" class="outline-4">
-<h4 id="sec-1-2-5"><span class="section-number-4">1.2.5</span> what is known about the data?</h4>
-<div class="outline-text-4" id="text-1-2-5">
-</div><ol class="org-ol"><li><a id="sec-1-2-5-1" name="sec-1-2-5-1"></a>constants<br ><div class="outline-text-5" id="text-1-2-5-1">
-<ul class="org-ul">
-<li>value already known
-</li>
-<li>most constrained
-</li>
-</ul>
-</div>
-</li>
+<div id="outline-container-sec-1-1-1" class="outline-4">
+<h4 id="sec-1-1-1"><span class="section-number-4">1.1.1</span> constants</h4>
+<div class="outline-text-4" id="text-1-1-1">
+<p>
+If a value already known ahead of time, it can be represented with a constant. Constants are specific values like the number <code>5</code> or the word <code>"Hello"</code>. These are directly stated as part of the program and are the most constrained form of a noun.
+</p>
 
+<p>
+Most programming languages, including C++, categorize different values in the following way:
+</p>
 
-<li><a id="sec-1-2-5-2" name="sec-1-2-5-2"></a>primitive types<br ><div class="outline-text-5" id="text-1-2-5-2">
 <table class="table table-striped table-bordered table-hover table-condensed">
 
 
@@ -348,7 +307,7 @@ MathJax.Hub.Config({
 <thead>
 <tr>
 <th scope="col" class="text-left">real world</th>
-<th scope="col" class="text-left">C++</th>
+<th scope="col" class="text-left">C++ type</th>
 </tr>
 </thead>
 <tbody>
@@ -373,13 +332,14 @@ MathJax.Hub.Config({
 </tr>
 </tbody>
 </table>
-</div>
 
-<ol class="org-ol"><li><a id="sec-1-2-5-2-1" name="sec-1-2-5-2-1"></a>int<br ><div class="outline-text-6" id="text-1-2-5-2-1">
-<ul class="org-ul">
-<li>positive and negative numbers
-</li>
-</ul>
+<p>
+Each of these different categories of values are called a <code>Type</code>. Types help tell the program what can and cannot be done with certain values. It wouldn't make sense for a person to try and send a text message with a bicycle and we'd like the same to be true in our programs as well. The four types listed above are not the only types we can work with while programming, but they are some the most primitive. All other types are combinations of these four types.
+</p>
+
+<p>
+The first of these types <code>int</code> represents positive and negative whole numbers and can be expressed in a program like this:
+</p>
 
 <div class="org-src-container">
 
@@ -390,18 +350,14 @@ MathJax.Hub.Config({
 -123493952395923592359
 </pre>
 </div>
-</div>
-</li>
 
-<li><a id="sec-1-2-5-2-2" name="sec-1-2-5-2-2"></a>float<br ><div class="outline-text-6" id="text-1-2-5-2-2">
-<ul class="org-ul">
-<li>decimal numbers
-</li>
-<li>fractions
-</li>
-<li>percentages
-</li>
-</ul>
+<p>
+<code>int</code> values are great for counting things or representing amounts. A few examples of real world <code>int</code> values are: ages, years, stars in a movie review, students in a classroom, etc.
+</p>
+
+<p>
+The next category of values are <code>float</code> values. These values represent decimal numbers and can be expressed like this:
+</p>
 
 <div class="org-src-container">
 
@@ -411,16 +367,14 @@ MathJax.Hub.Config({
 12435.234
 </pre>
 </div>
-</div>
-</li>
 
-<li><a id="sec-1-2-5-2-3" name="sec-1-2-5-2-3"></a>char<br ><div class="outline-text-6" id="text-1-2-5-2-3">
-<ul class="org-ul">
-<li>any single symbol you can type on the keyboard
-</li>
-<li>written using single quotes around the symbol
-</li>
-</ul>
+<p>
+<code>float</code> values are great for representing percentages, positions, fractions, etc. Concepts like height, discounts, and money can be representing with this type.
+</p>
+
+<p>
+Numbers are not the only values which can be represented on a computer. Any symbol on your keyboard can be represented using the <code>char</code> type. Typically, <code>char</code> values are used to represent letters and single digits. Any symbol surrounded by single quotes is a <code>char</code>. For example:
+</p>
 
 <div class="org-src-container">
 
@@ -431,18 +385,10 @@ MathJax.Hub.Config({
 <span style="color: #2aa889;">':'</span>
 </pre>
 </div>
-</div>
-</li>
 
-<li><a id="sec-1-2-5-2-4" name="sec-1-2-5-2-4"></a>string<br ><div class="outline-text-6" id="text-1-2-5-2-4">
-<ul class="org-ul">
-<li>a collection of characters
-</li>
-<li>sentences or phrases
-</li>
-<li>written using double quotes around the symbols
-</li>
-</ul>
+<p>
+By grouping <code>char</code> values together we can make a <code>string</code>. The <code>string</code> type allows us to represent any amount of text within our programs. Names, addresses, dates, etc. are typically represented using this type. You can express a <code>string</code> by wrapping the text in double quotes like so:
+</p>
 
 <div class="org-src-container">
 
@@ -451,14 +397,22 @@ MathJax.Hub.Config({
 <span style="color: #2aa889;">"&lt;(-.-)&gt;  (@_o)!!!"</span>
 </pre>
 </div>
-</div>
-</li>
 
-<li><a id="sec-1-2-5-2-5" name="sec-1-2-5-2-5"></a>the using keyword<br ><div class="outline-text-6" id="text-1-2-5-2-5">
-<ul class="org-ul">
-<li>helps associate the type with the real world thing its representing
-</li>
-</ul>
+<p>
+Strings have a special value to represent no text, otherwise known as the "empty string" or <code>""</code>. There is no space between the quotes and is the same as an empty chat dialogue box or an empty searchbar.
+</p>
+
+<p>
+Programs are essentially text files which people (mostly you) will have to read. In order to make our programs as easy to understand for humans, it is often useful to give better names for the values we want to use so they better capture the real world noun they are meant to represent. For example, instead of just saying <code>int</code>, one could say <code>Age</code>.
+</p>
+
+<p>
+In C++, you can tell the computer to interpet a word as a type via the <code>using</code> keyword. The term <code>keyword</code> in programming refers to words that have predefined meanings within the given programming language. These keywords cannot be redefiend by the user.
+</p>
+
+<p>
+Here we can see examples of <code>using</code> usage:
+</p>
 
 <div class="org-src-container">
 
@@ -469,10 +423,25 @@ MathJax.Hub.Config({
 ...
 </pre>
 </div>
-</div>
-</li>
 
-<li><a id="sec-1-2-5-2-6" name="sec-1-2-5-2-6"></a>grouping types<br ><div class="outline-text-6" id="text-1-2-5-2-6">
+<p>
+There are five parts to defining our own name for a <code>type</code>. The first part is the <code>using</code> keyword which tells the program that we intend to define a new name. The second part is the name we want to use. The third part is the \(=\) sign. The fourth is the existing type which the name to the left of the \(=\) symbol will actually mean. The final bit of syntax for this kind of statement is the <code>;</code>. Any kind of statement or step in a program will end in a semi-colon.  
+</p>
+
+<p>
+Note that any names you add into your program cannot have any spaces or strange symbols. The rules for new names are as follows:
+</p>
+<ul class="org-ul">
+<li>the name <b>must</b> begin with a letter
+</li>
+<li>the name can only consist of letters, numbers, or the <code>_</code> symbol
+</li>
+</ul>
+
+<p>
+Although, these primitive types can represent quite a bit on their own, they cannot represent <b>everything</b> we might want to program. In order to represent more complicated nouns like people or places, we'll need a way to group these values together into a new type.
+</p>
+
 <div class="org-src-container">
 
 <pre class="src src-cpp"><span style="color: #245361;">// </span><span style="color: #245361;">definition of a struct</span>
@@ -485,43 +454,39 @@ MathJax.Hub.Config({
   <span style="color: #d26937;">bool</span> <span style="color: #599cab;">employed</span>;
 };
 
-<span style="color: #245361;">// </span><span style="color: #245361;">use of the parts of a struct</span>
-<span style="color: #d26937;">string</span> <span style="color: #599cab;">full_name</span>(<span style="color: #d26937;">Person</span> <span style="color: #599cab;">p</span>) {
-  <span style="color: #195466; font-weight: bold;">return</span> p.first_name + p.last_name.insert(0,1, p.middle_inital);
-}
-
 <span style="color: #245361;">// </span><span style="color: #245361;">creating a struct value</span>
-full_name({22, 6.4, <span style="color: #2aa889;">"Jeffrey"</span>, <span style="color: #2aa889;">'M'</span>, <span style="color: #2aa889;">"Dwyer"</span>, <span style="color: #33859e; font-weight: bold;">true</span>});
-
-
+Person {30, 5.11, <span style="color: #2aa889;">"Captain"</span>, <span style="color: #2aa889;">'J'</span>, <span style="color: #2aa889;">"Sparrow"</span>, <span style="color: #33859e; font-weight: bold;">true</span>}
 </pre>
 </div>
 
-<div class="org-src-container">
+<p>
+In the first section of the above code we see a new type of statement. Here the code defines a <code>struct</code> or a collection of values. The syntax for <code>struct</code> definitions are as folows:
+</p>
+<ul class="org-ul">
+<li>the <code>struct</code> keyword
+</li>
+<li>the name of the new type (typically in upper case).
+</li>
+<li>the <code>{</code> symbol
+</li>
+<li>the different values in the <code>struct</code> which follow the pattern <code>type</code> then <code>name</code> ended with a <code>;</code>
+</li>
+<li>close the <code>{</code> with the <code>}</code> symbol
+</li>
+<li>semi-colon
+</li>
+</ul>
 
-<pre class="src src-cpp"><span style="color: #195466; font-weight: bold;">using</span> <span style="color: #d26937;">Age</span> = <span style="color: #d26937;">int</span>;
-<span style="color: #195466; font-weight: bold;">using</span> <span style="color: #d26937;">Name</span> = string;
-<span style="color: #195466; font-weight: bold;">struct</span> <span style="color: #d26937;">Person</span> { <span style="color: #d26937;">Age</span> <span style="color: #599cab;">age</span>; <span style="color: #d26937;">Name</span> <span style="color: #599cab;">name</span>; };
-
-<span style="color: #195466; font-weight: bold;">using</span> <span style="color: #d26937;">TeamName</span> = string;
-<span style="color: #195466; font-weight: bold;">struct</span> <span style="color: #d26937;">Team</span> { 
-  <span style="color: #d26937;">TeamName</span> <span style="color: #599cab;">name</span>; 
-  <span style="color: #d26937;">Person</span> <span style="color: #599cab;">coach</span>;
-  <span style="color: #d26937;">Person</span> <span style="color: #599cab;">quater_back</span>;
-  <span style="color: #d26937;">Person</span> <span style="color: #599cab;">wide_reciever</span>;
-  ...
-};
-</pre>
+<p>
+The names given to the values within the <code>struct</code> are there so you can access the individual parts of a struct later on. The second part of the code above defines a constant <code>Person</code> value. Constructing a value of any <code>struct</code> can be done by giving a value for each of the different members of the type. Note that the order is important, it is the same as they are defined. First the age, which is an <code>int</code>, then the hieght, which is a <code>double</code>, etc. The <code>{}</code> symbols are generally associated with groups of values and are used in both definitions and expressions.
+</p>
 </div>
-</div>
-</li></ol>
-</li></ol>
 </div>
 </div>
 
-<div id="outline-container-sec-1-3" class="outline-3">
-<h3 id="sec-1-3"><span class="section-number-3">1.3</span> function inputs</h3>
-<div class="outline-text-3" id="text-1-3">
+<div id="outline-container-sec-1-2" class="outline-3">
+<h3 id="sec-1-2"><span class="section-number-3">1.2</span> function inputs</h3>
+<div class="outline-text-3" id="text-1-2">
 <ul class="org-ul">
 <li>value will be known later
 </li>
@@ -578,9 +543,9 @@ append <span style="color: #599cab;">:</span> <span style="color: #99d1ce;">(</s
 </div>
 </div>
 
-<div id="outline-container-sec-1-3-1" class="outline-4">
-<h4 id="sec-1-3-1"><span class="section-number-4">1.3.1</span> function type signatures in C++</h4>
-<div class="outline-text-4" id="text-1-3-1">
+<div id="outline-container-sec-1-2-1" class="outline-4">
+<h4 id="sec-1-2-1"><span class="section-number-4">1.2.1</span> function type signatures in C++</h4>
+<div class="outline-text-4" id="text-1-2-1">
 <div class="org-src-container">
 
 <pre class="src src-cpp"><span style="color: #245361;">// </span><span style="color: #245361;">pseudo code</span>
@@ -596,9 +561,9 @@ append <span style="color: #599cab;">:</span> <span style="color: #99d1ce;">(</s
 </div>
 </div>
 
-<div id="outline-container-sec-1-3-2" class="outline-4">
-<h4 id="sec-1-3-2"><span class="section-number-4">1.3.2</span> function definition syntax</h4>
-<div class="outline-text-4" id="text-1-3-2">
+<div id="outline-container-sec-1-2-2" class="outline-4">
+<h4 id="sec-1-2-2"><span class="section-number-4">1.2.2</span> function definition syntax</h4>
+<div class="outline-text-4" id="text-1-2-2">
 <div class="org-src-container">
 
 <pre class="src src-cpp"><span style="color: #245361;">// </span><span style="color: #245361;">syntax</span>
@@ -615,9 +580,9 @@ append <span style="color: #599cab;">:</span> <span style="color: #99d1ce;">(</s
 </div>
 </div>
 
-<div id="outline-container-sec-1-3-3" class="outline-4">
-<h4 id="sec-1-3-3"><span class="section-number-4">1.3.3</span> function call syntax</h4>
-<div class="outline-text-4" id="text-1-3-3">
+<div id="outline-container-sec-1-2-3" class="outline-4">
+<h4 id="sec-1-2-3"><span class="section-number-4">1.2.3</span> function call syntax</h4>
+<div class="outline-text-4" id="text-1-2-3">
 <div class="org-src-container">
 
 <pre class="src src-cpp"><span style="color: #245361;">//</span><span style="color: #245361;">syntax</span>
@@ -631,9 +596,9 @@ doNothing(5);
 </div>
 </div>
 
-<div id="outline-container-sec-1-4" class="outline-3">
-<h3 id="sec-1-4"><span class="section-number-3">1.4</span> templates</h3>
-<div class="outline-text-3" id="text-1-4">
+<div id="outline-container-sec-1-3" class="outline-3">
+<h3 id="sec-1-3"><span class="section-number-3">1.3</span> templates</h3>
+<div class="outline-text-3" id="text-1-3">
 <ul class="org-ul">
 <li>value and type will be known later
 </li>
@@ -676,9 +641,9 @@ All of the functions are practically the same!
 </ul>
 </div>
 
-<div id="outline-container-sec-1-4-1" class="outline-4">
-<h4 id="sec-1-4-1"><span class="section-number-4">1.4.1</span> use cases</h4>
-<div class="outline-text-4" id="text-1-4-1">
+<div id="outline-container-sec-1-3-1" class="outline-4">
+<h4 id="sec-1-3-1"><span class="section-number-4">1.3.1</span> use cases</h4>
+<div class="outline-text-4" id="text-1-3-1">
 <div class="org-src-container">
 
 <pre class="src src-cpp"><span style="color: #195466; font-weight: bold;">template</span> &lt;<span style="color: #195466; font-weight: bold;">typename</span> <span style="color: #d26937;">T1</span>, <span style="color: #195466; font-weight: bold;">typename</span> <span style="color: #d26937;">T2</span>&gt;
@@ -773,9 +738,9 @@ Notice we've basically written the same thing twice!
 </div>
 </div>
 
-<div id="outline-container-sec-1-4-2" class="outline-4">
-<h4 id="sec-1-4-2"><span class="section-number-4">1.4.2</span> What if you need to do something several times?</h4>
-<div class="outline-text-4" id="text-1-4-2">
+<div id="outline-container-sec-1-3-2" class="outline-4">
+<h4 id="sec-1-3-2"><span class="section-number-4">1.3.2</span> What if you need to do something several times?</h4>
+<div class="outline-text-4" id="text-1-3-2">
 <div class="org-src-container">
 
 <pre class="src src-cpp"><span style="color: #195466; font-weight: bold;">template</span> &lt;<span style="color: #195466; font-weight: bold;">typename</span> <span style="color: #d26937;">T</span>&gt;
@@ -3660,10 +3625,9 @@ generate a string which contains a comma seperated list of all of the even multi
 <ul class="nav">
 <li><a href="#sec-1">1. Representing Data</a>
 <ul class="nav">
-<li><a href="#sec-1-1">1.1. using a programming language</a></li>
-<li><a href="#sec-1-2">1.2. how is information represented?</a></li>
-<li><a href="#sec-1-3">1.3. function inputs</a></li>
-<li><a href="#sec-1-4">1.4. templates</a></li>
+<li><a href="#sec-1-1">1.1. Nouns</a></li>
+<li><a href="#sec-1-2">1.2. function inputs</a></li>
+<li><a href="#sec-1-3">1.3. templates</a></li>
 </ul>
 </li>
 <li><a href="#sec-2">2. Math Tools</a>
