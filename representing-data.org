@@ -24,13 +24,9 @@ More generally, there are quite a few useful similarities between langauge and p
 | adjective | interface             |
 |-----------+-----------------------|
 
-** Nouns
+** Constants 
 
-In programming nouns can take several forms depending on how much you know about the noun beforehand. 
-
-*** constants
-
-If a value already known ahead of time, it can be represented with a constant. Constants are specific values like the number =5= or the word ="Hello"=. These are directly stated as part of the program and are the most constrained form of a noun.
+In programming nouns can take several forms depending on how much you know about the noun beforehand. If a value already known ahead of time, it can be represented with a constant. Constants are specific values like the number =5= or the word ="Hello"=. These are directly stated as part of the program and are the most constrained form of a noun.
 
 Most programming languages, including C++, categorize different values in the following way:
 
@@ -131,196 +127,93 @@ In the first section of the above code we see a new type of statement. Here the 
 - close the ={= with the =}= symbol
 - semi-colon
 
-The names given to the values within the =struct= are there so you can access the individual parts of a struct later on. The second part of the code above defines a constant =Person= value. Constructing a value of any =struct= can be done by giving a value for each of the different members of the type. Note that the order is important, it is the same as they are defined. First the age, which is an =int=, then the hieght, which is a =double=, etc. The ={}= symbols are generally associated with groups of values and are used in both definitions and expressions.
+The names given to the values within the =struct= are there so you can access the individual parts of a struct later on.
 
-** function inputs
-- value will be known later
-- constrained by type
-
-Questions to ask when designing a function:
-- What values does it need to produce an answer?
-- What is the result this function will produce?
-- What am I going to name it?
-
-everything has a type
-
-#+BEGIN_SRC haskell
-5 : int
-'a' : char
-3.14 : float
-#+END_SRC
-
-verbs let us transform values into other values
-
-#+BEGIN_SRC haskell
-add_one : int -> int
-to_upper : char -> char
-round : float -> float
-length : string -> int
-#+END_SRC
-
-verbs don't have to only work on a single value
-
-#+BEGIN_SRC haskell
-add : (int, int) -> int
-append : (string, string) -> int
-#+END_SRC
-
-*** function type signatures in C++
+For example, if we assumed that the name $p$ referred to a =Person= value, we could access its members like this:
 
 #+BEGIN_SRC cpp
-// pseudo code
-doNothing : int -> int
-
-// syntax
-<return type> <function name>(<input type> <input name>); 
-
-// example
-int doNothing(int input); 
+p.age
+p.height
+p.first_name
 #+END_SRC
 
-*** function definition syntax
+The dot expressions can be read as =p's age= or =p's first_name=. While the dot value =.age= could potentially refer to the age of any =Person=, it has to be paired with a particular =Person= in order to be used.
+
+The second part of the code above defines a constant =Person= value. Constructing a value of any =struct= can be done by giving a value for each of the different members of the type. Note that the order is important, it is the same as they are defined. First the age, which is an =int=, then the hieght, which is a =double=, etc. The ={}= symbols are generally associated with groups of values and are used in both definitions and expressions.
+
+** Functions 
+
+When a value isn't known ahead of time we can express it as a =function=. Functions are both a less specific version of a constant as well as a way to represent verbs.
+
+In maths, functions represent "mappings" from some domain into some range/co-domain. For our purposes we can think of the "domain" as the types of values that are needed to create the value we want (the co-domain). For example, addition can be thought of as a function that takes two =int= values and creates another =int= value.
+
+\[addition(x,y) = x + y\]
+
+In order to translate this definition into C++ we need to follow these steps:
+- determine what =type= of value you want to construct later on
+- come up with some name for the process of making the value (the function)
+- determine what other values might be needed and their =type=
+- write out an expression that, given all the inputs, will construct the value you want
 
 #+BEGIN_SRC cpp
-// syntax
-<return type> <function name>(<input type> <input name>) {
-  return <return value>;
-}
-
-// example
-int doNothing(int input) {
-  return input;
+int addition(int x, int y) {
+  return x + y;
 }
 #+END_SRC
 
-*** function call syntax
+The above code is the implementation to the earlier math expression. The first part of the definition is the =type= of the value we'll construct later once we know what the inputs are. The second part is the name of the function so we can refer to our definition later. The third part is a comma seperated list of all the input values needed to make our result. 
+
+These parts so far make up the "signature" of the function. This indicates all the information needed to use the function we've defined. It is a good idea first design the signature before trying to come up with the expression for the next part, the implementation.
+
+The implementation of a function is the part surrounded by the curly braces. This section of the function defines the steps needed to construct the result. When the value is constructed we indicate this by using a =return= statement.
 
 #+BEGIN_SRC cpp
-//syntax
-<function name>(<input name>);
+int plus_five(int x) {
+  return x + 5;
+}
 
-//example
-doNothing(5);
+plus_five(10)
 #+END_SRC
+
+The above function specifices a way to construct an =int= value from another =int=. Once the value $x$ is known, =plus_five= will construct another =int= by adding five to $x$.
+
+The second part uses the defined function to construct the value =15=. This is refered to as "calling" the function. Note that all which is needed to use the function is its name and a comma seperated list of the inputs.
+
+#+BEGIN_SRC cpp
+addition(1,2)
+#+END_SRC
+
+The above uses our previous defition of addition to construct =3=. The useful thing about functions is that they can work with data that doesn't exist until the program actual runs.
+
+Functions are needed when certain values aren't known ahead of time. These unknown values become the inputs to the functions and the process of constructing these values are how =verbs= are represented in programming. All programs do is construct new values out of other values. For example, games construct images at 60 fps from values like player health, position, camera angles, etc. Many tasks within programming are similar and by defining more abstract expressions with functions we can end up reusing those definitions.
 
 ** templates
-- value and type will be known later
-- least constrained
+
+The final level of abstraction in C++ can be achieved with =templates=. These kinds of values are needed when nothing is known about a value except that you need a value. This allows for the definition of very abstract concepts like a pair.
 
 #+BEGIN_SRC cpp
-int add_ints(int x, int y) {
-  return x + y;
-}
-
-int add_floats(int x, int y) {
-  return x + y;
-}
-
-int add_strs(int x, int y) {
-  return x + y;
-}
-#+END_SRC
-All of the functions are practically the same!
-
-#+REVEAL: split
-#+BEGIN_SRC cpp
-template <typename T>
-T add(T x, T y) {
-  return x + y;
-}
-#+END_SRC
-- Templates are functions of types
-- They take a type and return functions/data
-
-*** use cases
-#+BEGIN_SRC cpp
-template <typename T1, typename T2>
+template <typename A, typename B>
 struct Pair {
-  T1 first;
-  T2 second;
-};
-#+END_SRC
-A generic pair which can group *any* two values
-
-#+REVEAL: split
-#+BEGIN_SRC cpp
-template <typename T, typename A, typename B>
-Pair<T, B> over_first(const Pair<A,T> p, const function<B(A)> f) {
-  return { f(p.first), p.second };
-}
-
-template <typename T, typename A, typename B>
-Pair<T, B> over_second(const Pair<T,A> p, const function<B(A)> f) {
-  return { p.first, f(p.second) };
-}
-#+END_SRC
-
-#+REVEAL: split
-#+BEGIN_SRC cpp
-struct HumanUnit {
-  int attack;
-  ...
+  A first;
+  B second;
 };
 
-struct OrcUnit {
-  int defense;
-  ...
-};
-
-bool orc_atk_human_success(OrcUnit o, HumanUnit h) {
-  return o.attack > h.defense;
+template<typename T>
+T add_pair(Pair<T> p) {
+  return p.first + p.second;
 }
 
-bool human_atk_orc_success(HumanUnit h, OrchUnit o) {
-  return h.attack > o.defense;
-}
-#+END_SRC
-Notice we've basically written the same thing twice!
-
-#+REVEAL: split
-#+BEGIN_SRC cpp
-struct HumanUnit {
-  int attack;
-  ...
-};
-
-struct OrcUnit {
-  int defense;
-  ...
-};
-
-template <typename Unit1, typename Unit2>
-bool atk_success(Unit1 a, Unit2 b) {
-  return a.attack > b.defense;
-}
 #+END_SRC
 
-#+REVEAL: split
-#+BEGIN_SRC cpp
-// takes damage for any type T that has
-// .hp
-template <typename T>
-T take_damage(T unit, int dmg) {
-  unit.hp = unit.hp - dmg;
-  return unit;
-} 
+=template= values can be thought of as functions which take a =type= and return other =types=. In the above code we define a struct =Pair= which can hold a pair of *any* two types.
 
-template <typename T1, typename T2>
-Pair<T1, T2> combat(T1 attacker, T2 defender) {
-  return { attacker 
-         , atk_success(attacker, defender) ? 
-             take_damage(defender, 5) : 
-             defender 
-         };
-}
-#+END_SRC
+There are three parts to a template definition:
+- the keyword =template=
+- a comma seperated list of =types=, with each of the types preceeded by the keyword =typename=
+- the definition that uses the input types
 
-*** What if you need to do something several times?
-#+BEGIN_SRC cpp
-template <typename T>
-function<T(T)> apply_twice(function<T(T)> f) {
-  return [f](T x) { return f(f(x)); };
-};
-#+END_SRC
+Templates are often used to define either very abstract concepts or used to make tools for programmers. Most programming languages will have a collection of templated functions and types which save the programmer time by defining concepts beforehand. For example, the =string= type in C++ is actually provided by a library.
 
-Transforms a function into one that is applied twice
+** Summary
+
+The first part of programming is determing how to break down a problem and then deciding how to represent the pieces. Any values which are known ahead of time can be defined with a constant. Any values which can't be constructed until other values are known (possibly when the program is run) can be defined by functions. Any values for which not even the =type= is known ahead of time can be defined by =templates=.
