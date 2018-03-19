@@ -8,53 +8,42 @@
 #+LATEX_HEADER: \usepackage{apacite}
 #+LATEX_HEADER: \usepackage{setspace}
 
-** using a programming language
-- in order to program, we have to talk to the computer in a language it understands
-- trying to directly state our problems in programming languages is usually impossible
-- we need a way to change how we talk about problems in order to make them fit into programming languages
+Programming is the process of breaking down problems into pieces that a computer can understand. The most challenging aspect of this process is changing the way we thinking about problems and, on a more philosophical note, the world around us. Computers have no concept of what a tree is or how to render a webpage until we as the programmers define what these terms mean. In many ways, this is similar to translating from your native language into another, more formal, one.
 
-** how is information represented?
+At its most basic level, programming can be summed up in two questions: how can we represent the problem's nouns and how can we represent the problem's verbs? Nouns tell us *what* we're working with. Verbs tell us *what to do* with the nouns or how to make them.
 
-*** information
-1. facts provided or learned about something or someone. 
-2. what is conveyed or represented by a particular arrangement or sequence of things.
-
-*** instructions break down into verbs and nouns
-- nouns tell us *what* we're working with
-- verbs tell us *what to do* with the nouns
-
-*** programming has two parts
-- take the parts of speech and break into simplier terms until directly expressible in a programming language
-- use the programming language to put the pieces back together into the final program
-  
-*** language vs programming
+More generally, there are quite a few useful similarities between langauge and programming:
+ 
 |-----------+-----------------------|
 | language  | programming           |
 |-----------+-----------------------|
 | noun      | data                  |
-| pronoun   | object                |
-| adjective | interface             |
 | verb      | function              |
 | adverb    | higher order function |
+| pronoun   | object                |
+| adjective | interface             |
 |-----------+-----------------------|
 
-*** what is known about the data?
+** Nouns
 
-**** constants
-- value already known
-- most constrained
+In programming nouns can take several forms depending on how much you know about the noun beforehand. 
 
+*** constants
 
-**** primitive types
-| real world | C++    |
-|------------+--------|
-| numbers    | int    |
-| decimals   | float  |
-| letters    | char   |
-| text/words | string |
+If a value already known ahead of time, it can be represented with a constant. Constants are specific values like the number =5= or the word ="Hello"=. These are directly stated as part of the program and are the most constrained form of a noun.
 
-***** int
-- positive and negative numbers
+Most programming languages, including C++, categorize different values in the following way:
+
+| real world | C++ type |
+|------------+----------|
+| numbers    | int      |
+| decimals   | float    |
+| letters    | char     |
+| text/words | string   |
+
+Each of these different categories of values are called a =Type=. Types help tell the program what can and cannot be done with certain values. It wouldn't make sense for a person to try and send a text message with a bicycle and we'd like the same to be true in our programs as well. The four types listed above are not the only types we can work with while programming, but they are some the most primitive. All other types are combinations of these four types.
+
+The first of these types =int= represents positive and negative whole numbers and can be expressed in a program like this:
 
 #+BEGIN_SRC cpp
 0
@@ -64,10 +53,9 @@
 -123493952395923592359
 #+END_SRC
 
-***** float
-- decimal numbers
-- fractions
-- percentages
+=int= values are great for counting things or representing amounts. A few examples of real world =int= values are: ages, years, stars in a movie review, students in a classroom, etc.
+
+The next category of values are =float= values. These values represent decimal numbers and can be expressed like this:
 
 #+BEGIN_SRC cpp
 0.0
@@ -76,9 +64,9 @@
 12435.234
 #+END_SRC
 
-***** char
-- any single symbol you can type on the keyboard
-- written using single quotes around the symbol
+=float= values are great for representing percentages, positions, fractions, etc. Concepts like height, discounts, and money can be representing with this type.
+
+Numbers are not the only values which can be represented on a computer. Any symbol on your keyboard can be represented using the =char= type. Typically, =char= values are used to represent letters and single digits. Any symbol surrounded by single quotes is a =char=. For example:
 
 #+BEGIN_SRC cpp
 'a'
@@ -88,10 +76,7 @@
 ':'
 #+END_SRC
 
-***** string
-- a collection of characters
-- sentences or phrases
-- written using double quotes around the symbols
+By grouping =char= values together we can make a =string=. The =string= type allows us to represent any amount of text within our programs. Names, addresses, dates, etc. are typically represented using this type. You can express a =string= by wrapping the text in double quotes like so:
 
 #+BEGIN_SRC cpp
 "Hello there fellow humans!"
@@ -99,8 +84,13 @@
 "<(-.-)>  (@_o)!!!"
 #+END_SRC
 
-***** the using keyword
-- helps associate the type with the real world thing its representing
+Strings have a special value to represent no text, otherwise known as the "empty string" or =""=. There is no space between the quotes and is the same as an empty chat dialogue box or an empty searchbar.
+
+Programs are essentially text files which people (mostly you) will have to read. In order to make our programs as easy to understand for humans, it is often useful to give better names for the values we want to use so they better capture the real world noun they are meant to represent. For example, instead of just saying =int=, one could say =Age=.
+
+In C++, you can tell the computer to interpet a word as a type via the =using= keyword. The term =keyword= in programming refers to words that have predefined meanings within the given programming language. These keywords cannot be redefiend by the user.
+
+Here we can see examples of =using= usage:
 
 #+BEGIN_SRC cpp
 using MarbleCount = int;
@@ -110,10 +100,15 @@ using PlayerSymbol = char;
 ...
 #+END_SRC
 
-***** grouping types
+There are five parts to defining our own name for a =type=. The first part is the =using= keyword which tells the program that we intend to define a new name. The second part is the name we want to use. The third part is the $=$ sign. The fourth is the existing type which the name to the left of the $=$ symbol will actually mean. The final bit of syntax for this kind of statement is the =;=. Any kind of statement or step in a program will end in a semi-colon.  
+
+Note that any names you add into your program cannot have any spaces or strange symbols. The rules for new names are as follows:
+- the name *must* begin with a letter
+- the name can only consist of letters, numbers, or the =_= symbol
+
+Although, these primitive types can represent quite a bit on their own, they cannot represent *everything* we might want to program. In order to represent more complicated nouns like people or places, we'll need a way to group these values together into a new type.
 
 #+BEGIN_SRC cpp
-
 // definition of a struct
 struct Person {
   int age;
@@ -124,32 +119,19 @@ struct Person {
   bool employed;
 };
 
-// use of the parts of a struct
-string full_name(Person p) {
-  return p.first_name + p.last_name.insert(0,1, p.middle_inital);
-}
-
 // creating a struct value
-full_name({22, 6.4, "Jeffrey", 'M', "Dwyer", true});
-
-  
+Person {30, 5.11, "Captain", 'J', "Sparrow", true}
 #+END_SRC
 
-#+BEGIN_SRC cpp
+In the first section of the above code we see a new type of statement. Here the code defines a =struct= or a collection of values. The syntax for =struct= definitions are as folows:
+- the =struct= keyword
+- the name of the new type (typically in upper case).
+- the ={= symbol
+- the different values in the =struct= which follow the pattern =type= then =name= ended with a =;=
+- close the ={= with the =}= symbol
+- semi-colon
 
-using Age = int;
-using Name = string;
-struct Person { Age age; Name name; };
-
-using TeamName = string;
-struct Team { 
-  TeamName name; 
-  Person coach;
-  Person quater_back;
-  Person wide_reciever;
-  ...
-};
-#+END_SRC
+The names given to the values within the =struct= are there so you can access the individual parts of a struct later on. The second part of the code above defines a constant =Person= value. Constructing a value of any =struct= can be done by giving a value for each of the different members of the type. Note that the order is important, it is the same as they are defined. First the age, which is an =int=, then the hieght, which is a =double=, etc. The ={}= symbols are generally associated with groups of values and are used in both definitions and expressions.
 
 ** function inputs
 - value will be known later
