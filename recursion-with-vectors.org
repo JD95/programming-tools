@@ -45,6 +45,7 @@ Can this be generalized?
 
 ** Generalizing sum
 
+This is the original
 #+BEGIN_SRC cpp
 int sum(vector<int> nums) {
   auto combine = [nums]() mutable {
@@ -55,13 +56,25 @@ int sum(vector<int> nums) {
   return !nums.empty() ? combine() : 0;
 }
 #+END_SRC
-This is the original
+
+Following from the five steps for recursion:
+|----------------------+--------------------------|
+| do-nothing input     | nums.empty()             |
+| do-nothing step      | + 0                      |
+| break off the front  | nums.front()             |
+| make problem smaller | nums.erase(nums.begin()) |
+| combine results      | n + sum(nums)            |
+|----------------------+--------------------------|
+
+Because our breaking off the front requires modifying =nums=, we need to use a =mutable= on-the-spot function for it.
+
+The first thing that can be generalized in =sum= is the operation used to actually combine all of the =int= values. If we allow for the function to be passed in rather than hard coded, =sum= can be used for more cases. To pull out the function we can add a template parameter =F= to represent the function and replace calls to =+= with =f=.
 
 #+REVEAL: split
 #+BEGIN_SRC cpp
 template <typename F>
-int sum(vector<int> nums, F f) mutable {
-  auto combine = [nums, f]() {
+int sum(vector<int> nums, F f) {
+  auto combine = [nums, f]() mutable {
    int n = nums.front();
    nums.erase(nums.begin());
    return f(n, sum(nums, f));
@@ -69,8 +82,17 @@ int sum(vector<int> nums, F f) mutable {
   return !nums.empty() ? combine() : 0;
 }
 #+END_SRC
-- start by pulling out the operation as a new function input
-- the template will figure out that F needs to be a function
+
+Now our recursion steps look like this:
+|----------------------+--------------------------|
+| do-nothing input     | nums.empty()             |
+| do-nothing step      | f(n, 0)                  |
+| break off the front  | nums.front()             |
+| make problem smaller | nums.erase(nums.begin()) |
+| combine results      | f(n, sum(nums))          |
+|----------------------+--------------------------|
+
+If we wanted to use this for a product of numbers instead of a summation, we'll have to change what the default value is, since anything times =0= is zero. Instead, we can just make that value an input as well.
 
 #+REVEAL: split
 #+BEGIN_SRC cpp
@@ -84,8 +106,19 @@ int sum(vector<int> nums, int init, F f) {
   return !nums.empty() ? combine() : init;
 }
 #+END_SRC
-- next, pull out the zero as the default
-- the default on recursive calls becomes the previous result
+
+By making the default value an input we can actually use that input to "accumulate" our result rather than having to wait until the rest of the vector has been processed before combinging results. In some langauges this can allow for faster and less memory intensive code, but unfortunately C++ doesn't make that optimization. However, it's a good habit to get into the practice of.
+
+Now our recursion steps look like this:
+|----------------------+--------------------------|
+| do-nothing input     | nums.empty()             |
+| do-nothing step      | init                     |
+| break off the front  | nums.front()             |
+| make problem smaller | nums.erase(nums.begin()) |
+| combine results      | f(n, int)                |
+|----------------------+--------------------------|
+
+The next bit of generalizing possible is allowing for the "sum" of types other than only =int=. There are lots of times when a collection might need to be combined into a single value.
 
 #+REVEAL: split
 #+BEGIN_SRC cpp
@@ -98,9 +131,12 @@ A sum(vector<A, allocator<A>> nums, A init, F f) {
   };
   return !nums.empty() ? combine() : init;
 }
+
 #+END_SRC
-- generalize over the type in the vector
-- the allocator<A> needs to be there because C++ is stupid
+
+Note the ugly =vector<A, allocator<A>>= type now being used. This is another unfortunate wart of C++. Allocators are a complicated topic, but just know that when you want to generalize over the type of a vector, you'll have to add in the =allocator= business.
+
+What we have so far is fairly general. It can use a function to combine all the elements of a vetor of any type by accumulating results in the =init= input. However, there is one last generalization that can be made here. What if we want the accumulated result to be a different type than what was initially in the collection? Imagine that you have a =vector<int>= and want to create a comma seperated =string= of all the numbers. In that case we'd want to accumulate the results into a =string= rather than an =int=. We can accomplish this by adding one more type parameter to =sum=.
 
 #+REVEAL: split
 #+BEGIN_SRC cpp
@@ -114,118 +150,27 @@ B sum(vector<A, allocator<A>> nums, B init, F f) {
   return !nums.empty() ? combine() : init;
 }
 #+END_SRC
-- allow the vector to be folded into a new type
 
-#+REVEAL: split
-#+BEGIN_SRC cpp
-template <typename B, typename A, typename F>
-B accumulate(vector<A, allocator<A>> nums, B init, F f) {
-  auto combine = [nums, init, f]() mutable {
-   A n = nums.front();
-   nums.erase(nums.begin());
-   return accumulate(nums, f(n, init), f);
-  };
-  return !nums.empty() ? combine() : init;
-}
-#+END_SRC
-- give it a more general sounding name
-- done! 
+There we go! From our initial definition, we now have a recursive function which can combine the elements of any vector into some accumulated value! Infact, the name "sum" doesn't really do justice to what's going on here. In C++, there is actually a version of this function called accumulate.
 
 ** accumulate example
 
 #+BEGIN_SRC cpp
-vector<int> numbers = {1,2,3,4,5};
+#include <numeric>
+using namespace std;
 
-int result = accumulate<int>(numbers, 0,
-  [](int x, int y) { return x + y });
-// result = 15
-
-#+END_SRC
-
-** intersperse
-
-#+BEGIN_SRC cpp
-template <typename T>
-auto intersperse(vector<T, allocator<T>> elems, T item) 
-->vector<T, allocator<T>>
-{
-  return accumulate(elems, vector<T, allocator<T>>{},
-   [item](auto elem, auto result) {
-      auto add = [elem, result, item]() mutable {
-	      result.insert(result.begin(), item);
-	      result.insert(result.begin(), elem);
-	      return result;
-         };
-       
-      // We need case to not add the item to the end
-      auto dont_add = [elem, result]() mutable {
-          result.insert(result.begin(), elem);
-          return result;
-          
-      };
-      
-      return result.empty() ? dont_add() : add();
-  });
+int main(){
+  vector<int> numbers = {1,2,3,4,5};
+  
+  cout << accumulate(numbers.begin(), numbers.end(), 0,
+    [](int x, int y) { return x + y });
+  
+  cout << "\n";
+  return 0;
 }
 #+END_SRC
 
-** intersperse example
-#+BEGIN_SRC cpp
-vector<string> words = { "hello", "there", "my", "friend" };
-auto commas = intersperse<string>(words, ", ");
-auto result = accumulate(commas, string(""),
-	[](string x, string y) { return x + y; });
-// result = "hello, there, my, friend"
-#+END_SRC
-
-** map
-#+BEGIN_SRC cpp
-template<typename A, typename B, typename F>
-auto map(vector<A, allocator<A>> elems, F f) 
-	-> vector<B, allocator<B>> 
-{
-  return accumulate(elems, vector<B,allocator<B>> {}, 
-    [f](auto elem, auto result) {
-      result.insert(result.end(), f(elem));
-      return result;
-  });
-}	
-#+END_SRC
-
-** map example
-#+BEGIN_SRC cpp
-vector<string> words = { "hello", "there", "my", "friend" };
-auto excited = map<string>(words, [](string s) { return s + "!"; });
-auto commas = intersperse<string>(words, ", ");
-auto result = accumulate(commas, string(""),
-	[](string x, string y) { return x + y; });
-// result is "hello!,there!, my!, friend!
-#+END_SRC
-
-** filter
-#+BEGIN_SRC cpp
-template<typename A, typename F>
-auto filter(vector<A, allocator<A>> elems, F f) 
-	-> vector<A, allocator<A>> 
-{
-  return accumulate(elems, vector<A, allocator<A>>{},
-    [f](auto elem, auto result) {
-      auto pass = [elem, result]() mutable {
-        result.insert(result.end(), elem);
-        return result;
-      };
-      return f(elem) ? pass() : result;
-  });
-}
-#+END_SRC
-
-** filter example
-#+BEGIN_SRC cpp
-vector<int> numbers = { 1, 2, 3, 4, 5 };
-auto evens = filter(numbers
-  [](int n) { return n % 2 == 0; });
-// evens = { 2, 4 }
-#+END_SRC
+The above code would output "15". The difference between our derived version of accumulate and C++'s version is that =std::accumulate= can actually accumulate chunks of the vector rather than the whole collection. The chunk is specified through the first two inputs. Normally, though, we want to accumulate the whole collection so =.begin()= and =.end()= are used.
 
 ** range
 #+BEGIN_SRC cpp
