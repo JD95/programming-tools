@@ -409,4 +409,203 @@ for_each(range.begin(), range.end(),
   [](auto e) { cout << e << " "; });
 #+END_SRC
 
-** 
+** No more recursion
+
+These two functions, =accumulate= and =grow=, open the doors to something that wasn't quite possible before. Namely, they allow us to complete *avoid* having to write recursive functions ourselves in most cases. In fact, when used together, the pattern of growing out a vector and then accumulating it into a result can capture a huge chunk of problems. 
+
+For example, if we wanted to sum all of the numbers from some start to some stop, we could accomplish this entirely without writing the recursion ourselves:
+
+#+BEGIN_SRC cpp
+int main() {
+  int start = -5;
+  int stop = 100;
+  
+  auto numbers = grow<int>(start,
+    [stop](int seed) { return seed <= stop; },
+    [](int seed) { return make_pair(seed, stop); });
+
+  cout << accumulate(numbers.begin(), numbers.end(), 0,
+    [](int result, int next) { return result + next; });
+  cout << "\n";
+
+  return 0;
+}
+#+END_SRC
+
+While perhaps a bit more verbose that the normal recursive solution would have been, this technique scales well into more complicated problems. In general, we can simply look at the expected type of our problem and pick which functions to use.
+
+If we see something of the form:
+
+\[T \rightarrow vector(T)\]
+
+We can solve it using =grow=. Likewise, if we see a problem which looks like:
+
+\[vector(T) \rightarrow T\]
+
+We can solve it with accumulate.
+
+** Problem Solving with Grow and Accumulate 
+
+Lets say that we had some file which specified what contents needed to be on a webpage. An example of the contents of this file might be:
+
+#+BEGIN_SRC 
+title: My Website
+heading: My Friends
+list: Abe, Bill, Clarice, Danica, Edgar
+image: https://thumbs.dreamstime.com/b/united-two-friends-guys-28277063.jpg
+#+END_SRC
+
+In this case we'd want to translate the lines into the following html:
+#+BEGIN_SRC html
+<html>
+<header>
+ <title> My Website </title>
+</header>
+<body>
+  <h1> My Website </h1>
+  <ul> <li>Abe</li><li>Bill</li><li>Clarice</li><li>Danica</li><li>Edgar</li></ul>
+  <img src="https://thumbs.dreamstime.com/b/united-two-friends-guys-28277063.jpg" />
+</body>
+</html>
+#+END_SRC
+
+It is important to note that there many be any number of lines with any order of what kind of html to generate. The results *cannot* be hard coded before hand. How can we even begin to tackle this problem?
+
+The first step is to look at it from a birds eye view. If we had a function which did the conversion for us, what would its type look like?
+
+Since we begin with the contents of a file, it has to be a =string= for the input. Because we need to also output html to a file, the result must also be a =string=, but to be clear in our planning we can alias =string= with =html=. So we can shorthand what happens in the function like this:
+
+\[string \rightarrow html\]
+
+We start with a =string= and end up with =html= (which is really =string=). Since we can't tackle the entire problem all at once, let's break it down. Its true that we get the contents of the file as a single string, but what we really care about are the *lines* of the file. In other words, the string is technically not a single value, it is many values separated by newline characters ="\n"=. So *if* we had a way to break up the initial value into lines, we could more accurately express the problem as:
+
+\[string \rightarrow vector(string) \rightarrow html\]
+
+Once we have the lines as a collection we could then think about them individually. How could we take a single line from the file and convert it into the proper html? Assuming we could, our program could now resemble something like:
+
+\[string \rightarrow vector(string) \rightarrow vector(html) \rightarrow html\]
+
+Notice that the two halves of our program match exactly with our recursion replacements! $string \rightarrow vector(string)$ can be solved using =grow= and $vector(html) \rightarrow html$ can be solved using accumulate. This leaves only the middle step from $vector(string) \rightarrow vector(html)$ as a complete mystery. 
+
+#+BEGIN_SRC cpp
+#include <numeric>
+
+using html = string;
+
+vector<string> lines(string spec) {
+  return grow<string>(???);
+}
+
+vector<html> to_html(vector<string> ls) {
+  return ???;
+}
+
+html combine_html(vector<html> elems) {
+  return accumulate(???);
+}
+
+html website(string spec) {
+  auto spec_lines = lines(spec); 
+  auto html_lines = to_html(spec_lines);
+  return combine_html(html_linles);
+}
+#+END_SRC
+
+First, let's fill out the =lines= function. Remember that =grow= needs three inputs:
+- a starting =seed= value from which to grow the collection
+- a function which can check the =seed= to determine if it can still grow
+- a function which expands the =seed= into an element for the collection and a new =seed=
+
+#+BEGIN_SRC cpp
+vector<string> lines(string spec) {
+  return grow<string>(???, ???, ???);
+}
+#+END_SRC
+
+Obviously we need to start with =spec= as there are no other inputs. 
+
+#+BEGIN_SRC cpp
+vector<string> lines(string spec) {
+  return grow<string>(spec, ???, ???);
+}
+#+END_SRC
+
+We know that the file has separate lines and thus, every line inside of the string is separated by ="\n"=. Just like with normal recursion, it is useful to figure out the do-nothing input. In terms of grow, the do-nothing input will be what seed stops the growing. Our check then should be something along the lines of "if we are not at the do-nothing value".
+
+#+BEGIN_SRC cpp
+vector<string> lines(string spec) {
+  return grow<string>(spec,
+    [](string seed) { return ???; },
+    ???);
+}
+#+END_SRC
+
+So the question is, when should we stop growing the collection? Well, remember that =spec= will contain all of the lines from the file. If there are no more lines in =spec=, then we shouldn't do any more work. However, with grow we actually want that last line to be included in the collection. If we make our check only for the existence of a ="\n"=, then it will stop when it hits the last line and not actually include it. To remedy this, we can make our check for the empty string.
+
+#+BEGIN_SRC cpp
+vector<string> lines(string spec) {
+  return grow<string>(spec,
+    [](string seed) { return !spec.empty(); },
+    ???);
+}
+#+END_SRC
+
+Remember that the check is to see whether the seed should *continue* to grow, not whether it should stop. For this reason we negate the result of =empty= using the =!= operation.
+
+The final input for grow has to be our expand function. This function will take a seed value and generate a pair of a new element for the collection and a new seed value. This process is similar to the normal recursion steps of breaking off the front and making the problem smaller. The element for the list is the front while the next seed is the smaller input to the function.
+
+#+BEGIN_SRC cpp
+vector<string> lines(string spec) {
+  return grow<string>(spec,
+    [](string seed) { return !spec.empty(); },
+    [](string seed) { return make_pair(Elem?, Next?); });
+}
+#+END_SRC
+
+Now we have two objectives: =Elem?= and =Next?=. We can turn them into functions and solve them separately. For our element, we want only the portion of the string up until the first ="\n"= or the end of the string if there are none. For the next seed we want the inverse, where everything up to the next ="\n"= is dropped.
+
+#+BEGIN_SRC cpp
+string take_line(string line) {
+  return ???;
+}
+
+string drop_line(string line) {
+  return ???;
+} 
+
+vector<string> lines(string spec) {
+  return grow<string>(spec,
+    [](string seed) { return !spec.empty(); },
+    [](string seed) { return make_pair(take_line(seed), drop_line(seed)); });
+}
+#+END_SRC
+
+This means that most of the work from our problem is actually in the $vector(string) \rightarrow vector(html)$ step. 
+
+#+BEGIN_SRC cpp
+#include <numeric>
+
+using html = string;
+
+vector<string> lines(string spec) {
+  return grow<string>(spec,
+    [](string seed) { return ???; },
+    [](string seed) { return ???; });
+}
+
+vector<html> to_html(vector<string> ls) {
+  return ???;
+}
+
+html combine_html(vector<html> elems) {
+  return accumulate(elems.begin(), elems.end(),
+    string(""),
+    [](html result, html e) { return result + e; });
+}
+
+html website(string spec) {
+  auto spec_lines = lines(spec); 
+  auto html_lines = to_html(spec_lines);
+  return combine_html(html_linles);
+}
+#+END_SRC
