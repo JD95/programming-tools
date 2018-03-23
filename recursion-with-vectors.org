@@ -12,7 +12,7 @@
 - It's complicated
 - Can we do better?
 
-** Examining past problems
+** Examining Past Problems
 
 #+REVEAL: split
 #+BEGIN_SRC cpp
@@ -43,7 +43,7 @@ The functions only differ by the operation that combines the elements of the col
 #+REVEAL: split
 Can this be generalized?
 
-** Generalizing sum
+** Generalizing Sum
 
 This is the original
 #+BEGIN_SRC cpp
@@ -153,6 +153,8 @@ B sum(vector<A, allocator<A>> nums, B init, F f) {
 
 There we go! From our initial definition, we now have a recursive function which can combine the elements of any vector into some accumulated value! Infact, the name "sum" doesn't really do justice to what's going on here. In C++, there is actually a version of this function called accumulate.
 
+** Accumulate
+
 #+BEGIN_SRC cpp
 #include <numeric>
 using namespace std;
@@ -170,7 +172,7 @@ int main(){
 
 The above code would output "15". The difference between our derived version of accumulate and C++'s version is that =std::accumulate= can actually accumulate chunks of the vector rather than the whole collection. The chunk is specified through the first two inputs. Normally, though, we want to accumulate the whole collection so =.begin()= and =.end()= are used.
 
-** range
+** Range
 #+BEGIN_SRC cpp
 vector<int> range(int start, int stop) {
 	auto continue_range = [start, stop]() {
@@ -210,7 +212,7 @@ Evluate the first insert, resulting in the vector ={1, 2, 3}=.
 
 As we can see, range is more of less the opposite of =sum= from before. Instead of combining all numbers in a vector down to a single result, we use a "seed" value =start= to grow a vector of =int= values while some condition is true.
 
-** generalizing range
+** Generalizing Range
 
 Given our success with generalizing =sum= into the function =accumulate=, it stands to reason that we can do the same for this function as well.
 
@@ -383,6 +385,8 @@ vector<B, allocator<B>> range(Expand f, Check cond, A start) {
 
 Unfortunately, there is no equivalent of this generalized range function in the C++ standard library. As such we'll give our own name to the function in order to better reflect what it actually does.
 
+** Grow
+
 #+BEGIN_SRC cpp
 template<typename B, typename A, typename Expand, typename Check>
 vector<B, allocator<B>> grow(A seed, Check cond, Expand f) {
@@ -409,7 +413,7 @@ for_each(range.begin(), range.end(),
   [](auto e) { cout << e << " "; });
 #+END_SRC
 
-** No more recursion
+** No More Recursion
 
 These two functions, =accumulate= and =grow=, open the doors to something that wasn't quite possible before. Namely, they allow us to complete *avoid* having to write recursive functions ourselves in most cases. In fact, when used together, the pattern of growing out a vector and then accumulating it into a result can capture a huge chunk of problems. 
 
@@ -833,3 +837,14 @@ html website(string spec) {
 We can new redefine =to_html= to only handle a single line from the spec file, rather than the entire collection of lines and replace the creation of a new collection in =main= with a statement where we use =transform= on =spec_lines=. Note that because we aren't technically transforming the collection into a new type, we can just reuse =spec_lines= as the destination for our transform results.
 
 With that taken care of, the only part left to solve is converting a single line of the file, which is left as an exercise to the reader. You'll have to do something similar to this process again for list items, whose elements must be separated out and transformed individually before combining them back into the final html for that line.
+
+** Summary
+
+Recursion is a powerful technique, but sometimes writing the recursive functions ourselves can be confusing and tedious. Luckily, C++ is expressive enough to let us generalize over certain types of recursive problems and solve them by only providing the necessary pieces. It turns out that most problems will break down into the pattern of =grow= then =transform= then =accumulate=. There are other such functions which cover different cases, but as a start, these functions can be used to plan out larger tasks that involve collections and reduce the actual code we need to write as programmers to the simple cases that only handle one or two elements from the collections at a time.
+
+| Problem                           | Function   |
+|-----------------------------------+------------|
+| $T \rightarrow vector(T)$         | grow       |
+| $vector(A) \rightarrow vector(B)$ | transform  |
+| $vector(T) \rightarrow T$         | accumulate |
+|-----------------------------------+------------|
