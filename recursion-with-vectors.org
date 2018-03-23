@@ -580,17 +580,91 @@ vector<string> lines(string spec) {
 }
 #+END_SRC
 
-This means that most of the work from our problem is actually in the $vector(string) \rightarrow vector(html)$ step. 
+We can now just fill in the take and drop functions like so:
+
+#+BEGIN_SRC cpp
+string take_line(string line) {
+  int new_line = line.find("\n");
+  return new_line == -1 ? line :
+    line.substr(0, new_line);
+}
+
+string drop_line(string line) {
+  int new_line = line.find("\n");
+  return new_line == -1 ? "" :
+    line.substr(new_line + 1, line.length()-1);
+} 
+
+vector<string> lines(string spec) {
+  return grow<string>(spec,
+    [](string seed) { return !spec.empty(); },
+    [](string seed) { return make_pair(take_line(seed), drop_line(seed)); });
+}
+#+END_SRC
+
+And with that we've solved the first third of the program! The accumulate step is much simpler than the grow step in this case. =accumulate()= needs four inputs: 
+- where in the collection to begin 
+- where in the collection to end 
+- a starting accumulation value (same type as the desired result)
+- a function which takes the result so far and an element from the collection and combines them into a new result
+
+Typically we'll always want to accumulate from =.begin()= to =.end()=.
+
+#+BEGIN_SRC cpp
+html combine_html(vector<html> elems) {
+  return accumulate(elems.begin(), elems.end(), ???, ???);
+}
+#+END_SRC
+
+Since we are accumulating some =html= (remember its actually just a =string=), we can begin with the empty string. Note that C++ is dumb and can't figure out that by =""= you want a string and not a =char[]= in this case, so write the empty string as =string("")= to fix this.
+
+#+BEGIN_SRC cpp
+html combine_html(vector<html> elems) {
+  return accumulate(elems.begin(), elems.end(), string(""), ???);
+}
+#+END_SRC
+
+That leaves us with the combination function.
+
+#+BEGIN_SRC cpp
+html combine_html(vector<html> elems) {
+  return accumulate(elems.begin(), elems.end(), string(""), 
+    [](html result, html e) { return ???; });
+}
+#+END_SRC
+
+And in this case, we can just add up the result so far with the element!
+
+#+BEGIN_SRC cpp
+html combine_html(vector<html> elems) {
+  return accumulate(elems.begin(), elems.end(), string(""), 
+    [](html result, html e) { return html + e; });
+}
+#+END_SRC
+
+So we have now solved two thirds of the problem by using =grow= and =accumulate=. We can split up the initial spec string into all of it's lines and once we have all of the correct html elements which correspond to the lines, we can just add them back up into the final result. This means that most of the work from our problem is actually in the $vector(string) \rightarrow vector(html)$ step. 
 
 #+BEGIN_SRC cpp
 #include <numeric>
 
 using html = string;
 
+string take_line(string line) {
+  int new_line = line.find("\n");
+  return new_line == -1 ? line :
+    line.substr(0, new_line);
+}
+
+string drop_line(string line) {
+  int new_line = line.find("\n");
+  return new_line == -1 ? "" :
+    line.substr(new_line + 1, line.length()-1);
+} 
+
 vector<string> lines(string spec) {
   return grow<string>(spec,
-    [](string seed) { return ???; },
-    [](string seed) { return ???; });
+    [](string seed) { return !spec.empty(); },
+    [](string seed) { return make_pair(take_line(seed), drop_line(seed)); });
 }
 
 vector<html> to_html(vector<string> ls) {
@@ -598,9 +672,8 @@ vector<html> to_html(vector<string> ls) {
 }
 
 html combine_html(vector<html> elems) {
-  return accumulate(elems.begin(), elems.end(),
-    string(""),
-    [](html result, html e) { return result + e; });
+  return accumulate(elems.begin(), elems.end(), string(""), 
+    [](html result, html e) { return html + e; });
 }
 
 html website(string spec) {
@@ -609,3 +682,154 @@ html website(string spec) {
   return combine_html(html_linles);
 }
 #+END_SRC
+
+** Transform
+
+The last piece of the puzzle is the =to_html= function. So far we haven't encountered any tools which would let use take a collection and return a collection. Luckily there is a cousin of =accumulate= called =transform= which solves exactly this problem.
+
+=transform= needs four things:
+- where in some collection to start transforming
+- where in some collection to stop transforming
+- a place to put the transformed values
+- a function to transform one element
+
+As an example, lets try to convert a collection of numbers into a collection of strings.
+
+#+BEGIN_SRC cpp
+#include <iostream>
+#include <string>
+#include <algorithm>
+using namespace std;
+
+int main() {
+  vector<int> nums = {1,2,3,4,5};
+  vector<string> strs;
+
+  transform(???, ???, ???, ???);
+
+  foreach(strs.begin(), strs.end(),
+    [](auto e) { cout << e << " "; });
+  cout << "\n";
+  
+  return 0;
+}
+#+END_SRC
+
+As usual, we'll transform the whole collection from =.begin()= to =.end()=.
+
+#+BEGIN_SRC cpp
+#include <iostream>
+#include <string>
+#include <algorithm>
+using namespace std;
+
+int main() {
+  vector<int> nums = {1,2,3,4,5};
+  vector<string> strs;
+
+  transform(nums.begin(), nums.end(), ???, ???);
+
+  foreach(strs.begin(), strs.end(),
+    [](auto e) { cout << e << " "; });
+  cout << "\n";
+  
+  return 0;
+}
+#+END_SRC
+
+We want to put our results into the new vector =strs=, however, to make the elements in =strs= have the same order as in =nums=, we'll need to use the function =back_inserter= to tell =transform= this.
+
+#+BEGIN_SRC cpp
+#include <iostream>
+#include <string>
+#include <algorithm>
+using namespace std;
+
+int main() {
+  vector<int> nums = {1,2,3,4,5};
+  vector<string> strs;
+
+  transform(nums.begin(), nums.end(), 
+    back_inserter(strs), 
+    ???);
+
+  foreach(strs.begin(), strs.end(),
+    [](auto e) { cout << e << " "; });
+  cout << "\n";
+  
+  return 0;
+}
+#+END_SRC
+
+Now we simply need to provide the function that converts a single =int= value into a single =string= value. =transform= will take this function and run it on every element in the range we specified and collect the results in the location provided. In this way, =transform= lets us reduce the problem of transforming an entire collection of =int= and =string= values and instead solve a single step of the problem.
+
+#+BEGIN_SRC cpp
+#include <iostream>
+#include <string>
+#include <algorithm>
+using namespace std;
+
+int main() {
+  vector<int> nums = {1,2,3,4,5};
+  vector<string> strs;
+
+  transform(nums.begin(), nums.end(), 
+    back_inserter(strs), 
+    [](int n) { return to_string(n); });
+
+  foreach(strs.begin(), strs.end(),
+    [](auto e) { cout << e << " "; });
+  cout << "\n";
+  
+  return 0;
+}
+#+END_SRC
+
+More generally, =transform= lets us solve any problem with the form $vector(A) \rightarrow vector(B)$ by only solving the problem of $A \rightarrow B$. In this case we just needed a function that did $int \rightarrow string$. How can this be applied to the previous problem of converting the lines from the spec file into html? In the same way that we only needed to solve the simpler case when converting numbers into strings, using transform only need to solve the problem of converting a single line into the proper html.
+
+#+BEGIN_SRC cpp
+#include <numeric>
+
+using html = string;
+
+string take_line(string line) {
+  int new_line = line.find("\n");
+  return new_line == -1 ? line :
+    line.substr(0, new_line);
+}
+
+string drop_line(string line) {
+  int new_line = line.find("\n");
+  return new_line == -1 ? "" :
+    line.substr(new_line + 1, line.length()-1);
+} 
+
+vector<string> lines(string spec) {
+  return grow<string>(spec,
+    [](string seed) { return !spec.empty(); },
+    [](string seed) { return make_pair(take_line(seed), drop_line(seed)); });
+}
+
+html to_html(string line) {
+  return ???;
+}
+
+html combine_html(vector<html> elems) {
+  return accumulate(elems.begin(), elems.end(), string(""), 
+    [](html result, html e) { return html + e; });
+}
+
+html website(string spec) {
+  auto spec_lines = lines(spec);
+ 
+  transform(spec_lines.begin(), spec_lines.end(),
+    spec_lines.begin(),
+    [](string line) { return to_html(line); });
+
+  return combine_html(html_linles);
+}
+#+END_SRC
+
+We can new redefine =to_html= to only handle a single line from the spec file, rather than the entire collection of lines and replace the creation of a new collection in =main= with a statement where we use =transform= on =spec_lines=. Note that because we aren't technically transforming the collection into a new type, we can just reuse =spec_lines= as the destination for our transform results.
+
+With that taken care of, the only part left to solve is converting a single line of the file, which is left as an exercise to the reader. You'll have to do something similar to this process again for list items, whose elements must be separated out and transformed individually before combining them back into the final html for that line.
