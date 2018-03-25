@@ -649,34 +649,34 @@ The first part of programming is determing how to break down a problem and then 
 </colgroup>
 <thead>
 <tr>
+<th scope="col" class="text-left">operation</th>
 <th scope="col" class="text-left">function</th>
-<th scope="col" class="text-left">meaning</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td class="text-left">+</td>
 <td class="text-left">addition</td>
+<td class="text-left">\(+\)</td>
 </tr>
 
 <tr>
-<td class="text-left">-</td>
 <td class="text-left">subtraction</td>
+<td class="text-left">\(-\)</td>
 </tr>
 
 <tr>
-<td class="text-left"><code>*</code></td>
 <td class="text-left">multiplication</td>
+<td class="text-left">\(*\)</td>
 </tr>
 
 <tr>
-<td class="text-left"><code>/</code></td>
 <td class="text-left">division</td>
+<td class="text-left">\(/\)</td>
 </tr>
 
 <tr>
-<td class="text-left">%</td>
 <td class="text-left">modulus</td>
+<td class="text-left">\(\%\)</td>
 </tr>
 </tbody>
 </table>
@@ -691,8 +691,182 @@ The first part of programming is determing how to break down a problem and then 
 </div>
 
 <div id="outline-container-sec-2-2" class="outline-3">
-<h3 id="sec-2-2"><span class="section-number-3">2.2</span> char math</h3>
+<h3 id="sec-2-2"><span class="section-number-3">2.2</span> representing expressions</h3>
 <div class="outline-text-3" id="text-2-2">
+<p>
+The following expression can be translated into C++ like so:
+</p>
+
+<p>
+\[\frac{2x + 5y}{3z}\]
+</p>
+
+<p>
+Because we do not know the values of \(x\), \(y\), or \(z\) we'll have to make a function with those values as inputs.
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-cpp">??? f(??? x, ??? y, ??? z) {
+  <span style="color: #195466; font-weight: bold;">return</span> ???; 
+}
+</pre>
+</div>
+
+<p>
+What type should be chosen for the inputs and result? Given that the expression contains division, it would make sense to allow for decimal numbers. Thus, <code>float</code> makes the most sense.
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-cpp"><span style="color: #d26937;">float</span> <span style="color: #599cab;">f</span>(<span style="color: #d26937;">float</span> <span style="color: #599cab;">x</span>, <span style="color: #d26937;">float</span> <span style="color: #599cab;">y</span>, <span style="color: #d26937;">float</span> <span style="color: #599cab;">z</span>) {
+  <span style="color: #195466; font-weight: bold;">return</span> ???; 
+}
+</pre>
+</div>
+
+<p>
+Using the above table we can write out the expression.
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-cpp"><span style="color: #d26937;">float</span> <span style="color: #599cab;">f</span>(<span style="color: #d26937;">float</span> <span style="color: #599cab;">x</span>, <span style="color: #d26937;">float</span> <span style="color: #599cab;">y</span>, <span style="color: #d26937;">float</span> <span style="color: #599cab;">z</span>) {
+  <span style="color: #195466; font-weight: bold;">return</span> 2*x + 5*y / z;
+}
+</pre>
+</div>
+
+<p>
+However, this expression is incorrect because of the standard order of operations:
+</p>
+<ol class="org-ol">
+<li>Parenthesis
+</li>
+<li>Exponents
+</li>
+<li>Multiplication
+</li>
+<li>Division
+</li>
+<li>Addition
+</li>
+<li>Subtraction
+</li>
+</ol>
+
+<p>
+If the implicit parenthesis are added back, we get:
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-cpp"><span style="color: #d26937;">float</span> <span style="color: #599cab;">f</span>(<span style="color: #d26937;">float</span> <span style="color: #599cab;">x</span>, <span style="color: #d26937;">float</span> <span style="color: #599cab;">y</span>, <span style="color: #d26937;">float</span> <span style="color: #599cab;">z</span>) {
+  <span style="color: #195466; font-weight: bold;">return</span> (2*x) + ((5*y) / z);
+}
+</pre>
+</div>
+
+<p>
+So if left as is, the expression will divide \(5y\) by \(z\) instead of \(2x + 5y\). To correct this we can just add in the parenthesis ourselves to ensure the correct order.
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-cpp"><span style="color: #d26937;">float</span> <span style="color: #599cab;">f</span>(<span style="color: #d26937;">float</span> <span style="color: #599cab;">x</span>, <span style="color: #d26937;">float</span> <span style="color: #599cab;">y</span>, <span style="color: #d26937;">float</span> <span style="color: #599cab;">z</span>) {
+  <span style="color: #195466; font-weight: bold;">return</span> (2*x + 5*y) / z;
+}
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-2-3" class="outline-3">
+<h3 id="sec-2-3"><span class="section-number-3">2.3</span> cmath</h3>
+<div class="outline-text-3" id="text-2-3">
+<p>
+Not all math operations are defined by default in C++. Many useful math functions need a library to work. For example, in order to represent \(x^2\) we'd need the <code>pow</code> function from <code>&lt;cmath&gt;</code>. 
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-cpp"><span style="color: #c23127;">#include</span> <span style="color: #2aa889;">&lt;iostream&gt;</span>
+<span style="color: #c23127;">#include</span> <span style="color: #2aa889;">&lt;cmath&gt;</span>
+<span style="color: #195466; font-weight: bold;">using</span> <span style="color: #195466; font-weight: bold;">namespace</span> <span style="color: #33859e; font-weight: bold;">std</span>;
+
+<span style="color: #d26937;">int</span> <span style="color: #599cab;">main</span>() {
+  cout &lt;&lt; pow(2, 3);  
+  <span style="color: #195466; font-weight: bold;">return</span> 0;
+}
+</pre>
+</div>
+
+<table class="table table-striped table-bordered table-hover table-condensed">
+
+
+<colgroup>
+<col  class="left">
+
+<col  class="left">
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="text-left">operation</th>
+<th scope="col" class="text-left">function</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="text-left">logorithm</td>
+<td class="text-left">log</td>
+</tr>
+
+<tr>
+<td class="text-left">square root</td>
+<td class="text-left">sqrt</td>
+</tr>
+
+<tr>
+<td class="text-left">sin</td>
+<td class="text-left">sin</td>
+</tr>
+
+<tr>
+<td class="text-left">cos</td>
+<td class="text-left">cos</td>
+</tr>
+
+<tr>
+<td class="text-left">tan</td>
+<td class="text-left">tan</td>
+</tr>
+
+<tr>
+<td class="text-left">round up</td>
+<td class="text-left">ceil</td>
+</tr>
+
+<tr>
+<td class="text-left">round down</td>
+<td class="text-left">floor</td>
+</tr>
+
+<tr>
+<td class="text-left">round nearest to nearest</td>
+<td class="text-left">trunc</td>
+</tr>
+</tbody>
+</table>
+
+<p>
+There are many more functions defined in <code>&lt;cmath&gt;</code>. A complete list can be found at <a href="http://en.cppreference.com/w/cpp/header/cmath">here</a>.
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-2-4" class="outline-3">
+<h3 id="sec-2-4"><span class="section-number-3">2.4</span> char math</h3>
+<div class="outline-text-3" id="text-2-4">
 <ul class="org-ul">
 <li>remember that characters are represented as numbers in an ascii table
 </li>
@@ -714,9 +888,92 @@ The first part of programming is determing how to break down a problem and then 
 </div>
 </div>
 
-<div id="outline-container-sec-2-3" class="outline-3">
-<h3 id="sec-2-3"><span class="section-number-3">2.3</span> string math</h3>
-<div class="outline-text-3" id="text-2-3">
+<div id="outline-container-sec-2-5" class="outline-3">
+<h3 id="sec-2-5"><span class="section-number-3">2.5</span> type conversions</h3>
+<div class="outline-text-3" id="text-2-5">
+<p>
+Below is a table of possible conversions for some value \(x\). Begin with a row for the starting type and go to the column for the desired type. The conversion \(int \rightarrow float\) is not the same as \(float \rightarrow int\) . Note that if a conversion isn't possible it will be labeled with NA for "not available".
+</p>
+
+<table class="table table-striped table-bordered table-hover table-condensed">
+
+
+<colgroup>
+<col  class="left">
+
+<col  class="left">
+
+<col  class="left">
+
+<col  class="left">
+
+<col  class="left">
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="text-left">&#xa0;</th>
+<th scope="col" class="text-left">int</th>
+<th scope="col" class="text-left">float</th>
+<th scope="col" class="text-left">char</th>
+<th scope="col" class="text-left">string</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="text-left">int</td>
+<td class="text-left">\(x\)</td>
+<td class="text-left">\(x\)</td>
+<td class="text-left">\(x\)</td>
+<td class="text-left">\(to\_string(x)\)</td>
+</tr>
+
+<tr>
+<td class="text-left">float</td>
+<td class="text-left">\(trunc(x)\)</td>
+<td class="text-left">\(x\)</td>
+<td class="text-left">NA</td>
+<td class="text-left">\(to\_string(x)\)</td>
+</tr>
+
+<tr>
+<td class="text-left">char (digit)</td>
+<td class="text-left">\(x\)</td>
+<td class="text-left">NA</td>
+<td class="text-left">\(x\)</td>
+<td class="text-left">\(string(1, x)\)</td>
+</tr>
+
+<tr>
+<td class="text-left">string</td>
+<td class="text-left">\(stoi(x)\)</td>
+<td class="text-left">\(stof(x)\)</td>
+<td class="text-left">NA</td>
+<td class="text-left">\(x\)</td>
+</tr>
+</tbody>
+</table>
+
+<p>
+Several of these conversions, \(int \rightarrow float\) for example, will happen automatically. So if we have a function like:
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-cpp"><span style="color: #d26937;">int</span> <span style="color: #599cab;">add_one</span>(<span style="color: #d26937;">int</span> <span style="color: #599cab;">x</span>) {
+  <span style="color: #195466; font-weight: bold;">return</span> x + 1;
+}
+</pre>
+</div>
+
+<p>
+Then if we attempt to use it with a <code>float</code> value, the float will automatically truncate into an <code>int</code>. Another conversion that happens implicitly is the conversion between a <code>char</code> and an <code>int</code>.
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-2-6" class="outline-3">
+<h3 id="sec-2-6"><span class="section-number-3">2.6</span> string math</h3>
+<div class="outline-text-3" id="text-2-6">
 <ul class="org-ul">
 <li>strings can be combined using <code>+</code>
 </li>
@@ -4045,8 +4302,11 @@ Recursion is a powerful technique, but sometimes writing the recursive functions
 <li><a href="#sec-2">2. Math Tools</a>
 <ul class="nav">
 <li><a href="#sec-2-1">2.1. basic math functions</a></li>
-<li><a href="#sec-2-2">2.2. char math</a></li>
-<li><a href="#sec-2-3">2.3. string math</a></li>
+<li><a href="#sec-2-2">2.2. representing expressions</a></li>
+<li><a href="#sec-2-3">2.3. cmath</a></li>
+<li><a href="#sec-2-4">2.4. char math</a></li>
+<li><a href="#sec-2-5">2.5. type conversions</a></li>
+<li><a href="#sec-2-6">2.6. string math</a></li>
 </ul>
 </li>
 <li><a href="#sec-3">3. String Tools</a>
