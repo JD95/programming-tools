@@ -3644,7 +3644,7 @@ Unfortunately, there is no equivalent of this generalized range function in the 
 <span style="color: #d26937;">vector</span>&lt;<span style="color: #d26937;">B</span>, <span style="color: #d26937;">allocator</span>&lt;<span style="color: #d26937;">B</span>&gt;&gt; <span style="color: #599cab;">grow</span>(<span style="color: #d26937;">A</span> <span style="color: #599cab;">seed</span>, <span style="color: #d26937;">Check</span> <span style="color: #599cab;">cond</span>, <span style="color: #d26937;">Expand</span> <span style="color: #599cab;">f</span>) {
         <span style="color: #195466; font-weight: bold;">auto</span> <span style="color: #599cab;">expand</span> = [f, cond, seed]() {
                 <span style="color: #d26937;">pair</span>&lt;<span style="color: #d26937;">B</span>, <span style="color: #d26937;">A</span>&gt; <span style="color: #599cab;">result</span> = f(seed);
-                <span style="color: #195466; font-weight: bold;">auto</span> <span style="color: #599cab;">rest</span> = unfold&lt;<span style="color: #d26937;">B</span>&gt;(f, cond, get&lt;1&gt;(result));
+                <span style="color: #195466; font-weight: bold;">auto</span> <span style="color: #599cab;">rest</span> = unfold&lt;<span style="color: #d26937;">B</span>&gt;(get&lt;1&gt;(result), cond, f);
                 rest.insert(rest.begin(), get&lt;0&gt;(result));
                 <span style="color: #195466; font-weight: bold;">return</span> rest;
         };
