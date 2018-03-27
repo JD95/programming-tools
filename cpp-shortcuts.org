@@ -1,0 +1,123 @@
+#+TITLE: Shortcuts
+#+STARTUP: hidestar
+#+STARTUP: indent
+
+
+# latex options
+#+OPTIONS: toc:nil author:nil date:nil num:nil
+#+LATEX_HEADER: \usepackage[margin=1.5in]{geometry}
+#+LATEX_HEADER: \usepackage{apacite}
+#+LATEX_HEADER: \usepackage{setspace}
+
+** First example 
+
+
+#+BEGIN_SRC
+Problem: Given a sales price and the amount paid, calculate and display the amount of each type of currency used for the change.
+
+Example:
+
+price = 125.27
+paid = 200.00
+
+Change amount: 74.73
+1 fifty
+1 twenty
+4 ones
+2 quarters
+2 dimes
+3 pennies
+#+END_SRC
+
+First we need to pull out the nouns:
+- sales price
+- amount paid
+- the change
+- ammount of each type of money used for the change
+
+Verbs:
+- calculate (the change)
+- display (the amount of each type of currency used)
+
+Money can usually be represented with decimal values, so a float can be used for all money values
+
+#+BEGIN_SRC cpp
+#include <iostream>
+using namespace std;
+
+using Dollars = float;
+
+int main() {
+  Dollars price = 125.27;
+  Dollars paid = 200.0;
+
+  cout << "Price: " << price << "\n";
+  cout << "Paid: " << paid << "\n";
+
+  return 0;
+}
+#+END_SRC 
+
+Next we can calculate the change by subtracting the paid from the price
+
+#+BEGIN_SRC cpp
+#+BEGIN_SRC cpp
+#include <iostream>
+using namespace std;
+
+using Dollars = float;
+
+int main() {
+  Dollars price = 125.27;
+  Dollars paid = 200.0;
+  Dollars change = paid - price;
+
+  cout << "Price: " << price << "\n";
+  cout << "Paid: " << paid << "\n";
+  cout << "Change: " << change << "\n";
+
+  return 0;
+}
+#+END_SRC 
+
+Next we need to represent the amount of coins
+
+#+BEGIN_SRC cpp
+#include <iostream>
+#include <string>
+using namespace std;
+
+struct Currency {
+  string name;
+  Dollars worth;
+};
+
+const Currency penny = { "penny", 0.01 };
+
+#+END_SRC
+
+Include the =<string>= header for the name.
+
+We can define the other types of currency
+
+#+BEGIN_SRC cpp
+#include <iostream>
+#include <string>
+using namespace std;
+
+struct Currency {
+  string name;
+  Dollars worth;
+};
+
+const Currency penny = { "penny", 0.01 };
+const Currency nickle = { "nickle", 0.05 };
+const Currency dime = { "dime", 0.10 };
+const Currency quarter = { "quarter", 0.25 };
+const Currency dollar = { "dollar", 1.0 };
+const Currency five = { "five", 5.0 };
+const Currency ten = { "ten", 10.0 };
+const Currency twenty = { "twenty", 20.0 };
+const Currency fifty = { "fifty", 50.0 };
+const Currency hundred = { "hundred", 100.0 };
+#+END_SRC
