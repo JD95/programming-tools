@@ -3644,7 +3644,7 @@ Unfortunately, there is no equivalent of this generalized range function in the 
 <span style="color: #d26937;">vector</span>&lt;<span style="color: #d26937;">B</span>, <span style="color: #d26937;">allocator</span>&lt;<span style="color: #d26937;">B</span>&gt;&gt; <span style="color: #599cab;">grow</span>(<span style="color: #d26937;">A</span> <span style="color: #599cab;">seed</span>, <span style="color: #d26937;">Check</span> <span style="color: #599cab;">cond</span>, <span style="color: #d26937;">Expand</span> <span style="color: #599cab;">f</span>) {
         <span style="color: #195466; font-weight: bold;">auto</span> <span style="color: #599cab;">expand</span> = [f, cond, seed]() {
                 <span style="color: #d26937;">pair</span>&lt;<span style="color: #d26937;">B</span>, <span style="color: #d26937;">A</span>&gt; <span style="color: #599cab;">result</span> = f(seed);
-                <span style="color: #195466; font-weight: bold;">auto</span> <span style="color: #599cab;">rest</span> = unfold&lt;<span style="color: #d26937;">B</span>&gt;(f, cond, get&lt;1&gt;(result));
+                <span style="color: #195466; font-weight: bold;">auto</span> <span style="color: #599cab;">rest</span> = unfold&lt;<span style="color: #d26937;">B</span>&gt;(get&lt;1&gt;(result), cond, f);
                 rest.insert(rest.begin(), get&lt;0&gt;(result));
                 <span style="color: #195466; font-weight: bold;">return</span> rest;
         };
@@ -3817,7 +3817,7 @@ Notice that the two halves of our program match exactly with our recursion repla
 <span style="color: #d26937;">html</span> <span style="color: #599cab;">website</span>(<span style="color: #d26937;">string</span> <span style="color: #599cab;">spec</span>) {
   <span style="color: #195466; font-weight: bold;">auto</span> <span style="color: #599cab;">spec_lines</span> = lines(spec); 
   <span style="color: #195466; font-weight: bold;">auto</span> <span style="color: #599cab;">html_lines</span> = to_html(spec_lines);
-  <span style="color: #195466; font-weight: bold;">return</span> combine_html(html_linles);
+  <span style="color: #195466; font-weight: bold;">return</span> combine_html(html_lines);
 }
 </pre>
 </div>
@@ -3876,7 +3876,7 @@ So the question is, when should we stop growing the collection? Well, remember t
 
 <pre class="src src-cpp"><span style="color: #d26937;">vector</span>&lt;<span style="color: #d26937;">string</span>&gt; <span style="color: #599cab;">lines</span>(<span style="color: #d26937;">string</span> <span style="color: #599cab;">spec</span>) {
   <span style="color: #195466; font-weight: bold;">return</span> grow&lt;<span style="color: #d26937;">string</span>&gt;(spec,
-    [](<span style="color: #d26937;">string</span> <span style="color: #599cab;">seed</span>) { <span style="color: #195466; font-weight: bold;">return</span> <span style="color: #c23127;">!</span>spec.empty(); },
+    [](<span style="color: #d26937;">string</span> <span style="color: #599cab;">seed</span>) { <span style="color: #195466; font-weight: bold;">return</span> <span style="color: #c23127;">!</span>seed.empty(); },
     ???);
 }
 </pre>
@@ -3894,7 +3894,7 @@ The final input for grow has to be our expand function. This function will take 
 
 <pre class="src src-cpp"><span style="color: #d26937;">vector</span>&lt;<span style="color: #d26937;">string</span>&gt; <span style="color: #599cab;">lines</span>(<span style="color: #d26937;">string</span> <span style="color: #599cab;">spec</span>) {
   <span style="color: #195466; font-weight: bold;">return</span> grow&lt;<span style="color: #d26937;">string</span>&gt;(spec,
-    [](<span style="color: #d26937;">string</span> <span style="color: #599cab;">seed</span>) { <span style="color: #195466; font-weight: bold;">return</span> <span style="color: #c23127;">!</span>spec.empty(); },
+    [](<span style="color: #d26937;">string</span> <span style="color: #599cab;">seed</span>) { <span style="color: #195466; font-weight: bold;">return</span> <span style="color: #c23127;">!</span>seed.empty(); },
     [](<span style="color: #d26937;">string</span> <span style="color: #599cab;">seed</span>) { <span style="color: #195466; font-weight: bold;">return</span> make_pair(Elem?, Next?); });
 }
 </pre>
@@ -3916,7 +3916,7 @@ Now we have two objectives: <code>Elem?</code> and <code>Next?</code>. We can tu
 
 <span style="color: #d26937;">vector</span>&lt;<span style="color: #d26937;">string</span>&gt; <span style="color: #599cab;">lines</span>(<span style="color: #d26937;">string</span> <span style="color: #599cab;">spec</span>) {
   <span style="color: #195466; font-weight: bold;">return</span> grow&lt;<span style="color: #d26937;">string</span>&gt;(spec,
-    [](<span style="color: #d26937;">string</span> <span style="color: #599cab;">seed</span>) { <span style="color: #195466; font-weight: bold;">return</span> <span style="color: #c23127;">!</span>spec.empty(); },
+    [](<span style="color: #d26937;">string</span> <span style="color: #599cab;">seed</span>) { <span style="color: #195466; font-weight: bold;">return</span> <span style="color: #c23127;">!</span>seed.empty(); },
     [](<span style="color: #d26937;">string</span> <span style="color: #599cab;">seed</span>) { <span style="color: #195466; font-weight: bold;">return</span> make_pair(take_line(seed), drop_line(seed)); });
 }
 </pre>
@@ -3942,7 +3942,7 @@ We can now just fill in the take and drop functions like so:
 
 <span style="color: #d26937;">vector</span>&lt;<span style="color: #d26937;">string</span>&gt; <span style="color: #599cab;">lines</span>(<span style="color: #d26937;">string</span> <span style="color: #599cab;">spec</span>) {
   <span style="color: #195466; font-weight: bold;">return</span> grow&lt;<span style="color: #d26937;">string</span>&gt;(spec,
-    [](<span style="color: #d26937;">string</span> <span style="color: #599cab;">seed</span>) { <span style="color: #195466; font-weight: bold;">return</span> <span style="color: #c23127;">!</span>spec.empty(); },
+    [](<span style="color: #d26937;">string</span> <span style="color: #599cab;">seed</span>) { <span style="color: #195466; font-weight: bold;">return</span> <span style="color: #c23127;">!</span>seed.empty(); },
     [](<span style="color: #d26937;">string</span> <span style="color: #599cab;">seed</span>) { <span style="color: #195466; font-weight: bold;">return</span> make_pair(take_line(seed), drop_line(seed)); });
 }
 </pre>
@@ -4007,7 +4007,7 @@ And in this case, we can just add up the result so far with the element!
 
 <pre class="src src-cpp"><span style="color: #d26937;">html</span> <span style="color: #599cab;">combine_html</span>(<span style="color: #d26937;">vector</span>&lt;<span style="color: #d26937;">html</span>&gt; <span style="color: #599cab;">elems</span>) {
   <span style="color: #195466; font-weight: bold;">return</span> accumulate(elems.begin(), elems.end(), string(<span style="color: #2aa889;">""</span>), 
-    [](<span style="color: #d26937;">html</span> <span style="color: #599cab;">result</span>, <span style="color: #d26937;">html</span> <span style="color: #599cab;">e</span>) { <span style="color: #195466; font-weight: bold;">return</span> html + e; });
+    [](<span style="color: #d26937;">html</span> <span style="color: #599cab;">result</span>, <span style="color: #d26937;">html</span> <span style="color: #599cab;">e</span>) { <span style="color: #195466; font-weight: bold;">return</span> result + e; });
 }
 </pre>
 </div>
@@ -4036,7 +4036,7 @@ So we have now solved two thirds of the problem by using <code>grow</code> and <
 
 <span style="color: #d26937;">vector</span>&lt;<span style="color: #d26937;">string</span>&gt; <span style="color: #599cab;">lines</span>(<span style="color: #d26937;">string</span> <span style="color: #599cab;">spec</span>) {
   <span style="color: #195466; font-weight: bold;">return</span> grow&lt;<span style="color: #d26937;">string</span>&gt;(spec,
-    [](<span style="color: #d26937;">string</span> <span style="color: #599cab;">seed</span>) { <span style="color: #195466; font-weight: bold;">return</span> <span style="color: #c23127;">!</span>spec.empty(); },
+    [](<span style="color: #d26937;">string</span> <span style="color: #599cab;">seed</span>) { <span style="color: #195466; font-weight: bold;">return</span> <span style="color: #c23127;">!</span>seed.empty(); },
     [](<span style="color: #d26937;">string</span> <span style="color: #599cab;">seed</span>) { <span style="color: #195466; font-weight: bold;">return</span> make_pair(take_line(seed), drop_line(seed)); });
 }
 
@@ -4046,13 +4046,13 @@ So we have now solved two thirds of the problem by using <code>grow</code> and <
 
 <span style="color: #d26937;">html</span> <span style="color: #599cab;">combine_html</span>(<span style="color: #d26937;">vector</span>&lt;<span style="color: #d26937;">html</span>&gt; <span style="color: #599cab;">elems</span>) {
   <span style="color: #195466; font-weight: bold;">return</span> accumulate(elems.begin(), elems.end(), string(<span style="color: #2aa889;">""</span>), 
-    [](<span style="color: #d26937;">html</span> <span style="color: #599cab;">result</span>, <span style="color: #d26937;">html</span> <span style="color: #599cab;">e</span>) { <span style="color: #195466; font-weight: bold;">return</span> html + e; });
+    [](<span style="color: #d26937;">html</span> <span style="color: #599cab;">result</span>, <span style="color: #d26937;">html</span> <span style="color: #599cab;">e</span>) { <span style="color: #195466; font-weight: bold;">return</span> result + e; });
 }
 
 <span style="color: #d26937;">html</span> <span style="color: #599cab;">website</span>(<span style="color: #d26937;">string</span> <span style="color: #599cab;">spec</span>) {
   <span style="color: #195466; font-weight: bold;">auto</span> <span style="color: #599cab;">spec_lines</span> = lines(spec); 
   <span style="color: #195466; font-weight: bold;">auto</span> <span style="color: #599cab;">html_lines</span> = to_html(spec_lines);
-  <span style="color: #195466; font-weight: bold;">return</span> combine_html(html_linles);
+  <span style="color: #195466; font-weight: bold;">return</span> combine_html(html_lines);
 }
 </pre>
 </div>
@@ -4212,7 +4212,7 @@ More generally, <code>transform</code> lets us solve any problem with the form \
 
 <span style="color: #d26937;">vector</span>&lt;<span style="color: #d26937;">string</span>&gt; <span style="color: #599cab;">lines</span>(<span style="color: #d26937;">string</span> <span style="color: #599cab;">spec</span>) {
   <span style="color: #195466; font-weight: bold;">return</span> grow&lt;<span style="color: #d26937;">string</span>&gt;(spec,
-    [](<span style="color: #d26937;">string</span> <span style="color: #599cab;">seed</span>) { <span style="color: #195466; font-weight: bold;">return</span> <span style="color: #c23127;">!</span>spec.empty(); },
+    [](<span style="color: #d26937;">string</span> <span style="color: #599cab;">seed</span>) { <span style="color: #195466; font-weight: bold;">return</span> <span style="color: #c23127;">!</span>seed.empty(); },
     [](<span style="color: #d26937;">string</span> <span style="color: #599cab;">seed</span>) { <span style="color: #195466; font-weight: bold;">return</span> make_pair(take_line(seed), drop_line(seed)); });
 }
 
@@ -4222,7 +4222,7 @@ More generally, <code>transform</code> lets us solve any problem with the form \
 
 <span style="color: #d26937;">html</span> <span style="color: #599cab;">combine_html</span>(<span style="color: #d26937;">vector</span>&lt;<span style="color: #d26937;">html</span>&gt; <span style="color: #599cab;">elems</span>) {
   <span style="color: #195466; font-weight: bold;">return</span> accumulate(elems.begin(), elems.end(), string(<span style="color: #2aa889;">""</span>), 
-    [](<span style="color: #d26937;">html</span> <span style="color: #599cab;">result</span>, <span style="color: #d26937;">html</span> <span style="color: #599cab;">e</span>) { <span style="color: #195466; font-weight: bold;">return</span> html + e; });
+    [](<span style="color: #d26937;">html</span> <span style="color: #599cab;">result</span>, <span style="color: #d26937;">html</span> <span style="color: #599cab;">e</span>) { <span style="color: #195466; font-weight: bold;">return</span> result + e; });
 }
 
 <span style="color: #d26937;">html</span> <span style="color: #599cab;">website</span>(<span style="color: #d26937;">string</span> <span style="color: #599cab;">spec</span>) {
@@ -4232,7 +4232,7 @@ More generally, <code>transform</code> lets us solve any problem with the form \
     spec_lines.begin(),
     [](<span style="color: #d26937;">string</span> <span style="color: #599cab;">line</span>) { <span style="color: #195466; font-weight: bold;">return</span> to_html(line); });
 
-  <span style="color: #195466; font-weight: bold;">return</span> combine_html(html_linles);
+  <span style="color: #195466; font-weight: bold;">return</span> combine_html(spec_lines);
 }
 </pre>
 </div>

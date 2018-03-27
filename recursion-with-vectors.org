@@ -392,7 +392,7 @@ template<typename B, typename A, typename Expand, typename Check>
 vector<B, allocator<B>> grow(A seed, Check cond, Expand f) {
 	auto expand = [f, cond, seed]() {
 		pair<B, A> result = f(seed);
-		auto rest = unfold<B>(f, cond, get<1>(result));
+		auto rest = unfold<B>(get<1>(result), cond, f);
 		rest.insert(rest.begin(), get<0>(result));
 		return rest;
 	};
@@ -511,7 +511,7 @@ html combine_html(vector<html> elems) {
 html website(string spec) {
   auto spec_lines = lines(spec); 
   auto html_lines = to_html(spec_lines);
-  return combine_html(html_linles);
+  return combine_html(html_lines);
 }
 #+END_SRC
 
@@ -549,7 +549,7 @@ So the question is, when should we stop growing the collection? Well, remember t
 #+BEGIN_SRC cpp
 vector<string> lines(string spec) {
   return grow<string>(spec,
-    [](string seed) { return !spec.empty(); },
+    [](string seed) { return !seed.empty(); },
     ???);
 }
 #+END_SRC
@@ -561,7 +561,7 @@ The final input for grow has to be our expand function. This function will take 
 #+BEGIN_SRC cpp
 vector<string> lines(string spec) {
   return grow<string>(spec,
-    [](string seed) { return !spec.empty(); },
+    [](string seed) { return !seed.empty(); },
     [](string seed) { return make_pair(Elem?, Next?); });
 }
 #+END_SRC
@@ -579,7 +579,7 @@ string drop_line(string line) {
 
 vector<string> lines(string spec) {
   return grow<string>(spec,
-    [](string seed) { return !spec.empty(); },
+    [](string seed) { return !seed.empty(); },
     [](string seed) { return make_pair(take_line(seed), drop_line(seed)); });
 }
 #+END_SRC
@@ -601,7 +601,7 @@ string drop_line(string line) {
 
 vector<string> lines(string spec) {
   return grow<string>(spec,
-    [](string seed) { return !spec.empty(); },
+    [](string seed) { return !seed.empty(); },
     [](string seed) { return make_pair(take_line(seed), drop_line(seed)); });
 }
 #+END_SRC
@@ -642,7 +642,7 @@ And in this case, we can just add up the result so far with the element!
 #+BEGIN_SRC cpp
 html combine_html(vector<html> elems) {
   return accumulate(elems.begin(), elems.end(), string(""), 
-    [](html result, html e) { return html + e; });
+    [](html result, html e) { return result + e; });
 }
 #+END_SRC
 
@@ -667,7 +667,7 @@ string drop_line(string line) {
 
 vector<string> lines(string spec) {
   return grow<string>(spec,
-    [](string seed) { return !spec.empty(); },
+    [](string seed) { return !seed.empty(); },
     [](string seed) { return make_pair(take_line(seed), drop_line(seed)); });
 }
 
@@ -677,13 +677,13 @@ vector<html> to_html(vector<string> ls) {
 
 html combine_html(vector<html> elems) {
   return accumulate(elems.begin(), elems.end(), string(""), 
-    [](html result, html e) { return html + e; });
+    [](html result, html e) { return result + e; });
 }
 
 html website(string spec) {
   auto spec_lines = lines(spec); 
   auto html_lines = to_html(spec_lines);
-  return combine_html(html_linles);
+  return combine_html(html_lines);
 }
 #+END_SRC
 
@@ -810,7 +810,7 @@ string drop_line(string line) {
 
 vector<string> lines(string spec) {
   return grow<string>(spec,
-    [](string seed) { return !spec.empty(); },
+    [](string seed) { return !seed.empty(); },
     [](string seed) { return make_pair(take_line(seed), drop_line(seed)); });
 }
 
@@ -820,7 +820,7 @@ html to_html(string line) {
 
 html combine_html(vector<html> elems) {
   return accumulate(elems.begin(), elems.end(), string(""), 
-    [](html result, html e) { return html + e; });
+    [](html result, html e) { return result + e; });
 }
 
 html website(string spec) {
@@ -830,7 +830,7 @@ html website(string spec) {
     spec_lines.begin(),
     [](string line) { return to_html(line); });
 
-  return combine_html(html_linles);
+  return combine_html(spec_lines);
 }
 #+END_SRC
 
