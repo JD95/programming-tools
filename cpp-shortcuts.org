@@ -13,20 +13,96 @@
 
 ** while loops 
 
+#+BEGIN_SRC
+while (not do-nothing) {
+ break off the front;
+ make problem smaller;
+ combine results;
+} 
+#+END_SRC
+
+#+BEGIN_SRC cpp
+int sum(int n) {
+  int result = 0;
+  while (n > 0) {
+    int front = n;
+    n = n -1;
+    result = front + result;
+  }
+  return result;
+}
+#+END_SRC
+
+Which can be simplified
+
+#+BEGIN_SRC cpp
+int sum(int n) {
+  int result = 0;
+  while (n > 0) {
+    result = n + result;
+    n = n - 1;
+  }
+  return result;
+}
+#+END_SRC
+
+We can express our recursion replacements in terms of while loops.
+
+#+BEGIN_SRC cpp
+template<typename B, typename A, typename Expand, typename Check>
+vector<B, allocator<B>> grow(A seed, Check cond, Expand f) {
+  pair<B,A> expand;
+  vector<B, allocator<B>> result;
+  while (cond(seed)) {
+    expand = f(seed);
+    seed = get<1>(expand);
+    result.push_back(get<0>(expand));
+  }
+  return result;
+}
+#+END_SRC
+
+| step                 | code                                        |
+|----------------------+---------------------------------------------|
+| do-nothing           | !cond(seed)                                 |
+| break off front      | f(seed)                                     |
+| make problem smaller | seed = get<1>(exapnd)                       |
+| combine results      | @@html:result.push_back(get<0>(expand))@@   |
+
+#+BEGIN_SRC cpp
+template <typename B, typename A, typename F>
+B accumulate(vector<A, allocator<A>> nums, B init, F f) {
+  B result = init;
+  while (!num.empty()) {
+    auto front = nums.front();
+    result = f(result, front);
+    nums.erase(0);
+  }
+  return result;
+}
+#+END_SRC
+
+| step                 | code             |
+|----------------------+------------------|
+| do-nothing           | num.empty()      |
+| break off front      | nums.front()     |
+| make problem smaller | nums.erase(0)    |
+| combine results      | f(result, front) |
+
 ** for loops
 
 ** when to use what
 
-| problem                                                   | tool            |
-|-----------------------------------------------------------+-----------------|
-| Build a collection out a single value                     | grow            |
-| Use something simple like $+$ to combine elements         | accumulate      |
-| Remove elements from a collection which don't pass a test | $remove_if$     |
-| Do something to every element and use the results later   | transform       |
-| Do something for each element of a collection             | range-based for |
-| Index a collection                                        | for             |
-| Repeat action while condition is true                     | while           |
-| Everything else                                           | recursion       |
+| I need to...                                              | tool               |
+|-----------------------------------------------------------+--------------------|
+| Build a collection out a single value                     | grow               |
+| Use something simple like + to combine elements           | accumulate         |
+| Remove elements from a collection which don't pass a test | @@html:remove_if@@ |
+| Do something to every element and use the results later   | transform          |
+| Do something for each element of a collection             | range-based for    |
+| Index a collection                                        | for                |
+| Repeat action while condition is true                     | while              |
+| Everything else                                           | recursion          |
 
 ** First example 
 
