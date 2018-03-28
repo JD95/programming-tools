@@ -62,12 +62,13 @@ vector<B, allocator<B>> grow(A seed, Check cond, Expand f) {
 }
 #+END_SRC
 
-| step                 | code                                        |
-|----------------------+---------------------------------------------|
-| do-nothing           | !cond(seed)                                 |
-| break off front      | f(seed)                                     |
-| make problem smaller | seed = get<1>(exapnd)                       |
-| combine results      | @@html:result.push_back(get<0>(expand))@@   |
+| step                 | code                                      |
+|----------------------+-------------------------------------------|
+| do-nothing input     | !cond(seed)                               |
+| do-nothing step      | return result                             |
+| break off front      | f(seed)                                   |
+| make problem smaller | seed = get<1>(exapnd)                     |
+| combine results      | @@html:result.push_back(get<0>(expand))@@ |
 
 #+BEGIN_SRC cpp
 template <typename B, typename A, typename F>
@@ -84,7 +85,8 @@ B accumulate(vector<A, allocator<A>> nums, B init, F f) {
 
 | step                 | code             |
 |----------------------+------------------|
-| do-nothing           | num.empty()      |
+| do-nothing input     | num.empty()      |
+| do-nothing step      | return result    |
 | break off front      | nums.front()     |
 | make problem smaller | nums.erase(0)    |
 | combine results      | f(result, front) |
