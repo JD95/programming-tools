@@ -9,8 +9,26 @@
 #+LATEX_HEADER: \usepackage{apacite}
 #+LATEX_HEADER: \usepackage{setspace}
 
-** First example 
+** if statements
 
+** while loops 
+
+** for loops
+
+** when to use what
+
+| problem                                                   | tool            |
+|-----------------------------------------------------------+-----------------|
+| Build a collection out a single value                     | grow            |
+| Use something simple like $+$ to combine elements         | accumulate      |
+| Remove elements from a collection which don't pass a test | $remove_if$     |
+| Do something to every element and use the results later   | transform       |
+| Do something for each element of a collection             | range-based for |
+| Index a collection                                        | for             |
+| Repeat action while condition is true                     | while           |
+| Everything else                                           | recursion       |
+
+** First example 
 
 #+BEGIN_SRC
 Problem: Given a sales price and the amount paid, calculate and display the amount of each type of currency used for the change.
@@ -503,7 +521,79 @@ That looks about right!
 
 Now we just need to count how many of each type of currency exists in the record.
 
-To count we can simply remove all of the other stuff from the =vector= and check its length.
+We need to take our record =vector<Currency>= and get another collection which has each type of currency and a count of how many there were in the collection.
+
+Abstractly our problem looks like this:
+
+\[vector(Currency) \rightarrow vector((Currency, int))\]
+
+Because our problem has a shape like $vector(A) -> vector(B)$ we could use transform for this. But which collection are we transforming? If we transform $record$, then we won't have access to the other elements so we can't count their occurences. In this case it actually makes more sense to use $currency$ and for each item use $record$ to count the occurences.
+
+So our step per element looks like this:
+\[(vector(Currency), string) \rightarrow int\]
+
+We need $record$ and what type of currency we're looking for. So how exactly can we count repeated items in a collection? Given that $record$ will contain all the items we want to count, we could just remove all the elements which are not a penny for example and take the length of $record$ afterwards.
+
+#+BEGIN_SRC cpp
+vector<Currency> filter_coins(vector<Currency> change, string name) {
+  auto new_end = remove_if(change.begin(), change.end(),
+    [name](Currency c) { return c.name != name; });
+  change.erase(new_end, change.end());
+  return change;
+}
+#+END_SRC
+
+We can use =remove_if= to filter out everything that isn't what we're looking for and return a new collection with only that type of currency. Counting them is simply a matter of getting the size of the result.
+
+#+BEGIN_SRC cpp
+int count_coins(vector<Currency> change, string name) {
+  return filter_coins(change, name).size();
+}
+#+END_SRC
+
+Alright, now the question is what to use to do the "transform" step. Remember that transform is useful when we actually need to use the results later. So if we used transform we end up creating a new =vector= of =pair= values only to loop through it and deconstruct those pairs to print out the values.
+
+#+BEGIN_SRC cpp
+int main() {
+  Dollars price = {125, 27};
+  Dollars paid = {200, 0};
+  Dollars change = minus_dollars(paid, price); 
+
+  cout << "Price: " << display_dollars(price) << "\n";
+  cout << "Paid: " << display_dollars(paid) << "\n";
+  cout << "Change: " << display_dollars(change) << "\n";
+
+  vector<Currency> record = record_coins(change);
+
+  vector<pair<Currency, int>> counts;
+
+  transform(currency.begin(), currency.end(), back_inserter(counts),
+    [record](Currency c) { return make_pair(c, count_coins(record, c.name)); });
+
+  for (auto pair : counts) {
+    Currency c = get<0>(pair);
+    int count = get<1>(pair);
+    if (count > 0) {
+      cout << c.name << ": " << count << "\n";
+    }
+  }
+
+  return 0;
+}
+#+END_SRC
+
+While this could work, it creates more clutter than necessary. In this case it is less cognative load to simply loop over $currency$ and then get and print the count without creating the pairs and extra collection.
+
+#+BEGIN_SRC cpp
+for (auto c : currency) {
+  int count = count_coins(record, c.name);
+  if (count > 0) {
+    cout << c.name << ": " << count << "\n";
+  }
+}
+#+END_SRC
+
+Putting everything together we get:
 
 #+BEGIN_SRC cpp
 #include <iostream>
@@ -584,7 +674,6 @@ int main() {
 
   vector<Currency> record = record_coins(change);
   
-
   for (auto c : currency) {
     int count = count_coins(record, c.name);
     if (count > 0) {
@@ -595,3 +684,30 @@ int main() {
   return 0;
 }
 #+END_SRC
+
+Which displays:
+
+#+BEGIN_SRC bash
+Price: 125.27
+Paid: 200.0
+Change: 74.73
+fifties: 1
+twenties: 1
+dollars: 4
+quarters: 2
+dimes: 2
+pennies: 3
+#+END_SRC
+
+Done!
+
+| goals                                       | Done?        |
+|---------------------------------------------+--------------|
+| sales price                                 | $\checkmark$ |
+| amount paid                                 | $\checkmark$ |
+| the change                                  | $\checkmark$ |
+| amounts for each type of coin/dollar used   | $\checkmark$ |
+| subtract Dollar values                      | $\checkmark$ |
+| display Dollar values                       | $\checkmark$ |
+| calculate (the change)                      | $\checkmark$ |
+| display (the amount for each currency used) | $\checkmark$ |

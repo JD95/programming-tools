@@ -41,3 +41,5 @@
 
 * New Recursion Techniques
 #+INCLUDE: "./recursion-with-vectors.org" :lines "10-"
+* C++ Shortcuts
+#+INCLUDE: "./cpp-shortcuts.org" :lines "10-"
