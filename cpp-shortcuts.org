@@ -95,6 +95,8 @@ B accumulate(vector<A, allocator<A>> nums, B init, F f) {
 
 ** when to use what
 
+[[./images/cpp-shortcuts/repetition-tool-heirarchy.svg]]
+
 | I need to...                                              | tool               |
 |-----------------------------------------------------------+--------------------|
 | Build a collection out a single value                     | grow               |
