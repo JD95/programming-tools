@@ -699,8 +699,6 @@ dimes: 2
 pennies: 3
 #+END_SRC
 
-Done!
-
 | goals                                       | Done?        |
 |---------------------------------------------+--------------|
 | sales price                                 | $\checkmark$ |
@@ -711,3 +709,9 @@ Done!
 | display Dollar values                       | $\checkmark$ |
 | calculate (the change)                      | $\checkmark$ |
 | display (the amount for each currency used) | $\checkmark$ |
+
+Done!
+
+** Summary
+
+The choice of how to represent data is important and impact what tools you can use to solve a problem. While some tools like recursion may be powerful, not everything is a nail. Using the wrong tools ends up creating clutter and unecessary complexity in the problem. As we program it is always important to periodically ask ourselves if we can do better with our solutions. The change making problem could be solved in qute a few ways, but some of those ways are either tedious or to mentally stressful to be viable.
