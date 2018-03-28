@@ -4288,6 +4288,1470 @@ Recursion is a powerful technique, but sometimes writing the recursive functions
 </div>
 </div>
 </div>
+<div id="outline-container-sec-12" class="outline-2">
+<h2 id="sec-12"><span class="section-number-2">12</span> C++ Shortcuts</h2>
+<div class="outline-text-2" id="text-12">
+</div>
+
+<div id="outline-container-sec-12-1" class="outline-3">
+<h3 id="sec-12-1"><span class="section-number-3">12.1</span> if statements</h3>
+</div>
+
+<div id="outline-container-sec-12-2" class="outline-3">
+<h3 id="sec-12-2"><span class="section-number-3">12.2</span> while loops</h3>
+<div class="outline-text-3" id="text-12-2">
+<pre class="example">
+while (not do-nothing) {
+ break off the front;
+ make problem smaller;
+ combine results;
+} 
+</pre>
+
+<div class="org-src-container">
+
+<pre class="src src-cpp"><span style="color: #d26937;">int</span> <span style="color: #599cab;">sum</span>(<span style="color: #d26937;">int</span> <span style="color: #599cab;">n</span>) {
+  <span style="color: #d26937;">int</span> <span style="color: #599cab;">result</span> = 0;
+  <span style="color: #195466; font-weight: bold;">while</span> (n &gt; 0) {
+    <span style="color: #d26937;">int</span> <span style="color: #599cab;">front</span> = n;
+    n = n -1;
+    result = front + result;
+  }
+  <span style="color: #195466; font-weight: bold;">return</span> result;
+}
+</pre>
+</div>
+
+<p>
+Which can be simplified
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-cpp"><span style="color: #d26937;">int</span> <span style="color: #599cab;">sum</span>(<span style="color: #d26937;">int</span> <span style="color: #599cab;">n</span>) {
+  <span style="color: #d26937;">int</span> <span style="color: #599cab;">result</span> = 0;
+  <span style="color: #195466; font-weight: bold;">while</span> (n &gt; 0) {
+    result = n + result;
+    n = n - 1;
+  }
+  <span style="color: #195466; font-weight: bold;">return</span> result;
+}
+</pre>
+</div>
+
+<p>
+We can express our recursion replacements in terms of while loops.
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-cpp"><span style="color: #195466; font-weight: bold;">template</span>&lt;<span style="color: #195466; font-weight: bold;">typename</span> <span style="color: #d26937;">B</span>, <span style="color: #195466; font-weight: bold;">typename</span> <span style="color: #d26937;">A</span>, <span style="color: #195466; font-weight: bold;">typename</span> <span style="color: #d26937;">Expand</span>, <span style="color: #195466; font-weight: bold;">typename</span> <span style="color: #d26937;">Check</span>&gt;
+<span style="color: #d26937;">vector</span>&lt;<span style="color: #d26937;">B</span>, <span style="color: #d26937;">allocator</span>&lt;<span style="color: #d26937;">B</span>&gt;&gt; <span style="color: #599cab;">grow</span>(<span style="color: #d26937;">A</span> <span style="color: #599cab;">seed</span>, <span style="color: #d26937;">Check</span> <span style="color: #599cab;">cond</span>, <span style="color: #d26937;">Expand</span> <span style="color: #599cab;">f</span>) {
+  <span style="color: #d26937;">pair</span>&lt;<span style="color: #d26937;">B</span>,<span style="color: #d26937;">A</span>&gt; <span style="color: #599cab;">expand</span>;
+  <span style="color: #d26937;">vector</span>&lt;<span style="color: #d26937;">B</span>, <span style="color: #d26937;">allocator</span>&lt;<span style="color: #d26937;">B</span>&gt;&gt; <span style="color: #599cab;">result</span>;
+  <span style="color: #195466; font-weight: bold;">while</span> (cond(seed)) {
+    expand = f(seed);
+    seed = get&lt;1&gt;(expand);
+    result.push_back(get&lt;0&gt;(expand));
+  }
+  <span style="color: #195466; font-weight: bold;">return</span> result;
+}
+</pre>
+</div>
+
+<table class="table table-striped table-bordered table-hover table-condensed">
+
+
+<colgroup>
+<col  class="left">
+
+<col  class="left">
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="text-left">step</th>
+<th scope="col" class="text-left">code</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="text-left">do-nothing input</td>
+<td class="text-left">!cond(seed)</td>
+</tr>
+
+<tr>
+<td class="text-left">do-nothing step</td>
+<td class="text-left">return result</td>
+</tr>
+
+<tr>
+<td class="text-left">break off front</td>
+<td class="text-left">f(seed)</td>
+</tr>
+
+<tr>
+<td class="text-left">make problem smaller</td>
+<td class="text-left">seed = get&lt;1&gt;(exapnd)</td>
+</tr>
+
+<tr>
+<td class="text-left">combine results</td>
+<td class="text-left">result.push_back(get<0>(expand))</td>
+</tr>
+</tbody>
+</table>
+
+<div class="org-src-container">
+
+<pre class="src src-cpp"><span style="color: #195466; font-weight: bold;">template</span> &lt;<span style="color: #195466; font-weight: bold;">typename</span> <span style="color: #d26937;">B</span>, <span style="color: #195466; font-weight: bold;">typename</span> <span style="color: #d26937;">A</span>, <span style="color: #195466; font-weight: bold;">typename</span> <span style="color: #d26937;">F</span>&gt;
+<span style="color: #d26937;">B</span> <span style="color: #599cab;">accumulate</span>(<span style="color: #d26937;">vector</span>&lt;<span style="color: #d26937;">A</span>, <span style="color: #d26937;">allocator</span>&lt;<span style="color: #d26937;">A</span>&gt;&gt; <span style="color: #599cab;">nums</span>, <span style="color: #d26937;">B</span> <span style="color: #599cab;">init</span>, <span style="color: #d26937;">F</span> <span style="color: #599cab;">f</span>) {
+  <span style="color: #d26937;">B</span> <span style="color: #599cab;">result</span> = init;
+  <span style="color: #195466; font-weight: bold;">while</span> (<span style="color: #c23127;">!</span>num.empty()) {
+    <span style="color: #195466; font-weight: bold;">auto</span> <span style="color: #599cab;">front</span> = nums.front();
+    result = f(result, front);
+    nums.erase(0);
+  }
+  <span style="color: #195466; font-weight: bold;">return</span> result;
+}
+</pre>
+</div>
+
+<table class="table table-striped table-bordered table-hover table-condensed">
+
+
+<colgroup>
+<col  class="left">
+
+<col  class="left">
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="text-left">step</th>
+<th scope="col" class="text-left">code</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="text-left">do-nothing input</td>
+<td class="text-left">num.empty()</td>
+</tr>
+
+<tr>
+<td class="text-left">do-nothing step</td>
+<td class="text-left">return result</td>
+</tr>
+
+<tr>
+<td class="text-left">break off front</td>
+<td class="text-left">nums.front()</td>
+</tr>
+
+<tr>
+<td class="text-left">make problem smaller</td>
+<td class="text-left">nums.erase(0)</td>
+</tr>
+
+<tr>
+<td class="text-left">combine results</td>
+<td class="text-left">f(result, front)</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+
+<div id="outline-container-sec-12-3" class="outline-3">
+<h3 id="sec-12-3"><span class="section-number-3">12.3</span> for loops</h3>
+</div>
+
+<div id="outline-container-sec-12-4" class="outline-3">
+<h3 id="sec-12-4"><span class="section-number-3">12.4</span> when to use what</h3>
+<div class="outline-text-3" id="text-12-4">
+
+<figure>
+<p><img src="./images/cpp-shortcuts/repetition-tool-heirarchy.svg" class="img-responsive" alt="repetition-tool-heirarchy.svg">
+</p>
+</figure>
+
+<table class="table table-striped table-bordered table-hover table-condensed">
+
+
+<colgroup>
+<col  class="left">
+
+<col  class="left">
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="text-left">I need to&#x2026;</th>
+<th scope="col" class="text-left">tool</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="text-left">Build a collection out a single value</td>
+<td class="text-left">grow</td>
+</tr>
+
+<tr>
+<td class="text-left">Use something simple like + to combine elements</td>
+<td class="text-left">accumulate</td>
+</tr>
+
+<tr>
+<td class="text-left">Remove elements from a collection which don't pass a test</td>
+<td class="text-left">remove_if</td>
+</tr>
+
+<tr>
+<td class="text-left">Do something to every element and use the results later</td>
+<td class="text-left">transform</td>
+</tr>
+
+<tr>
+<td class="text-left">Do something for each element of a collection</td>
+<td class="text-left">range-based for</td>
+</tr>
+
+<tr>
+<td class="text-left">Index a collection</td>
+<td class="text-left">for</td>
+</tr>
+
+<tr>
+<td class="text-left">Repeat action while condition is true</td>
+<td class="text-left">while</td>
+</tr>
+
+<tr>
+<td class="text-left">Everything else</td>
+<td class="text-left">recursion</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+
+<div id="outline-container-sec-12-5" class="outline-3">
+<h3 id="sec-12-5"><span class="section-number-3">12.5</span> First example</h3>
+<div class="outline-text-3" id="text-12-5">
+<pre class="example">
+Problem: Given a sales price and the amount paid, calculate and display the amount of each type of currency used for the change.
+
+Example:
+
+price = 125.27
+paid = 200.00
+
+Change amount: 74.73
+1 fifty
+1 twenty
+4 ones
+2 quarters
+2 dimes
+3 pennies
+</pre>
+
+<table class="table table-striped table-bordered table-hover table-condensed">
+
+
+<colgroup>
+<col  class="left">
+
+<col  class="left">
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="text-left">goals</th>
+<th scope="col" class="text-left">Done?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="text-left">sales price</td>
+<td class="text-left">&#xa0;</td>
+</tr>
+
+<tr>
+<td class="text-left">amount paid</td>
+<td class="text-left">&#xa0;</td>
+</tr>
+
+<tr>
+<td class="text-left">the change</td>
+<td class="text-left">&#xa0;</td>
+</tr>
+
+<tr>
+<td class="text-left">amounts for each type of coin/dollar used</td>
+<td class="text-left">&#xa0;</td>
+</tr>
+
+<tr>
+<td class="text-left">calculate (the change)</td>
+<td class="text-left">&#xa0;</td>
+</tr>
+
+<tr>
+<td class="text-left">display (the amount for each currency used)</td>
+<td class="text-left">&#xa0;</td>
+</tr>
+</tbody>
+</table>
+
+<p>
+The obvious choice for representing money would <code>float</code> or <code>double</code> types, however there are <b>serious</b> problems with that approach. For reason I will not go into here, it is advised to <b>never</b> use floating point types for money and to instead use two <code>int</code> values to represent the dollars and coins.
+</p>
+
+<p>
+The following video and <a href="https://stackoverflow.com/questions/3730019/why-not-use-double-or-float-to-represent-currency/">this stack overflow answer</a> cover the reasons why.
+</p>
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/PZRI1IfStY0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+
+<p>
+So we can start by defining a new type <code>Dollars</code> which represents the number of dollars and cents in the money.
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-cpp"><span style="color: #195466; font-weight: bold;">struct</span> <span style="color: #d26937;">Dollars</span> {
+  <span style="color: #d26937;">int</span> <span style="color: #599cab;">papers</span>;
+  <span style="color: #d26937;">int</span> <span style="color: #599cab;">coins</span>;
+};
+</pre>
+</div>
+
+<table class="table table-striped table-bordered table-hover table-condensed">
+
+
+<colgroup>
+<col  class="left">
+
+<col  class="left">
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="text-left">goals</th>
+<th scope="col" class="text-left">Done?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="text-left">sales price</td>
+<td class="text-left">\(\checkmark\)</td>
+</tr>
+
+<tr>
+<td class="text-left">amount paid</td>
+<td class="text-left">\(\checkmark\)</td>
+</tr>
+
+<tr>
+<td class="text-left">the change</td>
+<td class="text-left">\(\checkmark\)</td>
+</tr>
+
+<tr>
+<td class="text-left">amounts for each type of coin/dollar used</td>
+<td class="text-left">&#xa0;</td>
+</tr>
+
+<tr>
+<td class="text-left">calculate (the change)</td>
+<td class="text-left">&#xa0;</td>
+</tr>
+
+<tr>
+<td class="text-left">display (the amount for each currency used)</td>
+<td class="text-left">&#xa0;</td>
+</tr>
+</tbody>
+</table>
+
+<p>
+Since we also need to eventually break apart the change into the various dollar ammounts and coins used, it would be useful to also define a new type to represent a kind of currency.
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-cpp"><span style="color: #195466; font-weight: bold;">struct</span> <span style="color: #d26937;">Currency</span> {
+  <span style="color: #d26937;">string</span> <span style="color: #599cab;">name</span>;
+  <span style="color: #d26937;">Dollars</span> <span style="color: #599cab;">worth</span>;
+};
+</pre>
+</div>
+
+<p>
+So what kinds of currency are there? We have dollar bills ranging from the $100 bill to the $1 bill and then several types of coins. For this project, it will be useful to have both the amount and the name for each of these types of currency. We might be tempted to do something like the following:
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-cpp"><span style="color: #195466; font-weight: bold;">const</span> <span style="color: #d26937;">Currency</span> <span style="color: #599cab;">hundreds</span> = { <span style="color: #2aa889;">"hundreds"</span>, {100, 0} };
+</pre>
+</div>
+
+<p>
+Going this route would mean a new variable for each type of currency that we might use in our program. It is a rule of thumb that you want to avoid creating variables if you don't have to, even if they are constants. The reason being is these variables are often not treated separately, but rather belong to a collection. For this task it turns out that writing these currencies in a <code>vector</code> will make things easier for us later.
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-cpp"><span style="color: #195466; font-weight: bold;">struct</span> <span style="color: #d26937;">Dollars</span> {
+  <span style="color: #d26937;">int</span> <span style="color: #599cab;">papers</span>;
+  <span style="color: #d26937;">int</span> <span style="color: #599cab;">coins</span>;
+};
+
+<span style="color: #195466; font-weight: bold;">struct</span> <span style="color: #d26937;">Currency</span> {
+  <span style="color: #d26937;">string</span> <span style="color: #599cab;">name</span>;
+  <span style="color: #d26937;">Dollars</span> <span style="color: #599cab;">worth</span>;
+};
+
+<span style="color: #195466; font-weight: bold;">const</span> <span style="color: #d26937;">vector</span>&lt;<span style="color: #d26937;">Currency</span>&gt; <span style="color: #599cab;">currency</span> = {
+  { <span style="color: #2aa889;">"hundreds"</span>, {100, 0} },
+  { <span style="color: #2aa889;">"fifties"</span>, {50, 0} },
+  { <span style="color: #2aa889;">"twenties"</span>, {20, 0} },
+  { <span style="color: #2aa889;">"tens"</span>, {10, 0} },
+  { <span style="color: #2aa889;">"fives"</span>, {5, 0} },
+  { <span style="color: #2aa889;">"dollars"</span>, {1, 0} },
+  { <span style="color: #2aa889;">"quarters"</span>, {0, 25} },
+  { <span style="color: #2aa889;">"dimes"</span>, {0, 10} },
+  { <span style="color: #2aa889;">"nickles"</span>, {0, 5}},
+  { <span style="color: #2aa889;">"pennies"</span>, {0, 1} }
+};
+</pre>
+</div>
+
+<p>
+How might one know ahead of time which approach to take? It's impossible to say for certain whether variables or a single collection is better, but typically if the values are associated, they should be in a collection.
+</p>
+
+<table class="table table-striped table-bordered table-hover table-condensed">
+
+
+<colgroup>
+<col  class="left">
+
+<col  class="left">
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="text-left">goals</th>
+<th scope="col" class="text-left">Done?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="text-left">sales price</td>
+<td class="text-left">\(\checkmark\)</td>
+</tr>
+
+<tr>
+<td class="text-left">amount paid</td>
+<td class="text-left">\(\checkmark\)</td>
+</tr>
+
+<tr>
+<td class="text-left">the change</td>
+<td class="text-left">\(\checkmark\)</td>
+</tr>
+
+<tr>
+<td class="text-left">amounts for each type of coin/dollar used</td>
+<td class="text-left">\(\checkmark\)</td>
+</tr>
+
+<tr>
+<td class="text-left">calculate (the change)</td>
+<td class="text-left">&#xa0;</td>
+</tr>
+
+<tr>
+<td class="text-left">display (the amount for each currency used)</td>
+<td class="text-left">&#xa0;</td>
+</tr>
+</tbody>
+</table>
+
+<p>
+Now that we have our nouns more or less squared away we can start building up the main function. Remember that we have two tasks: calculate the change and break up the change into the different types of coins/dollars used. Let's start with the first one:
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-cpp"><span style="color: #d26937;">int</span> <span style="color: #599cab;">main</span>() {
+  <span style="color: #d26937;">Dollars</span> <span style="color: #599cab;">price</span> = {125, 27};
+  <span style="color: #d26937;">Dollars</span> <span style="color: #599cab;">paid</span> = {200, 0};
+  <span style="color: #d26937;">Dollars</span> <span style="color: #599cab;">change</span> = paid - price;
+
+  cout &lt;&lt; <span style="color: #2aa889;">"Price: "</span> &lt;&lt; price &lt;&lt; <span style="color: #2aa889;">"\n"</span>;
+  cout &lt;&lt; <span style="color: #2aa889;">"Paid: "</span> &lt;&lt; paid &lt;&lt; <span style="color: #2aa889;">"\n"</span>;
+  cout &lt;&lt; <span style="color: #2aa889;">"Change: "</span> &lt;&lt; change &lt;&lt; <span style="color: #2aa889;">"\n"</span>;
+
+  <span style="color: #195466; font-weight: bold;">return</span> 0;
+}
+</pre>
+</div>
+
+<p>
+Right off the bat we are struck with two problems. First, there is no defined way to actually subtract to <code>Dollar</code> values. Second, cout only prints out the primitive types by default. So we'll have to add those problems to our goals.
+</p>
+
+<table class="table table-striped table-bordered table-hover table-condensed">
+
+
+<colgroup>
+<col  class="left">
+
+<col  class="left">
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="text-left">goals</th>
+<th scope="col" class="text-left">Done?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="text-left">sales price</td>
+<td class="text-left">\(\checkmark\)</td>
+</tr>
+
+<tr>
+<td class="text-left">amount paid</td>
+<td class="text-left">\(\checkmark\)</td>
+</tr>
+
+<tr>
+<td class="text-left">the change</td>
+<td class="text-left">\(\checkmark\)</td>
+</tr>
+
+<tr>
+<td class="text-left">amounts for each type of coin/dollar used</td>
+<td class="text-left">\(\checkmark\)</td>
+</tr>
+
+<tr>
+<td class="text-left">subtract Dollar values</td>
+<td class="text-left">&#xa0;</td>
+</tr>
+
+<tr>
+<td class="text-left">display Dollar values</td>
+<td class="text-left">&#xa0;</td>
+</tr>
+
+<tr>
+<td class="text-left">calculate (the change)</td>
+<td class="text-left">&#xa0;</td>
+</tr>
+
+<tr>
+<td class="text-left">display (the amount for each currency used)</td>
+<td class="text-left">&#xa0;</td>
+</tr>
+</tbody>
+</table>
+
+<p>
+The simpler of the two new goals is displaying a <code>Dollar</code> value, so we'll tackle it first.
+</p>
+
+<p>
+\[Dollars \rightarrow ???\]
+</p>
+
+<p>
+We need to somehow convert a <code>Dollar</code> value into one of the primitive types that <code>cout</code> can display. The easiest target (usually) is <code>string</code>. Since a <code>Dollar</code> value is really just two <code>int</code> values so our problem really looks like \((int, int) \rightarrow string\), we can use <code>to_string</code> to convert the numbers into <code>string</code> values and then add them up while putting the usual dot inbetween. 
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-cpp"><span style="color: #d26937;">string</span> <span style="color: #599cab;">display_dollars</span>(<span style="color: #d26937;">Dollars</span> <span style="color: #599cab;">x</span>){
+  <span style="color: #195466; font-weight: bold;">return</span> to_string(x.papers) + <span style="color: #2aa889;">"."</span> + to_string(x.coins);
+}
+</pre>
+</div>
+
+<p>
+Now we can comment out the code which wont work yet and test out our <code>display_dollars</code> function.
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-cpp"><span style="color: #c23127;">#include</span> <span style="color: #2aa889;">&lt;iostream&gt;</span>
+<span style="color: #c23127;">#include</span> <span style="color: #2aa889;">&lt;string&gt;</span>
+<span style="color: #195466; font-weight: bold;">using</span> <span style="color: #195466; font-weight: bold;">namespace</span> <span style="color: #33859e; font-weight: bold;">std</span>;
+
+<span style="color: #195466; font-weight: bold;">struct</span> <span style="color: #d26937;">Dollars</span> {
+  <span style="color: #d26937;">int</span> <span style="color: #599cab;">papers</span>;
+  <span style="color: #d26937;">int</span> <span style="color: #599cab;">coins</span>;
+};
+
+<span style="color: #d26937;">string</span> <span style="color: #599cab;">display_dollars</span>(<span style="color: #d26937;">Dollars</span> <span style="color: #599cab;">x</span>){
+  <span style="color: #195466; font-weight: bold;">return</span> to_string(x.papers) + <span style="color: #2aa889;">"."</span> + to_string(x.coins);
+}
+
+<span style="color: #d26937;">int</span> <span style="color: #599cab;">main</span>() {
+  <span style="color: #d26937;">Dollars</span> <span style="color: #599cab;">price</span> = {125, 27};
+  <span style="color: #d26937;">Dollars</span> <span style="color: #599cab;">paid</span> = {200, 0};
+  <span style="color: #245361;">//</span><span style="color: #245361;">Dollars change = paid - price;</span>
+
+  cout &lt;&lt; <span style="color: #2aa889;">"Price: "</span> &lt;&lt; display_dollars(price) &lt;&lt; <span style="color: #2aa889;">"\n"</span>;
+  cout &lt;&lt; <span style="color: #2aa889;">"Paid: "</span> &lt;&lt; display_dollars(paid) &lt;&lt; <span style="color: #2aa889;">"\n"</span>;
+  <span style="color: #245361;">//</span><span style="color: #245361;">cout &lt;&lt; "Change: " &lt;&lt; change &lt;&lt; "\n";</span>
+
+  <span style="color: #195466; font-weight: bold;">return</span> 0;
+}
+</pre>
+</div>
+
+<p>
+This should display:
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-bash">Price: 125.27
+Paid: 200.0
+</pre>
+</div>
+
+<table class="table table-striped table-bordered table-hover table-condensed">
+
+
+<colgroup>
+<col  class="left">
+
+<col  class="left">
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="text-left">goals</th>
+<th scope="col" class="text-left">Done?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="text-left">sales price</td>
+<td class="text-left">\(\checkmark\)</td>
+</tr>
+
+<tr>
+<td class="text-left">amount paid</td>
+<td class="text-left">\(\checkmark\)</td>
+</tr>
+
+<tr>
+<td class="text-left">the change</td>
+<td class="text-left">\(\checkmark\)</td>
+</tr>
+
+<tr>
+<td class="text-left">amounts for each type of coin/dollar used</td>
+<td class="text-left">\(\checkmark\)</td>
+</tr>
+
+<tr>
+<td class="text-left">subtract Dollar values</td>
+<td class="text-left">&#xa0;</td>
+</tr>
+
+<tr>
+<td class="text-left">display Dollar values</td>
+<td class="text-left">\(\checkmark\)</td>
+</tr>
+
+<tr>
+<td class="text-left">calculate (the change)</td>
+<td class="text-left">&#xa0;</td>
+</tr>
+
+<tr>
+<td class="text-left">display (the amount for each currency used)</td>
+<td class="text-left">&#xa0;</td>
+</tr>
+</tbody>
+</table>
+
+<p>
+Okay, now let's tackle subtracting <code>Dollar</code> values. Since we need two <code>Dollar</code> values to subtract and get a new one, the outline for this problem looks like this:
+</p>
+
+<p>
+\[(Dollar, Dollar) \rightarrow Dollar\]
+</p>
+
+<p>
+However, just like before, we can make the problem easier to solve be replacing the <code>Dollar</code> type with two <code>int</code> values.
+</p>
+
+<p>
+\[((int, int), (int, int)) \rightarrow (int, int)\]
+</p>
+
+<p>
+So what would we need to do in order to subtract the values properly? A first instinct might be to do something like \(subtract (a,b) (c,d) = (a - c, d - b)\), yet there is a problem. What happens if \(b > d\)? We can test this to see what happens: 
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-cpp"><span style="color: #c23127;">#include</span> <span style="color: #2aa889;">&lt;iostream&gt;</span>
+<span style="color: #195466; font-weight: bold;">using</span> <span style="color: #195466; font-weight: bold;">namespace</span> <span style="color: #33859e; font-weight: bold;">std</span>;
+
+<span style="color: #195466; font-weight: bold;">struct</span> <span style="color: #d26937;">Dollars</span> {
+  <span style="color: #d26937;">int</span> <span style="color: #599cab;">papers</span>;
+  <span style="color: #d26937;">int</span> <span style="color: #599cab;">coins</span>;
+};
+
+<span style="color: #d26937;">string</span> <span style="color: #599cab;">display_dollars</span>(<span style="color: #d26937;">Dollars</span> <span style="color: #599cab;">x</span>){
+  <span style="color: #195466; font-weight: bold;">return</span> to_string(x.papers) + <span style="color: #2aa889;">"."</span> + to_string(x.coins);
+}
+
+<span style="color: #d26937;">Dollars</span> <span style="color: #599cab;">minus_dollars</span>(<span style="color: #d26937;">Dollars</span> <span style="color: #599cab;">x</span>, <span style="color: #d26937;">Dollars</span> <span style="color: #599cab;">y</span>) {
+  <span style="color: #d26937;">int</span> <span style="color: #599cab;">ps</span> = x.papers - y.papers;
+  <span style="color: #d26937;">int</span> <span style="color: #599cab;">cs</span> = x.coins - y.coins;
+  <span style="color: #195466; font-weight: bold;">return</span> Dollars{ ps, cs }; 
+}
+
+<span style="color: #d26937;">int</span> <span style="color: #599cab;">main</span>() {
+  <span style="color: #d26937;">Dollars</span> <span style="color: #599cab;">a</span> = {10, 5};
+  <span style="color: #d26937;">Dollars</span> <span style="color: #599cab;">b</span> = {5, 10};
+
+  cout &lt;&lt; display_dollars(minus_dollars(a, b)) &lt;&lt; <span style="color: #2aa889;">"\n"</span>;
+
+  <span style="color: #195466; font-weight: bold;">return</span> 0;
+}
+</pre>
+</div>
+
+<p>
+Which displays:
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-bash">5.-5
+</pre>
+</div>
+
+<p>
+The <code>.coin</code> value of the <code>Dollar</code> would end up negative, which isn't what we want. If it's the case where \(b > d\), then we want to subtract a dollar and subtract the coin amount from 100.
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-cpp"><span style="color: #c23127;">#include</span> <span style="color: #2aa889;">&lt;iostream&gt;</span>
+<span style="color: #c23127;">#include</span> <span style="color: #2aa889;">&lt;string&gt;</span>
+<span style="color: #195466; font-weight: bold;">using</span> <span style="color: #195466; font-weight: bold;">namespace</span> <span style="color: #33859e; font-weight: bold;">std</span>;
+
+<span style="color: #195466; font-weight: bold;">struct</span> <span style="color: #d26937;">Dollars</span> {
+  <span style="color: #d26937;">int</span> <span style="color: #599cab;">papers</span>;
+  <span style="color: #d26937;">int</span> <span style="color: #599cab;">coins</span>;
+};
+
+<span style="color: #d26937;">string</span> <span style="color: #599cab;">display_dollars</span>(<span style="color: #d26937;">Dollars</span> <span style="color: #599cab;">x</span>){
+  <span style="color: #195466; font-weight: bold;">return</span> to_string(x.papers) + <span style="color: #2aa889;">"."</span> + to_string(x.coins);
+}
+
+<span style="color: #d26937;">Dollars</span> <span style="color: #599cab;">minus_dollars</span>(<span style="color: #d26937;">Dollars</span> <span style="color: #599cab;">x</span>, <span style="color: #d26937;">Dollars</span> <span style="color: #599cab;">y</span>) {
+  <span style="color: #d26937;">int</span> <span style="color: #599cab;">ps</span> = x.papers - y.papers;
+  <span style="color: #d26937;">int</span> <span style="color: #599cab;">cs</span> = x.coins - y.coins;
+  <span style="color: #195466; font-weight: bold;">return</span> cs &gt;= 0 ? Dollars{ ps, cs } : Dollars{ ps - 1, 100 + cs };
+}
+
+<span style="color: #d26937;">int</span> <span style="color: #599cab;">main</span>() {
+  <span style="color: #d26937;">Dollars</span> <span style="color: #599cab;">price</span> = {125, 27};
+  <span style="color: #d26937;">Dollars</span> <span style="color: #599cab;">paid</span> = {200, 0};
+  <span style="color: #d26937;">Dollars</span> <span style="color: #599cab;">change</span> = minus_dollars(paid, price);
+
+  cout &lt;&lt; <span style="color: #2aa889;">"Price: "</span> &lt;&lt; display_dollars(price) &lt;&lt; <span style="color: #2aa889;">"\n"</span>;
+  cout &lt;&lt; <span style="color: #2aa889;">"Paid: "</span> &lt;&lt; display_dollars(paid) &lt;&lt; <span style="color: #2aa889;">"\n"</span>;
+  cout &lt;&lt; <span style="color: #2aa889;">"Change: "</span> &lt;&lt; display_dollars(change) &lt;&lt; <span style="color: #2aa889;">"\n"</span>;
+
+  <span style="color: #195466; font-weight: bold;">return</span> 0;
+}
+</pre>
+</div>
+
+<p>
+Which displays
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-bash">Price: 125.27
+Paid: 200.0
+Change: 74.73
+</pre>
+</div>
+
+<p>
+Problem solved!
+</p>
+
+<table class="table table-striped table-bordered table-hover table-condensed">
+
+
+<colgroup>
+<col  class="left">
+
+<col  class="left">
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="text-left">goals</th>
+<th scope="col" class="text-left">Done?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="text-left">sales price</td>
+<td class="text-left">\(\checkmark\)</td>
+</tr>
+
+<tr>
+<td class="text-left">amount paid</td>
+<td class="text-left">\(\checkmark\)</td>
+</tr>
+
+<tr>
+<td class="text-left">the change</td>
+<td class="text-left">\(\checkmark\)</td>
+</tr>
+
+<tr>
+<td class="text-left">amounts for each type of coin/dollar used</td>
+<td class="text-left">\(\checkmark\)</td>
+</tr>
+
+<tr>
+<td class="text-left">subtract Dollar values</td>
+<td class="text-left">\(\checkmark\)</td>
+</tr>
+
+<tr>
+<td class="text-left">display Dollar values</td>
+<td class="text-left">\(\checkmark\)</td>
+</tr>
+
+<tr>
+<td class="text-left">calculate (the change)</td>
+<td class="text-left">\(\checkmark\)</td>
+</tr>
+
+<tr>
+<td class="text-left">display (the amount for each currency used)</td>
+<td class="text-left">&#xa0;</td>
+</tr>
+</tbody>
+</table>
+
+<p>
+Now we only have one goal left to solve. We need to somehow figure out how many of each type of currency (fifty dollar bill, quarter, dollar, penny, etc) can be used to make up the change.
+</p>
+
+<p>
+The algorithm can be described as followed:
+</p>
+<ol class="org-ol">
+<li>If the value is greater than or equal to $100, subtract $100 from the change, record "1 hundred", and go to step 1
+</li>
+<li>If the value is greater than or equal to $50, subtract $50 from the change, record "1 fifty", and go to step 1
+</li>
+<li>If the value is greater than or equal to $20, subtract $20 from the change, record "1 twenty", and go to step 1 
+</li>
+<li>If the value is greater than or equal to $10, subtract $10 from the change, record "1 ten", and go to step 1 
+</li>
+<li>If the value is greater than or equal to $5, subtract $5 from the change, record "1 five", and go to step 1 
+</li>
+<li>If the value is greater than or equal to $1, subtract $1 from the change, record "1 one" and go to step 1  
+</li>
+<li>If the value is greater than or equal to $0.25, subtract $0.25 from the change, record "1 quarter" and go to step 1 
+</li>
+<li>If the value is greater than or equal to $0.10, subtract $0.10 from the change, record "1 dime", and go to step 1 
+</li>
+<li>If the value is greater than or equal to $0.05, subtract $0.05 from the change, record "1 nickle", and go to step 1 
+</li>
+<li>If the value is greater than or equal to $0.01, subtract $0.01 from the change, record "1 penny", and go to step 1
+</li>
+<li>Done!
+</li>
+</ol>
+
+<p>
+If that seems horribly tedious and repetitive, that's because it is. Imagine what the code might look like if we tried to just directly write this out! As always, lets try to generalize and break this down into smaller pieces. First, notice the parts of the algorithm which are exactly the same for every step:
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-bash">If the value is greater than or equal to X, subtract X, from the change and record Y, and go to step 1
+</pre>
+</div>
+
+<p>
+This screams a function! So what do we need? We need some <code>Dollar</code> amount for \(X\) and some <code>string</code> for \(Y\). Remember how we eneded up defining our currency?
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-cpp"><span style="color: #195466; font-weight: bold;">struct</span> <span style="color: #d26937;">Currency</span> {
+  <span style="color: #d26937;">string</span> <span style="color: #599cab;">name</span>;
+  <span style="color: #d26937;">Dollars</span> <span style="color: #599cab;">worth</span>;
+};
+</pre>
+</div>
+
+<p>
+It is <b>exactly</b> the type we need for this! That alone doesn't do too much for us though. This algorithm assumes that we have some way of recording which values we see. How would this be done in real life? Probably by just writing down that you've used a certain type of coin? In the end you might get a list like:
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-bash">1 hundred
+1 dollar
+1 quarter
+1 penny
+1 penny
+</pre>
+</div>
+
+<p>
+This is just a collection of stuff, so we can use a <code>vector</code> to represent it and since we already figured out that our <code>Currency</code> type matches up with what we need to record, might as well just make it a <code>vector&lt;Currency&gt;</code>. So each step of our algorithm looks a bit like this:
+</p>
+
+<p>
+\[(Dollars, vector(Currency)) \rightarrow (Dollars, vector(Currency))\]
+</p>
+
+<p>
+Each step the change gets smaller and the record is updated, so the result is both new values. However, where are we going to get the values to check for at each step? One step has to be $100, then $50, and so on. Remember when we made that <code>vector&lt;Currency&gt;</code> earlier?
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-cpp"><span style="color: #195466; font-weight: bold;">const</span> <span style="color: #d26937;">vector</span>&lt;Currency&gt; <span style="color: #599cab;">currency</span> = {
+  { <span style="color: #2aa889;">"hundreds"</span>, {100, 0} },
+  { <span style="color: #2aa889;">"fifties"</span>, {50, 0} },
+  { <span style="color: #2aa889;">"twenties"</span>, {20, 0} },
+  { <span style="color: #2aa889;">"tens"</span>, {10, 0} },
+  { <span style="color: #2aa889;">"fives"</span>, {5, 0} },
+  { <span style="color: #2aa889;">"dollars"</span>, {1, 0} },
+  { <span style="color: #2aa889;">"quarters"</span>, {0, 25} },
+  { <span style="color: #2aa889;">"dimes"</span>, {0, 10} },
+  { <span style="color: #2aa889;">"nickles"</span>, {0, 5}},
+  { <span style="color: #2aa889;">"pennies"</span>, {0, 1} }
+};
+</pre>
+</div>
+
+<p>
+So our problem outline will look like this:
+</p>
+
+<p>
+\[vector(Currency) -> (Dollars, vector<Currency>)\]
+</p>
+
+<p>
+That's a pattern for accumulate! That being said, accumulate isn't the only solution here. We <b>could</b> use a loop for this as well. Looping over the <code>vector</code> and updating variables is the same as using <code>accumulate</code>. In either case, the steps are similar.
+</p>
+<ul class="org-ul">
+<li>We should stop when there is no more change left, so the do-nothing input is $0.0
+</li>
+<li>When it's done we should just return our record
+</li>
+<li>Breaking off the front is just applying our generalized step until it's greater than the change
+</li>
+<li>To solve the smaller part of the problem we can just repeat the steps using our result from the front
+</li>
+<li>No real need to combine results, just return the solution
+</li>
+</ul>
+
+<p>
+Translated more into code we get:
+</p>
+<table class="table table-striped table-bordered table-hover table-condensed">
+
+
+<colgroup>
+<col  class="left">
+
+<col  class="left">
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="text-left">steps</th>
+<th scope="col" class="text-left">value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="text-left">do-nothing input</td>
+<td class="text-left">change == Dollar{0,0}</td>
+</tr>
+
+<tr>
+<td class="text-left">do-nothing step</td>
+<td class="text-left">record</td>
+</tr>
+
+<tr>
+<td class="text-left">break off the front</td>
+<td class="text-left">step(change, record)</td>
+</tr>
+
+<tr>
+<td class="text-left">make problem smaller</td>
+<td class="text-left">used(change, record)</td>
+</tr>
+
+<tr>
+<td class="text-left">combine results</td>
+<td class="text-left">used(change, record)</td>
+</tr>
+</tbody>
+</table>
+
+<p>
+Fair enough, but which tool should we use for this? Since there isn't a clear meaning for adding our starting value with an element from the list we'd have to jump through hoops to get accumulate to work with this. That means a loop is probably our best bet. Since we don't know how many times this loop will have to run, we'll use a <code>while</code> loop.
+</p>
+
+<p>
+So let's begin with what we know so far:
+</p>
+<div class="org-src-container">
+
+<pre class="src src-cpp"><span style="color: #d26937;">vector</span>&lt;Currency&gt; <span style="color: #599cab;">record_coins</span>(<span style="color: #d26937;">Dollars</span> <span style="color: #599cab;">change</span>) {
+  <span style="color: #d26937;">vector</span>&lt;Currency&gt; <span style="color: #599cab;">record</span>;
+  <span style="color: #195466; font-weight: bold;">while</span> (change.papers &gt; 0 || change.coins &gt; 0) {
+    ???
+  }
+
+  <span style="color: #195466; font-weight: bold;">return</span> record;
+}
+</pre>
+</div>
+
+<p>
+We know from our do nothing check that we should stop when the change is $0.0, which means the loop should continue while either there are some dollars or some coins left. Since we need to record our values, we create a <code>vector&lt;Currency&gt;</code> and name it appropiately. Since we don't actually care about the change when we finish, we can just return the record.
+</p>
+
+<p>
+Now we can use our <code>currency</code> collection to implement the steps of the algorithm. In this case, we know exactly how many times we need to loop, since <code>vector</code> values always know their own size, we can use a <code>for</code> loop. Since we want to end up using the whole collection, we can use a <code>range-based for loop</code>.
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-cpp"><span style="color: #d26937;">vector</span>&lt;Currency&gt; <span style="color: #599cab;">record_coins</span>(<span style="color: #d26937;">Dollars</span> <span style="color: #599cab;">change</span>) {
+  <span style="color: #d26937;">vector</span>&lt;Currency&gt; <span style="color: #599cab;">curr_used</span>;
+  <span style="color: #195466; font-weight: bold;">while</span> (change.papers &gt; 0 || change.coins &gt; 0) {
+    <span style="color: #195466; font-weight: bold;">for</span> (<span style="color: #195466; font-weight: bold;">auto</span> <span style="color: #599cab;">c</span> : currency) {
+      ???
+    }
+  }
+
+  <span style="color: #195466; font-weight: bold;">return</span> curr_used;
+}
+</pre>
+</div>
+
+<p>
+Almost there! The <code>for</code> loop will capture doing all the steps and the <code>while</code> loop will capture repeating those steps. Now we need to implement the single step for our algorithm. 
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-bash">If the value is greater than or equal to X, subtract X, from the change and record Y, and go to step 1
+</pre>
+</div>
+
+<p>
+First, we check if the current \(change\) is greater than some <code>Currency</code> \(c\).
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-cpp"><span style="color: #d26937;">vector</span>&lt;Currency&gt; <span style="color: #599cab;">record_coins</span>(<span style="color: #d26937;">Dollars</span> <span style="color: #599cab;">change</span>) {
+  <span style="color: #d26937;">vector</span>&lt;Currency&gt; <span style="color: #599cab;">curr_used</span>;
+  <span style="color: #195466; font-weight: bold;">while</span> (change.papers &gt; 0 || change.coins &gt; 0) {
+    <span style="color: #195466; font-weight: bold;">for</span> (<span style="color: #195466; font-weight: bold;">auto</span> <span style="color: #599cab;">c</span> : currency) {
+        <span style="color: #195466; font-weight: bold;">if</span> (change.papers &gt;= c.worth.papers &amp;&amp; change.coins &gt;= c.worth.coins) {
+          ???
+        }
+    }
+  }
+
+  <span style="color: #195466; font-weight: bold;">return</span> curr_used;
+}
+</pre>
+</div>
+
+<p>
+If it is, we can subtract \(c\) from \(change\) and record \(c\) by pushing it into \(record\).
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-cpp"><span style="color: #d26937;">vector</span>&lt;Currency&gt; <span style="color: #599cab;">record_coins</span>(<span style="color: #d26937;">Dollars</span> <span style="color: #599cab;">change</span>) {
+  <span style="color: #d26937;">vector</span>&lt;Currency&gt; <span style="color: #599cab;">curr_used</span>;
+  <span style="color: #195466; font-weight: bold;">while</span> (change.papers &gt; 0 || change.coins &gt; 0) {
+    <span style="color: #195466; font-weight: bold;">for</span> (<span style="color: #195466; font-weight: bold;">auto</span> <span style="color: #599cab;">c</span> : currency) {
+        <span style="color: #195466; font-weight: bold;">if</span> (change.papers &gt;= c.worth.papers &amp;&amp; change.coins &gt;= c.worth.coins) {
+          change = minus_dollars(change, c.worth);
+          curr_used.push_back(c);
+        }
+    }
+  }
+
+  <span style="color: #195466; font-weight: bold;">return</span> curr_used;
+}
+</pre>
+</div>
+
+<p>
+That almost covers everything except the "and go to step 1" part. How can we simulate this? Well, since our <code>while</code> loop represents repeating all the steps, if we just ending the <code>for</code> loop early via \(break\) we could emulate "go to step 1".
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-cpp"><span style="color: #d26937;">vector</span>&lt;Currency&gt; <span style="color: #599cab;">record_coins</span>(<span style="color: #d26937;">Dollars</span> <span style="color: #599cab;">change</span>) {
+  <span style="color: #d26937;">vector</span>&lt;Currency&gt; <span style="color: #599cab;">curr_used</span>;
+  <span style="color: #195466; font-weight: bold;">while</span> (change.papers &gt; 0 || change.coins &gt; 0) {
+    <span style="color: #195466; font-weight: bold;">for</span> (<span style="color: #195466; font-weight: bold;">auto</span> <span style="color: #599cab;">c</span> : currency) {
+        <span style="color: #195466; font-weight: bold;">if</span> (change.papers &gt;= c.worth.papers &amp;&amp; change.coins &gt;= c.worth.coins) {
+          change = minus_dollars(change, c.worth);
+          curr_used.push_back(c);
+          <span style="color: #195466; font-weight: bold;">break</span>;
+        }
+    }
+  }
+
+  <span style="color: #195466; font-weight: bold;">return</span> curr_used;
+}
+</pre>
+</div>
+
+<p>
+Now we can test this out!
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-bash">Price: 125.27
+Paid: 200.0
+Change: 74.73
+fifties
+twenties
+dollars
+dollars
+dollars
+dollars
+quarters
+quarters
+dimes
+dimes
+pennies
+pennies
+pennies
+</pre>
+</div>
+
+<p>
+That looks about right!
+</p>
+
+<p>
+Now we just need to count how many of each type of currency exists in the record.
+</p>
+
+<p>
+We need to take our record <code>vector&lt;Currency&gt;</code> and get another collection which has each type of currency and a count of how many there were in the collection.
+</p>
+
+<p>
+Abstractly our problem looks like this:
+</p>
+
+<p>
+\[vector(Currency) \rightarrow vector((Currency, int))\]
+</p>
+
+<p>
+Because our problem has a shape like \(vector(A) -> vector(B)\) we could use transform for this. But which collection are we transforming? If we transform \(record\), then we won't have access to the other elements so we can't count their occurences. In this case it actually makes more sense to use \(currency\) and for each item use \(record\) to count the occurences.
+</p>
+
+<p>
+So our step per element looks like this:
+\[(vector(Currency), string) \rightarrow int\]
+</p>
+
+<p>
+We need \(record\) and what type of currency we're looking for. So how exactly can we count repeated items in a collection? Given that \(record\) will contain all the items we want to count, we could just remove all the elements which are not a penny for example and take the length of \(record\) afterwards.
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-cpp"><span style="color: #d26937;">vector</span>&lt;Currency&gt; <span style="color: #599cab;">filter_coins</span>(<span style="color: #d26937;">vector</span>&lt;Currency&gt; <span style="color: #599cab;">change</span>, <span style="color: #d26937;">string</span> <span style="color: #599cab;">name</span>) {
+  <span style="color: #195466; font-weight: bold;">auto</span> <span style="color: #599cab;">new_end</span> = remove_if(change.begin(), change.end(),
+    [name](<span style="color: #d26937;">Currency</span> <span style="color: #599cab;">c</span>) { <span style="color: #195466; font-weight: bold;">return</span> c.name != name; });
+  change.erase(new_end, change.end());
+  <span style="color: #195466; font-weight: bold;">return</span> change;
+}
+</pre>
+</div>
+
+<p>
+We can use <code>remove_if</code> to filter out everything that isn't what we're looking for and return a new collection with only that type of currency. Counting them is simply a matter of getting the size of the result.
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-cpp"><span style="color: #d26937;">int</span> <span style="color: #599cab;">count_coins</span>(<span style="color: #d26937;">vector</span>&lt;Currency&gt; <span style="color: #599cab;">change</span>, <span style="color: #d26937;">string</span> <span style="color: #599cab;">name</span>) {
+  <span style="color: #195466; font-weight: bold;">return</span> filter_coins(change, name).size();
+}
+</pre>
+</div>
+
+<p>
+Alright, now the question is what to use to do the "transform" step. Remember that transform is useful when we actually need to use the results later. So if we used transform we end up creating a new <code>vector</code> of <code>pair</code> values only to loop through it and deconstruct those pairs to print out the values.
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-cpp"><span style="color: #d26937;">int</span> <span style="color: #599cab;">main</span>() {
+  <span style="color: #d26937;">Dollars</span> <span style="color: #599cab;">price</span> = {125, 27};
+  <span style="color: #d26937;">Dollars</span> <span style="color: #599cab;">paid</span> = {200, 0};
+  <span style="color: #d26937;">Dollars</span> <span style="color: #599cab;">change</span> = minus_dollars(paid, price); 
+
+  cout &lt;&lt; <span style="color: #2aa889;">"Price: "</span> &lt;&lt; display_dollars(price) &lt;&lt; <span style="color: #2aa889;">"\n"</span>;
+  cout &lt;&lt; <span style="color: #2aa889;">"Paid: "</span> &lt;&lt; display_dollars(paid) &lt;&lt; <span style="color: #2aa889;">"\n"</span>;
+  cout &lt;&lt; <span style="color: #2aa889;">"Change: "</span> &lt;&lt; display_dollars(change) &lt;&lt; <span style="color: #2aa889;">"\n"</span>;
+
+  <span style="color: #d26937;">vector</span>&lt;Currency&gt; <span style="color: #599cab;">record</span> = record_coins(change);
+
+  <span style="color: #d26937;">vector</span>&lt;<span style="color: #d26937;">pair</span>&lt;Currency, <span style="color: #d26937;">int</span>&gt;&gt; <span style="color: #599cab;">counts</span>;
+
+  transform(currency.begin(), currency.end(), back_inserter(counts),
+    [record](<span style="color: #d26937;">Currency</span> <span style="color: #599cab;">c</span>) { <span style="color: #195466; font-weight: bold;">return</span> make_pair(c, count_coins(record, c.name)); });
+
+  <span style="color: #195466; font-weight: bold;">for</span> (<span style="color: #195466; font-weight: bold;">auto</span> <span style="color: #599cab;">pair</span> : counts) {
+    <span style="color: #d26937;">Currency</span> <span style="color: #599cab;">c</span> = get&lt;0&gt;(pair);
+    <span style="color: #d26937;">int</span> <span style="color: #599cab;">count</span> = get&lt;1&gt;(pair);
+    <span style="color: #195466; font-weight: bold;">if</span> (count &gt; 0) {
+      cout &lt;&lt; c.name &lt;&lt; <span style="color: #2aa889;">": "</span> &lt;&lt; count &lt;&lt; <span style="color: #2aa889;">"\n"</span>;
+    }
+  }
+
+  <span style="color: #195466; font-weight: bold;">return</span> 0;
+}
+</pre>
+</div>
+
+<p>
+While this could work, it creates more clutter than necessary. In this case it is less cognative load to simply loop over \(currency\) and then get and print the count without creating the pairs and extra collection.
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-cpp"><span style="color: #195466; font-weight: bold;">for</span> (<span style="color: #195466; font-weight: bold;">auto</span> <span style="color: #599cab;">c</span> : currency) {
+  <span style="color: #d26937;">int</span> <span style="color: #599cab;">count</span> = count_coins(record, c.name);
+  <span style="color: #195466; font-weight: bold;">if</span> (count &gt; 0) {
+    cout &lt;&lt; c.name &lt;&lt; <span style="color: #2aa889;">": "</span> &lt;&lt; count &lt;&lt; <span style="color: #2aa889;">"\n"</span>;
+  }
+}
+</pre>
+</div>
+
+<p>
+Putting everything together we get:
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-cpp"><span style="color: #c23127;">#include</span> <span style="color: #2aa889;">&lt;iostream&gt;</span>
+<span style="color: #c23127;">#include</span> <span style="color: #2aa889;">&lt;string&gt;</span>
+<span style="color: #c23127;">#include</span> <span style="color: #2aa889;">&lt;vector&gt;</span>
+<span style="color: #c23127;">#include</span> <span style="color: #2aa889;">&lt;numeric&gt;</span>
+<span style="color: #c23127;">#include</span> <span style="color: #2aa889;">&lt;algorithm&gt;</span>
+<span style="color: #195466; font-weight: bold;">using</span> <span style="color: #195466; font-weight: bold;">namespace</span> <span style="color: #33859e; font-weight: bold;">std</span>;
+
+<span style="color: #195466; font-weight: bold;">struct</span> <span style="color: #d26937;">Dollars</span> {
+  <span style="color: #d26937;">int</span> <span style="color: #599cab;">papers</span>;
+  <span style="color: #d26937;">int</span> <span style="color: #599cab;">coins</span>;
+};
+
+<span style="color: #195466; font-weight: bold;">struct</span> <span style="color: #d26937;">Currency</span> {
+  <span style="color: #d26937;">string</span> <span style="color: #599cab;">name</span>;
+  <span style="color: #d26937;">Dollars</span> <span style="color: #599cab;">worth</span>;
+};
+
+<span style="color: #195466; font-weight: bold;">const</span> <span style="color: #d26937;">vector</span>&lt;<span style="color: #d26937;">Currency</span>&gt; <span style="color: #599cab;">currency</span> = {
+  { <span style="color: #2aa889;">"hundreds"</span>, {100, 0} },
+  { <span style="color: #2aa889;">"fifties"</span>, {50, 0} },
+  { <span style="color: #2aa889;">"twenties"</span>, {20, 0} },
+  { <span style="color: #2aa889;">"tens"</span>, {10, 0} },
+  { <span style="color: #2aa889;">"fives"</span>, {5, 0} },
+  { <span style="color: #2aa889;">"dollars"</span>, {1, 0} },
+  { <span style="color: #2aa889;">"quarters"</span>, {0, 25} },
+  { <span style="color: #2aa889;">"dimes"</span>, {0, 10} },
+  { <span style="color: #2aa889;">"nickles"</span>, {0, 5}},
+  { <span style="color: #2aa889;">"pennies"</span>, {0, 1} }
+};
+
+<span style="color: #d26937;">Dollars</span> <span style="color: #599cab;">minus_dollars</span>(<span style="color: #d26937;">Dollars</span> <span style="color: #599cab;">x</span>, <span style="color: #d26937;">Dollars</span> <span style="color: #599cab;">y</span>) {
+  <span style="color: #d26937;">int</span> <span style="color: #599cab;">ps</span> = x.papers - y.papers;
+  <span style="color: #d26937;">int</span> <span style="color: #599cab;">cs</span> = x.coins - y.coins;
+
+  <span style="color: #195466; font-weight: bold;">return</span> cs &gt;= 0 ? Dollars{ ps, cs } : Dollars{ ps - 1, 100 + cs };
+}
+
+<span style="color: #d26937;">string</span> <span style="color: #599cab;">display_dollars</span>(<span style="color: #d26937;">Dollars</span> <span style="color: #599cab;">x</span>){
+  <span style="color: #195466; font-weight: bold;">return</span> to_string(x.papers) + <span style="color: #2aa889;">"."</span> + to_string(x.coins);
+}
+
+<span style="color: #d26937;">vector</span>&lt;<span style="color: #d26937;">Currency</span>&gt; <span style="color: #599cab;">record_coins</span>(<span style="color: #d26937;">Dollars</span> <span style="color: #599cab;">change</span>) {
+  <span style="color: #d26937;">vector</span>&lt;<span style="color: #d26937;">Currency</span>&gt; <span style="color: #599cab;">record</span>;
+  <span style="color: #195466; font-weight: bold;">while</span> (change.papers &gt; 0 || change.coins &gt; 0) {
+    <span style="color: #195466; font-weight: bold;">for</span> (<span style="color: #195466; font-weight: bold;">auto</span> <span style="color: #599cab;">c</span> : currency) {
+        <span style="color: #195466; font-weight: bold;">if</span> (change.papers &gt;= c.worth.papers &amp;&amp; change.coins &gt;= c.worth.coins) {
+          change = minus_dollars(change, c.worth);
+          record.push_back(c);
+          <span style="color: #195466; font-weight: bold;">break</span>;
+        }
+    }
+  }
+
+  <span style="color: #195466; font-weight: bold;">return</span> record;
+}
+
+<span style="color: #d26937;">vector</span>&lt;<span style="color: #d26937;">Currency</span>&gt; <span style="color: #599cab;">filter_coins</span>(<span style="color: #d26937;">vector</span>&lt;<span style="color: #d26937;">Currency</span>&gt; <span style="color: #599cab;">change</span>, <span style="color: #d26937;">string</span> <span style="color: #599cab;">name</span>) {
+  <span style="color: #195466; font-weight: bold;">auto</span> <span style="color: #599cab;">new_end</span> = remove_if(change.begin(), change.end(),
+    [name](<span style="color: #d26937;">Currency</span> <span style="color: #599cab;">c</span>) { <span style="color: #195466; font-weight: bold;">return</span> c.name != name; });
+  change.erase(new_end, change.end());
+  <span style="color: #195466; font-weight: bold;">return</span> change;
+}
+
+<span style="color: #d26937;">int</span> <span style="color: #599cab;">count_coins</span>(<span style="color: #d26937;">vector</span>&lt;<span style="color: #d26937;">Currency</span>&gt; <span style="color: #599cab;">change</span>, <span style="color: #d26937;">string</span> <span style="color: #599cab;">name</span>) {
+  <span style="color: #195466; font-weight: bold;">return</span> filter_coins(change, name).size();
+}
+
+<span style="color: #d26937;">int</span> <span style="color: #599cab;">main</span>() {
+  <span style="color: #d26937;">Dollars</span> <span style="color: #599cab;">price</span> = {125, 27};
+  <span style="color: #d26937;">Dollars</span> <span style="color: #599cab;">paid</span> = {200, 0};
+  <span style="color: #d26937;">Dollars</span> <span style="color: #599cab;">change</span> = minus_dollars(paid, price); 
+
+  cout &lt;&lt; <span style="color: #2aa889;">"Price: "</span> &lt;&lt; display_dollars(price) &lt;&lt; <span style="color: #2aa889;">"\n"</span>;
+  cout &lt;&lt; <span style="color: #2aa889;">"Paid: "</span> &lt;&lt; display_dollars(paid) &lt;&lt; <span style="color: #2aa889;">"\n"</span>;
+  cout &lt;&lt; <span style="color: #2aa889;">"Change: "</span> &lt;&lt; display_dollars(change) &lt;&lt; <span style="color: #2aa889;">"\n"</span>;
+
+  <span style="color: #d26937;">vector</span>&lt;<span style="color: #d26937;">Currency</span>&gt; <span style="color: #599cab;">record</span> = record_coins(change);
+
+  <span style="color: #195466; font-weight: bold;">for</span> (<span style="color: #195466; font-weight: bold;">auto</span> <span style="color: #599cab;">c</span> : currency) {
+    <span style="color: #d26937;">int</span> <span style="color: #599cab;">count</span> = count_coins(record, c.name);
+    <span style="color: #195466; font-weight: bold;">if</span> (count &gt; 0) {
+      cout &lt;&lt; c.name &lt;&lt; <span style="color: #2aa889;">": "</span> &lt;&lt; count &lt;&lt; <span style="color: #2aa889;">"\n"</span>;
+    }
+  }
+
+  <span style="color: #195466; font-weight: bold;">return</span> 0;
+}
+</pre>
+</div>
+
+<p>
+Which displays:
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-bash">Price: 125.27
+Paid: 200.0
+Change: 74.73
+fifties: 1
+twenties: 1
+dollars: 4
+quarters: 2
+dimes: 2
+pennies: 3
+</pre>
+</div>
+
+<table class="table table-striped table-bordered table-hover table-condensed">
+
+
+<colgroup>
+<col  class="left">
+
+<col  class="left">
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="text-left">goals</th>
+<th scope="col" class="text-left">Done?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="text-left">sales price</td>
+<td class="text-left">\(\checkmark\)</td>
+</tr>
+
+<tr>
+<td class="text-left">amount paid</td>
+<td class="text-left">\(\checkmark\)</td>
+</tr>
+
+<tr>
+<td class="text-left">the change</td>
+<td class="text-left">\(\checkmark\)</td>
+</tr>
+
+<tr>
+<td class="text-left">amounts for each type of coin/dollar used</td>
+<td class="text-left">\(\checkmark\)</td>
+</tr>
+
+<tr>
+<td class="text-left">subtract Dollar values</td>
+<td class="text-left">\(\checkmark\)</td>
+</tr>
+
+<tr>
+<td class="text-left">display Dollar values</td>
+<td class="text-left">\(\checkmark\)</td>
+</tr>
+
+<tr>
+<td class="text-left">calculate (the change)</td>
+<td class="text-left">\(\checkmark\)</td>
+</tr>
+
+<tr>
+<td class="text-left">display (the amount for each currency used)</td>
+<td class="text-left">\(\checkmark\)</td>
+</tr>
+</tbody>
+</table>
+
+<p>
+Done!
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-12-6" class="outline-3">
+<h3 id="sec-12-6"><span class="section-number-3">12.6</span> Summary</h3>
+<div class="outline-text-3" id="text-12-6">
+<p>
+The choice of how to represent data is important and impact what tools you can use to solve a problem. While some tools like recursion may be powerful, not everything is a nail. Using the wrong tools ends up creating clutter and unecessary complexity in the problem. As we program it is always important to periodically ask ourselves if we can do better with our solutions. The change making problem could be solved in qute a few ways, but some of those ways are either tedious or to mentally stressful to be viable.
+</p>
+</div>
+</div>
+</div>
 </div><div class="col-md-3"><nav id="table-of-contents">
 <div id="text-table-of-contents" class="bs-docs-sidebar">
 <ul class="nav">
@@ -4386,6 +5850,16 @@ Recursion is a powerful technique, but sometimes writing the recursive functions
 <li><a href="#sec-11-8">11.8. Problem Solving with Grow and Accumulate</a></li>
 <li><a href="#sec-11-9">11.9. Transform</a></li>
 <li><a href="#sec-11-10">11.10. Summary</a></li>
+</ul>
+</li>
+<li><a href="#sec-12">12. C++ Shortcuts</a>
+<ul class="nav">
+<li><a href="#sec-12-1">12.1. if statements</a></li>
+<li><a href="#sec-12-2">12.2. while loops</a></li>
+<li><a href="#sec-12-3">12.3. for loops</a></li>
+<li><a href="#sec-12-4">12.4. when to use what</a></li>
+<li><a href="#sec-12-5">12.5. First example</a></li>
+<li><a href="#sec-12-6">12.6. Summary</a></li>
 </ul>
 </li>
 </ul>
