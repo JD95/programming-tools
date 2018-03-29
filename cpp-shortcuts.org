@@ -231,7 +231,7 @@ int main() {
 }
 #+END_SRC
 
-Right off the bat we are struck with two problems. First, there is no defined way to actually subtract to =Dollar= values. Second, cout only prints out the primitive types by default. So we'll have to add those problems to our goals.
+Right off the bat we are struck with two problems. First, there is no defined way to actually subtract to =Dollars= values. Second, cout only prints out the primitive types by default. So we'll have to add those problems to our goals.
 
 | goals                                       | Done?        |
 |---------------------------------------------+--------------|
@@ -239,16 +239,16 @@ Right off the bat we are struck with two problems. First, there is no defined wa
 | amount paid                                 | $\checkmark$ |
 | the change                                  | $\checkmark$ |
 | amounts for each type of coin/dollar used   | $\checkmark$ |
-| subtract Dollar values                      |              |
-| display Dollar values                       |              |
+| subtract Dollars values                      |              |
+| display Dollars values                       |              |
 | calculate (the change)                      |              |
 | display (the amount for each currency used) |              |
 
-The simpler of the two new goals is displaying a =Dollar= value, so we'll tackle it first.
+The simpler of the two new goals is displaying a =Dollars= value, so we'll tackle it first.
 
 \[Dollars \rightarrow ???\]
 
-We need to somehow convert a =Dollar= value into one of the primitive types that =cout= can display. The easiest target (usually) is =string=. Since a =Dollar= value is really just two =int= values so our problem really looks like $(int, int) \rightarrow string$, we can use =to_string= to convert the numbers into =string= values and then add them up while putting the usual dot inbetween. 
+We need to somehow convert a =Dollars= value into one of the primitive types that =cout= can display. The easiest target (usually) is =string=. Since a =Dollars= value is really just two =int= values so our problem really looks like $(int, int) \rightarrow string$, we can use =to_string= to convert the numbers into =string= values and then add them up while putting the usual dot inbetween. 
 
 #+BEGIN_SRC cpp
 string display_dollars(Dollars x){
@@ -298,16 +298,16 @@ Paid: 200.0
 | amount paid                                 | $\checkmark$ |
 | the change                                  | $\checkmark$ |
 | amounts for each type of coin/dollar used   | $\checkmark$ |
-| subtract Dollar values                      |              |
-| display Dollar values                       | $\checkmark$ |
+| subtract Dollars values                      |              |
+| display Dollars values                       | $\checkmark$ |
 | calculate (the change)                      |              |
 | display (the amount for each currency used) |              |
 
-Okay, now let's tackle subtracting =Dollar= values. Since we need two =Dollar= values to subtract and get a new one, the outline for this problem looks like this:
+Okay, now let's tackle subtracting =Dollars= values. Since we need two =Dollars= values to subtract and get a new one, the outline for this problem looks like this:
 
-\[(Dollar, Dollar) \rightarrow Dollar\]
+\[(Dollars, Dollars) \rightarrow Dollars\]
 
-However, just like before, we can make the problem easier to solve be replacing the =Dollar= type with two =int= values.
+However, just like before, we can make the problem easier to solve be replacing the =Dollars= type with two =int= values.
 
 \[((int, int), (int, int)) \rightarrow (int, int)\]
 
@@ -348,7 +348,7 @@ Which displays:
 5.-5
 #+END_SRC
 
-The =.coin= value of the =Dollar= would end up negative, which isn't what we want. If it's the case where $b > d$, then we want to subtract a dollar and subtract the coin amount from 100.
+The =.coin= value of the =Dollars= would end up negative, which isn't what we want. If it's the case where $b > d$, then we want to subtract a dollar and subtract the coin amount from 100.
 
 #+BEGIN_SRC cpp
 #include <iostream>
@@ -399,8 +399,8 @@ Problem solved!
 | amount paid                                 | $\checkmark$ |
 | the change                                  | $\checkmark$ |
 | amounts for each type of coin/dollar used   | $\checkmark$ |
-| subtract Dollar values                      | $\checkmark$ |
-| display Dollar values                       | $\checkmark$ |
+| subtract Dollars values                     | $\checkmark$ |
+| display Dollars values                       | $\checkmark$ |
 | calculate (the change)                      | $\checkmark$ |
 | display (the amount for each currency used) |              |
 
@@ -425,7 +425,7 @@ If that seems horribly tedious and repetitive, that's because it is. Imagine wha
 If the value is greater than or equal to X, subtract X, from the change and record Y, and go to step 1
 #+END_SRC
 
-This screams a function! So what do we need? We need some =Dollar= amount for $X$ and some =string= for $Y$. Remember how we eneded up defining our currency?
+This screams a function! So what do we need? We need some =Dollars= amount for $X$ and some =string= for $Y$. Remember how we eneded up defining our currency?
 
 #+BEGIN_SRC cpp
 struct Currency {
@@ -477,19 +477,19 @@ That's a pattern for accumulate! That being said, accumulate isn't the only solu
 - No real need to combine results, just return the solution
 
 Translated more into code we get:
-| steps                | value                 |
-|----------------------+-----------------------|
-| do-nothing input     | change == Dollar{0,0} |
-| do-nothing step      | record                |
-| break off the front  | step(change, record)  |
-| make problem smaller | used(change, record)  |
-| combine results      | used(change, record)  |
+| steps                | value                  |
+|----------------------+------------------------|
+| do-nothing input     | change == Dollars{0,0} |
+| do-nothing step      | record                 |
+| break off the front  | step(change, record)   |
+| make problem smaller | used(change, record)   |
+| combine results      | used(change, record)   |
 
 Fair enough, but which tool should we use for this? Since there isn't a clear meaning for adding our starting value with an element from the list we'd have to jump through hoops to get accumulate to work with this. That means a loop is probably our best bet. Since we don't know how many times this loop will have to run, we'll use a =while= loop.
 
 So let's begin with what we know so far:
 #+BEGIN_SRC cpp
-vector<Currency> record_coins(Dollars change) {
+vector<Currency> record_coins(Dollarss change) {
   vector<Currency> record;
   while (change.papers > 0 || change.coins > 0) {
     ???
@@ -785,8 +785,8 @@ pennies: 3
 | amount paid                                 | $\checkmark$ |
 | the change                                  | $\checkmark$ |
 | amounts for each type of coin/dollar used   | $\checkmark$ |
-| subtract Dollar values                      | $\checkmark$ |
-| display Dollar values                       | $\checkmark$ |
+| subtract Dollars values                     | $\checkmark$ |
+| display Dollars values                      | $\checkmark$ |
 | calculate (the change)                      | $\checkmark$ |
 | display (the amount for each currency used) | $\checkmark$ |
 
