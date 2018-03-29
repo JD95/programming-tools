@@ -4795,7 +4795,7 @@ Now that we have our nouns more or less squared away we can start building up th
 </div>
 
 <p>
-Right off the bat we are struck with two problems. First, there is no defined way to actually subtract to <code>Dollar</code> values. Second, cout only prints out the primitive types by default. So we'll have to add those problems to our goals.
+Right off the bat we are struck with two problems. First, there is no defined way to actually subtract to <code>Dollars</code> values. Second, cout only prints out the primitive types by default. So we'll have to add those problems to our goals.
 </p>
 
 <table class="table table-striped table-bordered table-hover table-condensed">
@@ -4834,12 +4834,12 @@ Right off the bat we are struck with two problems. First, there is no defined wa
 </tr>
 
 <tr>
-<td class="text-left">subtract Dollar values</td>
+<td class="text-left">subtract Dollars values</td>
 <td class="text-left">&#xa0;</td>
 </tr>
 
 <tr>
-<td class="text-left">display Dollar values</td>
+<td class="text-left">display Dollars values</td>
 <td class="text-left">&#xa0;</td>
 </tr>
 
@@ -4856,7 +4856,7 @@ Right off the bat we are struck with two problems. First, there is no defined wa
 </table>
 
 <p>
-The simpler of the two new goals is displaying a <code>Dollar</code> value, so we'll tackle it first.
+The simpler of the two new goals is displaying a <code>Dollars</code> value, so we'll tackle it first.
 </p>
 
 <p>
@@ -4864,7 +4864,7 @@ The simpler of the two new goals is displaying a <code>Dollar</code> value, so w
 </p>
 
 <p>
-We need to somehow convert a <code>Dollar</code> value into one of the primitive types that <code>cout</code> can display. The easiest target (usually) is <code>string</code>. Since a <code>Dollar</code> value is really just two <code>int</code> values so our problem really looks like \((int, int) \rightarrow string\), we can use <code>to_string</code> to convert the numbers into <code>string</code> values and then add them up while putting the usual dot inbetween. 
+We need to somehow convert a <code>Dollars</code> value into one of the primitive types that <code>cout</code> can display. The easiest target (usually) is <code>string</code>. Since a <code>Dollars</code> value is really just two <code>int</code> values so our problem really looks like \((int, int) \rightarrow string\), we can use <code>to_string</code> to convert the numbers into <code>string</code> values and then add them up while putting the usual dot inbetween. 
 </p>
 
 <div class="org-src-container">
@@ -4955,12 +4955,12 @@ Paid: 200.0
 </tr>
 
 <tr>
-<td class="text-left">subtract Dollar values</td>
+<td class="text-left">subtract Dollars values</td>
 <td class="text-left">&#xa0;</td>
 </tr>
 
 <tr>
-<td class="text-left">display Dollar values</td>
+<td class="text-left">display Dollars values</td>
 <td class="text-left">\(\checkmark\)</td>
 </tr>
 
@@ -4977,15 +4977,15 @@ Paid: 200.0
 </table>
 
 <p>
-Okay, now let's tackle subtracting <code>Dollar</code> values. Since we need two <code>Dollar</code> values to subtract and get a new one, the outline for this problem looks like this:
+Okay, now let's tackle subtracting <code>Dollars</code> values. Since we need two <code>Dollars</code> values to subtract and get a new one, the outline for this problem looks like this:
 </p>
 
 <p>
-\[(Dollar, Dollar) \rightarrow Dollar\]
+\[(Dollars, Dollars) \rightarrow Dollars\]
 </p>
 
 <p>
-However, just like before, we can make the problem easier to solve be replacing the <code>Dollar</code> type with two <code>int</code> values.
+However, just like before, we can make the problem easier to solve be replacing the <code>Dollars</code> type with two <code>int</code> values.
 </p>
 
 <p>
@@ -5038,7 +5038,7 @@ Which displays:
 </div>
 
 <p>
-The <code>.coin</code> value of the <code>Dollar</code> would end up negative, which isn't what we want. If it's the case where \(b > d\), then we want to subtract a dollar and subtract the coin amount from 100.
+The <code>.coin</code> value of the <code>Dollars</code> would end up negative, which isn't what we want. If it's the case where \(b > d\), then we want to subtract a dollar and subtract the coin amount from 100.
 </p>
 
 <div class="org-src-container">
@@ -5128,12 +5128,12 @@ Problem solved!
 </tr>
 
 <tr>
-<td class="text-left">subtract Dollar values</td>
+<td class="text-left">subtract Dollars values</td>
 <td class="text-left">\(\checkmark\)</td>
 </tr>
 
 <tr>
-<td class="text-left">display Dollar values</td>
+<td class="text-left">display Dollars values</td>
 <td class="text-left">\(\checkmark\)</td>
 </tr>
 
@@ -5192,7 +5192,7 @@ If that seems horribly tedious and repetitive, that's because it is. Imagine wha
 </div>
 
 <p>
-This screams a function! So what do we need? We need some <code>Dollar</code> amount for \(X\) and some <code>string</code> for \(Y\). Remember how we eneded up defining our currency?
+This screams a function! So what do we need? We need some <code>Dollars</code> amount for \(X\) and some <code>string</code> for \(Y\). Remember how we eneded up defining our currency?
 </p>
 
 <div class="org-src-container">
@@ -5291,7 +5291,7 @@ Translated more into code we get:
 <tbody>
 <tr>
 <td class="text-left">do-nothing input</td>
-<td class="text-left">change == Dollar{0,0}</td>
+<td class="text-left">change == Dollars{0,0}</td>
 </tr>
 
 <tr>
@@ -5325,7 +5325,7 @@ So let's begin with what we know so far:
 </p>
 <div class="org-src-container">
 
-<pre class="src src-cpp"><span style="color: #d26937;">vector</span>&lt;Currency&gt; <span style="color: #599cab;">record_coins</span>(<span style="color: #d26937;">Dollars</span> <span style="color: #599cab;">change</span>) {
+<pre class="src src-cpp"><span style="color: #d26937;">vector</span>&lt;Currency&gt; <span style="color: #599cab;">record_coins</span>(<span style="color: #d26937;">Dollarss</span> <span style="color: #599cab;">change</span>) {
   <span style="color: #d26937;">vector</span>&lt;Currency&gt; <span style="color: #599cab;">record</span>;
   <span style="color: #195466; font-weight: bold;">while</span> (change.papers &gt; 0 || change.coins &gt; 0) {
     ???
@@ -5716,12 +5716,12 @@ pennies: 3
 </tr>
 
 <tr>
-<td class="text-left">subtract Dollar values</td>
+<td class="text-left">subtract Dollars values</td>
 <td class="text-left">\(\checkmark\)</td>
 </tr>
 
 <tr>
-<td class="text-left">display Dollar values</td>
+<td class="text-left">display Dollars values</td>
 <td class="text-left">\(\checkmark\)</td>
 </tr>
 
