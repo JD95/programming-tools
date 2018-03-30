@@ -467,7 +467,7 @@ const vector<Currency> currency = {
 
 So our problem outline will look like this:
 
-\[vector(Currency) -> (Dollars, vector<Currency>)\]
+\[vector(Currency) \rightarrow (Dollars, vector(Currency))\]
 
 That's a pattern for accumulate! That being said, accumulate isn't the only solution here. We *could* use a loop for this as well. Looping over the =vector= and updating variables is the same as using =accumulate=. In either case, the steps are similar.
 - We should stop when there is no more change left, so the do-nothing input is $0.0

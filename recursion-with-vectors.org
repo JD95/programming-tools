@@ -392,7 +392,7 @@ template<typename B, typename A, typename Expand, typename Check>
 vector<B, allocator<B>> grow(A seed, Check cond, Expand f) {
 	auto expand = [f, cond, seed]() {
 		pair<B, A> result = f(seed);
-		auto rest = unfold<B>(get<1>(result), cond, f);
+		auto rest = grow<B>(get<1>(result), cond, f);
 		rest.insert(rest.begin(), get<0>(result));
 		return rest;
 	};
