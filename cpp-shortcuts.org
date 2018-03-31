@@ -9,17 +9,34 @@
 #+LATEX_HEADER: \usepackage{apacite}
 #+LATEX_HEADER: \usepackage{setspace}
 
-** if statements
+While the tools we have covered so far are capable of doing everything we might want, there are certain situations where they make us work harder than need be. The problem isn't necessarily due to a decifiency with the tools, but rather us trying to make a nail out of everything because we have a good hammer. The vector functions like =grow=, =accumulate=, etc. are very well suited for creating and manipulating *existing* vectors, however in certain situations they make us do more work than is necessary.
+
+As a quick review, remember the five pieces to any problem with repeated steps:
+- Checking for a do-nothing input
+- A step for when no more work should be done
+- Breaking off the front of the problem
+- Solving a smaller version of the problem
+- Combining the results from the front and smaller version
+
+This translates into the general format for recursive functions:
+
+[[./images/cpp-shortcuts/recursion-schema.svg]]
+
+For example, we can sum number from 1 to n using this function:
+
+#+BEGIN_SRC cpp
+int sum(int n) {
+  return n > 0 ? n + sum(n-1) : 0;
+}
+#+END_SRC
+
+In this case, recursion leads to a short and concise solution. While recursion *can* solve any problem with repeated steps we might come across, we *shouldn't* reach for it in every situation. Sometimes, most of the time, there are better tools to use.
 
 ** while loops 
 
-#+BEGIN_SRC
-while (not do-nothing) {
- break off the front;
- make problem smaller;
- combine results;
-} 
-#+END_SRC
+There is a class of problems where an action is repeated over and over while a condition remains true. For these kinds of problems we can use something called a =while= loop.
+
+[[./images/cpp-shortcuts/while-loop-schema.svg]]
 
 #+BEGIN_SRC cpp
 int sum(int n) {
@@ -46,7 +63,7 @@ int sum(int n) {
 }
 #+END_SRC
 
-We can express our recursion replacements in terms of while loops.
+While this version of =sum= might be a bit more verbose, they actually solve other problems better. For example, we can express our recursion replacements in terms of while loops.
 
 #+BEGIN_SRC cpp
 template<typename B, typename A, typename Expand, typename Check>
@@ -93,13 +110,126 @@ B accumulate(vector<A, allocator<A>> nums, B init, F f) {
 
 ** for loops
 
+Another class of problems involve counting. 
+
+#+BEGIN_SRC cpp
+int repeat(string s, int n) {
+  return n > 0 ? s + repeat(s, n-1) : "";
+}
+#+END_SRC
+
+The alternative to writing recursion for problems repeat for some set amount of times is called a =for= loop. These kinds of loops are shortcuts for solving this while a =while= loop.
+
+#+BEGIN_SRC cpp
+int repeat(string s, int n) {
+  string result = s;
+  while (n > 0) {
+    result = result + s;
+    n = n - 1;
+  }
+  return result;
+}
+#+END_SRC
+
+[[./images/cpp-shortcuts/for-loop-schema.svg]]
+
+For example, if we wanted to write a function that will raise a number to the power of five, we *could* try this with normal recursion, but it would mean writing *another* function which actually had an input which we can count with and then calling that function.
+
+#+BEGIN_SRC cpp
+int power_of_five_impl(int base, int n) {
+  return n > 0 ? base * power_of_five_impl(base, n-1) : 1;
+}
+
+int power_of_five(int base) {
+  return power_of_five_impl(base, 5);
+}
+#+END_SRC
+
+That's *way* more work than we should have to do. So we could then reach for a =while= loop:
+#+BEGIN_SRC cpp
+int power_of_five(int base) {
+  int n = 5;
+  int result = base;
+  while (n > 0) {
+    result = result * base; 
+    n = n - 1;
+  }
+  return result;
+}
+#+END_SRC
+
+We didn't have to write another function, but it is still clunky. =for= loops let us express this kind of problem more concisely than a =while= loop because it includes dealing with a counter:
+#+BEGIN_SRC cpp
+int power_of_five(int base) {
+  int result = base;
+  for (int n = 5; n > 0; n--){
+    result = result * base; 
+  }
+  return result;
+}
+#+END_SRC
+
+Much better! The =n--= is also a short cut for =n = n-1=. You can write any kind of assignment statement in that position of the =for= loop but typically it will be =--= or =++=. 
+
+In the case of the function $repeat$, we already have a counter in the input =n= so we don't actually have to include that in the =for= loop. Note that the semi-colon *still* has to be included!
+
+#+BEGIN_SRC cpp
+string repeat(string s, int n){
+  string result = s;
+  for (; n > 0; i--) {
+    result = result + s;
+  }
+  return result;
+}
+#+END_SRC
+
+There is a cousin of normal =for= loops which deals explicitly with collections. The =range-based for= loop allows us to concisely describe performing an action on every element of something like a =vector= or an =array=. 
+
+[[./images/cpp-shortcuts/range-for-schema.svg]]
+
+For example, if we wanted to add up all the elements in an =array<int>=, we *could* use a normal for loop and access every spot in the =array= using the $at$ function:
+
+#+BEGIN_SRC cpp
+int sum_array(array<int, 10> elems) {
+  int result = 0;
+  for (int i = 0; i < 10; i++) {
+    result = result + elems.at(i);
+  }
+  return result;
+}
+#+END_SRC
+
+However, =array= defines =.begin()= and =.end()= which means we can use a =range-based for= loop.
+
+#+BEGIN_SRC cpp
+int sum_array(array<int, 10> elems) {
+  int result = 0;
+  for (int elem : elems) {
+    result = result + elem;
+  }
+  return 0;
+}
+#+END_SRC
+
+This makes problems like defining =accumulate= *much* easier:
+#+BEGIN_SRC cpp
+template <typename B, typename A, typename F>
+B accumulate(vector<A, allocator<A>> elems, B init, F f) {
+  B result = init;
+  for (auto elem : elems) {
+    result = f(result, elem);
+  }
+  return result;
+}
+#+END_SRC
+
 ** when to use what
 
 [[./images/cpp-shortcuts/repetition-tool-heirarchy.svg]]
 
 | I need to...                                              | tool               |
 |-----------------------------------------------------------+--------------------|
-| Build a collection out a single value                     | grow               |
+| Build a collection out of a single value                  | grow               |
 | Use something simple like + to combine elements           | accumulate         |
 | Remove elements from a collection which don't pass a test | @@html:remove_if@@ |
 | Do something to every element and use the results later   | transform          |
@@ -107,6 +237,49 @@ B accumulate(vector<A, allocator<A>> nums, B init, F f) {
 | Index a collection                                        | for                |
 | Repeat action while condition is true                     | while              |
 | Everything else                                           | recursion          |
+
+** if statements
+
+Another point convenience is an alternative to the (? :) syntax. For small, single conditions the ternary operation does fine, but for lots of nested conditions, it becomes a mess to deal with. 
+
+#+BEGIN_SRC cpp
+return (cond1 ? a : (cond2 ? b : (cond3 ? c : ...)));
+#+END_SRC
+
+A more painful situation is when you need to decide on whether to change variables or not. Because assignment is a statement and not an expression, you can't return that action using (? :). You'd have to create an on-the-spot function to achieve that.
+
+#+BEGIN_SRC cpp
+auto insert = [collection]() {
+  collection.push_back(input);
+  return collection;
+}
+return cond ? insert() : collection;
+#+END_SRC
+
+For these types of situations, it is easier to use an =if statement=. These kinds of statements are much like the (? :) syntax, except you aren't picking between two values, rather you are picking between two actions.
+
+[[./images/cpp-shortcuts/if-statement-schema.svg]]
+
+This solves the first problem by allowing us to write something like:
+
+#+BEGIN_SRC cpp
+if (cond1) { return a; }
+else if (cond2) { return b; }
+else if (cond3) { return c; }
+else ...
+#+END_SRC
+
+In this case, the if statements are clearer than the choice operation. Where the if statement really shines is with our second problem:
+
+#+BEGIN_SRC cpp
+if (cond) {
+  collection.push_back(input);
+}
+
+return collection;
+#+END_SRC
+
+Now you don't have to make a function on the spot in order to conditionally insert elements or otherwise change variables.
 
 ** First example 
 
