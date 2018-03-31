@@ -3644,7 +3644,7 @@ Unfortunately, there is no equivalent of this generalized range function in the 
 <span style="color: #d26937;">vector</span>&lt;<span style="color: #d26937;">B</span>, <span style="color: #d26937;">allocator</span>&lt;<span style="color: #d26937;">B</span>&gt;&gt; <span style="color: #599cab;">grow</span>(<span style="color: #d26937;">A</span> <span style="color: #599cab;">seed</span>, <span style="color: #d26937;">Check</span> <span style="color: #599cab;">cond</span>, <span style="color: #d26937;">Expand</span> <span style="color: #599cab;">f</span>) {
         <span style="color: #195466; font-weight: bold;">auto</span> <span style="color: #599cab;">expand</span> = [f, cond, seed]() {
                 <span style="color: #d26937;">pair</span>&lt;<span style="color: #d26937;">B</span>, <span style="color: #d26937;">A</span>&gt; <span style="color: #599cab;">result</span> = f(seed);
-                <span style="color: #195466; font-weight: bold;">auto</span> <span style="color: #599cab;">rest</span> = unfold&lt;<span style="color: #d26937;">B</span>&gt;(get&lt;1&gt;(result), cond, f);
+                <span style="color: #195466; font-weight: bold;">auto</span> <span style="color: #599cab;">rest</span> = grow&lt;<span style="color: #d26937;">B</span>&gt;(get&lt;1&gt;(result), cond, f);
                 rest.insert(rest.begin(), get&lt;0&gt;(result));
                 <span style="color: #195466; font-weight: bold;">return</span> rest;
         };
@@ -4291,22 +4291,65 @@ Recursion is a powerful technique, but sometimes writing the recursive functions
 <div id="outline-container-sec-12" class="outline-2">
 <h2 id="sec-12"><span class="section-number-2">12</span> C++ Shortcuts</h2>
 <div class="outline-text-2" id="text-12">
+<p>
+While the tools we have covered so far are capable of doing everything we might want, there are certain situations where they make us work harder than need be. The problem isn't necessarily due to a decifiency with the tools, but rather us trying to make a nail out of everything because we have a good hammer. The vector functions like <code>grow</code>, <code>accumulate</code>, etc. are very well suited for creating and manipulating <b>existing</b> vectors, however in certain situations they make us do more work than is necessary.
+</p>
+
+<p>
+As a quick review, remember the five pieces to any problem with repeated steps:
+</p>
+<ul class="org-ul">
+<li>Checking for a do-nothing input
+</li>
+<li>A step for when no more work should be done
+</li>
+<li>Breaking off the front of the problem
+</li>
+<li>Solving a smaller version of the problem
+</li>
+<li>Combining the results from the front and smaller version
+</li>
+</ul>
+
+<p>
+This translates into the general format for recursive functions:
+</p>
+
+
+<figure>
+<p><img src="./images/cpp-shortcuts/recursion-schema.svg" class="img-responsive" alt="recursion-schema.svg">
+</p>
+</figure>
+
+<p>
+For example, we can sum number from 1 to n using this function:
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-cpp"><span style="color: #d26937;">int</span> <span style="color: #599cab;">sum</span>(<span style="color: #d26937;">int</span> <span style="color: #599cab;">n</span>) {
+  <span style="color: #195466; font-weight: bold;">return</span> n &gt; 0 ? n + sum(n-1) : 0;
+}
+</pre>
+</div>
+
+<p>
+In this case, recursion leads to a short and concise solution. While recursion <b>can</b> solve any problem with repeated steps we might come across, we <b>shouldn't</b> reach for it in every situation. Sometimes, most of the time, there are better tools to use.
+</p>
 </div>
 
 <div id="outline-container-sec-12-1" class="outline-3">
-<h3 id="sec-12-1"><span class="section-number-3">12.1</span> if statements</h3>
-</div>
+<h3 id="sec-12-1"><span class="section-number-3">12.1</span> while loops</h3>
+<div class="outline-text-3" id="text-12-1">
+<p>
+There is a class of problems where an action is repeated over and over while a condition remains true. For these kinds of problems we can use something called a <code>while</code> loop.
+</p>
 
-<div id="outline-container-sec-12-2" class="outline-3">
-<h3 id="sec-12-2"><span class="section-number-3">12.2</span> while loops</h3>
-<div class="outline-text-3" id="text-12-2">
-<pre class="example">
-while (not do-nothing) {
- break off the front;
- make problem smaller;
- combine results;
-} 
-</pre>
+
+<figure>
+<p><img src="./images/cpp-shortcuts/while-loop-schema.svg" class="img-responsive" alt="while-loop-schema.svg">
+</p>
+</figure>
 
 <div class="org-src-container">
 
@@ -4340,7 +4383,7 @@ Which can be simplified
 </div>
 
 <p>
-We can express our recursion replacements in terms of while loops.
+While this version of <code>sum</code> might be a bit more verbose, they actually solve other problems better. For example, we can express our recursion replacements in terms of while loops.
 </p>
 
 <div class="org-src-container">
@@ -4460,13 +4503,175 @@ We can express our recursion replacements in terms of while loops.
 </div>
 </div>
 
-<div id="outline-container-sec-12-3" class="outline-3">
-<h3 id="sec-12-3"><span class="section-number-3">12.3</span> for loops</h3>
+<div id="outline-container-sec-12-2" class="outline-3">
+<h3 id="sec-12-2"><span class="section-number-3">12.2</span> for loops</h3>
+<div class="outline-text-3" id="text-12-2">
+<p>
+Another class of problems involve counting. 
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-cpp"><span style="color: #d26937;">int</span> <span style="color: #599cab;">repeat</span>(<span style="color: #d26937;">string</span> <span style="color: #599cab;">s</span>, <span style="color: #d26937;">int</span> <span style="color: #599cab;">n</span>) {
+  <span style="color: #195466; font-weight: bold;">return</span> n &gt; 0 ? s + repeat(s, n-1) : <span style="color: #2aa889;">""</span>;
+}
+</pre>
 </div>
 
-<div id="outline-container-sec-12-4" class="outline-3">
-<h3 id="sec-12-4"><span class="section-number-3">12.4</span> when to use what</h3>
-<div class="outline-text-3" id="text-12-4">
+<p>
+The alternative to writing recursion for problems repeat for some set amount of times is called a <code>for</code> loop. These kinds of loops are shortcuts for solving this while a <code>while</code> loop.
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-cpp"><span style="color: #d26937;">int</span> <span style="color: #599cab;">repeat</span>(<span style="color: #d26937;">string</span> <span style="color: #599cab;">s</span>, <span style="color: #d26937;">int</span> <span style="color: #599cab;">n</span>) {
+  <span style="color: #d26937;">string</span> <span style="color: #599cab;">result</span> = s;
+  <span style="color: #195466; font-weight: bold;">while</span> (n &gt; 0) {
+    result = result + s;
+    n = n - 1;
+  }
+  <span style="color: #195466; font-weight: bold;">return</span> result;
+}
+</pre>
+</div>
+
+
+<figure>
+<p><img src="./images/cpp-shortcuts/for-loop-schema.svg" class="img-responsive" alt="for-loop-schema.svg">
+</p>
+</figure>
+
+<p>
+For example, if we wanted to write a function that will raise a number to the power of five, we <b>could</b> try this with normal recursion, but it would mean writing <b>another</b> function which actually had an input which we can count with and then calling that function.
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-cpp"><span style="color: #d26937;">int</span> <span style="color: #599cab;">power_of_five_impl</span>(<span style="color: #d26937;">int</span> <span style="color: #599cab;">base</span>, <span style="color: #d26937;">int</span> <span style="color: #599cab;">n</span>) {
+  <span style="color: #195466; font-weight: bold;">return</span> n &gt; 0 ? base * power_of_five_impl(base, n-1) : 1;
+}
+
+<span style="color: #d26937;">int</span> <span style="color: #599cab;">power_of_five</span>(<span style="color: #d26937;">int</span> <span style="color: #599cab;">base</span>) {
+  <span style="color: #195466; font-weight: bold;">return</span> power_of_five_impl(base, 5);
+}
+</pre>
+</div>
+
+<p>
+That's <b>way</b> more work than we should have to do. So we could then reach for a <code>while</code> loop:
+</p>
+<div class="org-src-container">
+
+<pre class="src src-cpp"><span style="color: #d26937;">int</span> <span style="color: #599cab;">power_of_five</span>(<span style="color: #d26937;">int</span> <span style="color: #599cab;">base</span>) {
+  <span style="color: #d26937;">int</span> <span style="color: #599cab;">n</span> = 5;
+  <span style="color: #d26937;">int</span> <span style="color: #599cab;">result</span> = base;
+  <span style="color: #195466; font-weight: bold;">while</span> (n &gt; 0) {
+    result = result * base; 
+    n = n - 1;
+  }
+  <span style="color: #195466; font-weight: bold;">return</span> result;
+}
+</pre>
+</div>
+
+<p>
+We didn't have to write another function, but it is still clunky. <code>for</code> loops let us express this kind of problem more concisely than a <code>while</code> loop because it includes dealing with a counter:
+</p>
+<div class="org-src-container">
+
+<pre class="src src-cpp"><span style="color: #d26937;">int</span> <span style="color: #599cab;">power_of_five</span>(<span style="color: #d26937;">int</span> <span style="color: #599cab;">base</span>) {
+  <span style="color: #d26937;">int</span> <span style="color: #599cab;">result</span> = base;
+  <span style="color: #195466; font-weight: bold;">for</span> (<span style="color: #d26937;">int</span> <span style="color: #599cab;">n</span> = 5; n &gt; 0; n--){
+    result = result * base; 
+  }
+  <span style="color: #195466; font-weight: bold;">return</span> result;
+}
+</pre>
+</div>
+
+<p>
+Much better! The <code>n--</code> is also a short cut for <code>n = n-1</code>. You can write any kind of assignment statement in that position of the <code>for</code> loop but typically it will be <code>--</code> or <code>++</code>. 
+</p>
+
+<p>
+In the case of the function \(repeat\), we already have a counter in the input <code>n</code> so we don't actually have to include that in the <code>for</code> loop. Note that the semi-colon <b>still</b> has to be included!
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-cpp"><span style="color: #d26937;">string</span> <span style="color: #599cab;">repeat</span>(<span style="color: #d26937;">string</span> <span style="color: #599cab;">s</span>, <span style="color: #d26937;">int</span> <span style="color: #599cab;">n</span>){
+  <span style="color: #d26937;">string</span> <span style="color: #599cab;">result</span> = s;
+  <span style="color: #195466; font-weight: bold;">for</span> (; n &gt; 0; i--) {
+    result = result + s;
+  }
+  <span style="color: #195466; font-weight: bold;">return</span> result;
+}
+</pre>
+</div>
+
+<p>
+There is a cousin of normal <code>for</code> loops which deals explicitly with collections. The <code>range-based for</code> loop allows us to concisely describe performing an action on every element of something like a <code>vector</code> or an <code>array</code>. 
+</p>
+
+
+<figure>
+<p><img src="./images/cpp-shortcuts/range-for-schema.svg" class="img-responsive" alt="range-for-schema.svg">
+</p>
+</figure>
+
+<p>
+For example, if we wanted to add up all the elements in an <code>array&lt;int&gt;</code>, we <b>could</b> use a normal for loop and access every spot in the <code>array</code> using the \(at\) function:
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-cpp"><span style="color: #d26937;">int</span> <span style="color: #599cab;">sum_array</span>(<span style="color: #d26937;">array</span>&lt;<span style="color: #d26937;">int</span>, 10&gt; <span style="color: #599cab;">elems</span>) {
+  <span style="color: #d26937;">int</span> <span style="color: #599cab;">result</span> = 0;
+  <span style="color: #195466; font-weight: bold;">for</span> (<span style="color: #d26937;">int</span> <span style="color: #599cab;">i</span> = 0; i &lt; 10; i++) {
+    result = result + elems.at(i);
+  }
+  <span style="color: #195466; font-weight: bold;">return</span> result;
+}
+</pre>
+</div>
+
+<p>
+However, <code>array</code> defines <code>.begin()</code> and <code>.end()</code> which means we can use a <code>range-based for</code> loop.
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-cpp"><span style="color: #d26937;">int</span> <span style="color: #599cab;">sum_array</span>(<span style="color: #d26937;">array</span>&lt;<span style="color: #d26937;">int</span>, 10&gt; <span style="color: #599cab;">elems</span>) {
+  <span style="color: #d26937;">int</span> <span style="color: #599cab;">result</span> = 0;
+  <span style="color: #195466; font-weight: bold;">for</span> (<span style="color: #d26937;">int</span> <span style="color: #599cab;">elem</span> : elems) {
+    result = result + elem;
+  }
+  <span style="color: #195466; font-weight: bold;">return</span> 0;
+}
+</pre>
+</div>
+
+<p>
+This makes problems like defining <code>accumulate</code> <b>much</b> easier:
+</p>
+<div class="org-src-container">
+
+<pre class="src src-cpp"><span style="color: #195466; font-weight: bold;">template</span> &lt;<span style="color: #195466; font-weight: bold;">typename</span> <span style="color: #d26937;">B</span>, <span style="color: #195466; font-weight: bold;">typename</span> <span style="color: #d26937;">A</span>, <span style="color: #195466; font-weight: bold;">typename</span> <span style="color: #d26937;">F</span>&gt;
+<span style="color: #d26937;">B</span> <span style="color: #599cab;">accumulate</span>(<span style="color: #d26937;">vector</span>&lt;<span style="color: #d26937;">A</span>, <span style="color: #d26937;">allocator</span>&lt;<span style="color: #d26937;">A</span>&gt;&gt; <span style="color: #599cab;">elems</span>, <span style="color: #d26937;">B</span> <span style="color: #599cab;">init</span>, <span style="color: #d26937;">F</span> <span style="color: #599cab;">f</span>) {
+  <span style="color: #d26937;">B</span> <span style="color: #599cab;">result</span> = init;
+  <span style="color: #195466; font-weight: bold;">for</span> (<span style="color: #195466; font-weight: bold;">auto</span> <span style="color: #599cab;">elem</span> : elems) {
+    result = f(result, elem);
+  }
+  <span style="color: #195466; font-weight: bold;">return</span> result;
+}
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-12-3" class="outline-3">
+<h3 id="sec-12-3"><span class="section-number-3">12.3</span> when to use what</h3>
+<div class="outline-text-3" id="text-12-3">
 
 <figure>
 <p><img src="./images/cpp-shortcuts/repetition-tool-heirarchy.svg" class="img-responsive" alt="repetition-tool-heirarchy.svg">
@@ -4489,7 +4694,7 @@ We can express our recursion replacements in terms of while loops.
 </thead>
 <tbody>
 <tr>
-<td class="text-left">Build a collection out a single value</td>
+<td class="text-left">Build a collection out of a single value</td>
 <td class="text-left">grow</td>
 </tr>
 
@@ -4529,6 +4734,76 @@ We can express our recursion replacements in terms of while loops.
 </tr>
 </tbody>
 </table>
+</div>
+</div>
+
+<div id="outline-container-sec-12-4" class="outline-3">
+<h3 id="sec-12-4"><span class="section-number-3">12.4</span> if statements</h3>
+<div class="outline-text-3" id="text-12-4">
+<p>
+Another point convenience is an alternative to the (? :) syntax. For small, single conditions the ternary operation does fine, but for lots of nested conditions, it becomes a mess to deal with. 
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-cpp"><span style="color: #195466; font-weight: bold;">return</span> (cond1 ? a : (cond2 ? b : (cond3 ? c : ...)));
+</pre>
+</div>
+
+<p>
+A more painful situation is when you need to decide on whether to change variables or not. Because assignment is a statement and not an expression, you can't return that action using (? :). You'd have to create an on-the-spot function to achieve that.
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-cpp"><span style="color: #195466; font-weight: bold;">auto</span> <span style="color: #599cab;">insert</span> = [collection]() {
+  collection.push_back(input);
+  <span style="color: #195466; font-weight: bold;">return</span> collection;
+}
+<span style="color: #195466; font-weight: bold;">return</span> cond ? insert() : collection;
+</pre>
+</div>
+
+<p>
+For these types of situations, it is easier to use an <code>if statement</code>. These kinds of statements are much like the (? :) syntax, except you aren't picking between two values, rather you are picking between two actions.
+</p>
+
+
+<figure>
+<p><img src="./images/cpp-shortcuts/if-statement-schema.svg" class="img-responsive" alt="if-statement-schema.svg">
+</p>
+</figure>
+
+<p>
+This solves the first problem by allowing us to write something like:
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-cpp"><span style="color: #195466; font-weight: bold;">if</span> (cond1) { <span style="color: #195466; font-weight: bold;">return</span> a; }
+<span style="color: #195466; font-weight: bold;">else</span> <span style="color: #195466; font-weight: bold;">if</span> (cond2) { <span style="color: #195466; font-weight: bold;">return</span> b; }
+<span style="color: #195466; font-weight: bold;">else</span> <span style="color: #195466; font-weight: bold;">if</span> (cond3) { <span style="color: #195466; font-weight: bold;">return</span> c; }
+<span style="color: #195466; font-weight: bold;">else</span> ...
+</pre>
+</div>
+
+<p>
+In this case, the if statements are clearer than the choice operation. Where the if statement really shines is with our second problem:
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-cpp"><span style="color: #195466; font-weight: bold;">if</span> (cond) {
+  collection.push_back(input);
+}
+
+<span style="color: #195466; font-weight: bold;">return</span> collection;
+</pre>
+</div>
+
+<p>
+Now you don't have to make a function on the spot in order to conditionally insert elements or otherwise change variables.
+</p>
 </div>
 </div>
 
@@ -5252,7 +5527,7 @@ So our problem outline will look like this:
 </p>
 
 <p>
-\[vector(Currency) -> (Dollars, vector<Currency>)\]
+\[vector(Currency) \rightarrow (Dollars, vector(Currency))\]
 </p>
 
 <p>
@@ -5854,10 +6129,10 @@ The choice of how to represent data is important and impact what tools you can u
 </li>
 <li><a href="#sec-12">12. C++ Shortcuts</a>
 <ul class="nav">
-<li><a href="#sec-12-1">12.1. if statements</a></li>
-<li><a href="#sec-12-2">12.2. while loops</a></li>
-<li><a href="#sec-12-3">12.3. for loops</a></li>
-<li><a href="#sec-12-4">12.4. when to use what</a></li>
+<li><a href="#sec-12-1">12.1. while loops</a></li>
+<li><a href="#sec-12-2">12.2. for loops</a></li>
+<li><a href="#sec-12-3">12.3. when to use what</a></li>
+<li><a href="#sec-12-4">12.4. if statements</a></li>
 <li><a href="#sec-12-5">12.5. First example</a></li>
 <li><a href="#sec-12-6">12.6. Summary</a></li>
 </ul>
