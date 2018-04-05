@@ -238,7 +238,7 @@ somethingLater = \x -> x
 
 All that changed was the type of the input and output. What exactly is a value of =a= though? It could be anything!
 
-#+BEGIN_SRC cpp
+#+BEGIN_SRC haskell
 hello :: String
 hello = somethingLater "hello"
 
@@ -251,14 +251,14 @@ five = somethingLater 5
 
 The function $somethingLater$ can construct a value of any type by taking some value and giving it right back to us. This seems like a rather useless function, but it is surpisingly so useful Haskell predefines a function like that for us called $id$, short for identity.
 
-#+BEGIN_SRC cpp
+#+BEGIN_SRC haskell
 id :: a -> a
 id = \x -> x
 #+END_SRC
 
 This simple function will pop up many more times as we progress, but it would be prudent to at least show an actually useful case of generics.
 
-#+BEGIN_SRC cpp
+#+BEGIN_SRC haskell
 swap :: (a, b) -> (b, a)
 swap = \(x, y) -> (y, x)
 
