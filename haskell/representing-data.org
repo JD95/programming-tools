@@ -28,18 +28,18 @@ More generally, there are quite a few useful similarities between langauge and p
 
 In programming nouns can take several forms depending on how much you know about the noun beforehand. If a value already known ahead of time, it can be represented with a constant. Constants are specific values like the number =5= or the word ="Hello"=. These are directly stated as part of the program and are the most constrained form of a noun.
 
-Most programming languages, including C++, categorize different values in the following way:
+Most programming languages, including Haskell, categorize different values in the following way:
 
-| real world | C++ type |
-|------------+----------|
-| numbers    | int      |
-| decimals   | float    |
-| letters    | char     |
-| text/words | string   |
+| real world | Haskell type |
+|------------+--------------|
+| numbers    | Int          |
+| decimals   | Float        |
+| letters    | Char         |
+| text/words | String       |
 
-Each of these different categories of values are called a =Type=. Types help tell the program what can and cannot be done with certain values. It wouldn't make sense for a person to try and send a text message with a bicycle and we'd like the same to be true in our programs as well. The four types listed above are not the only types we can work with while programming, but they are some the most primitive. All other types are combinations of these four types.
+Each of these different categories of values are called a =Type=. Types help tell the program what can and cannot be done with certain values. It wouldn't make sense for a person to try and send a text message with a bicycle and we'd like the same to be true in our programs as well. The four types listed above are not the only types we can work with while programming, but they are some the most primitive. Many other types are built out of these simpler ones.
 
-The first of these types =int= represents positive and negative whole numbers and can be expressed in a program like this:
+The first of these types =Int= represents positive and negative numbers and can be expressed in a program like this:
 
 #+BEGIN_SRC cpp
 0
@@ -49,9 +49,9 @@ The first of these types =int= represents positive and negative whole numbers an
 -123493952395923592359
 #+END_SRC
 
-=int= values are great for counting things or representing amounts. A few examples of real world =int= values are: ages, years, stars in a movie review, students in a classroom, etc.
+=Int= values are great for counting things or representing amounts. A few examples of real world =Int= values are: ages, years, stars in a movie review, students in a classroom, etc.
 
-The next category of values are =float= values. These values represent decimal numbers and can be expressed like this:
+The next category of values are =Float= values. These values represent decimal numbers and can be expressed like this:
 
 #+BEGIN_SRC cpp
 0.0
@@ -60,9 +60,9 @@ The next category of values are =float= values. These values represent decimal n
 12435.234
 #+END_SRC
 
-=float= values are great for representing percentages, positions, fractions, etc. Concepts like height, discounts, and money can be representing with this type.
+=Float= values are great for representing percentages, positions, fractions, etc. Concepts like height and discounts can be representing with this type.
 
-Numbers are not the only values which can be represented on a computer. Any symbol on your keyboard can be represented using the =char= type. Typically, =char= values are used to represent letters and single digits. Any symbol surrounded by single quotes is a =char=. For example:
+Numbers are not the only values which can be represented on a computer. Any symbol on your keyboard can be represented using the =Char= type. Typically, =Char= values are used to represent letters and single digits. Any symbol surrounded by single quotes is a =Char=. For example:
 
 #+BEGIN_SRC cpp
 'a'
@@ -72,7 +72,7 @@ Numbers are not the only values which can be represented on a computer. Any symb
 ':'
 #+END_SRC
 
-By grouping =char= values together we can make a =string=. The =string= type allows us to represent any amount of text within our programs. Names, addresses, dates, etc. are typically represented using this type. You can express a =string= by wrapping the text in double quotes like so:
+By grouping =Char= values together we can make a =String=. The =String= type allows us to represent any amount of text within our programs. Names, addresses, dates, etc. are typically represented using this type. You can express a =String= by wrapping the text in double quotes like so:
 
 #+BEGIN_SRC cpp
 "Hello there fellow humans!"
@@ -82,138 +82,197 @@ By grouping =char= values together we can make a =string=. The =string= type all
 
 Strings have a special value to represent no text, otherwise known as the "empty string" or =""=. There is no space between the quotes and is the same as an empty chat dialogue box or an empty searchbar.
 
-Programs are essentially text files which people (mostly you) will have to read. In order to make our programs as easy to understand for humans, it is often useful to give better names for the values we want to use so they better capture the real world noun they are meant to represent. For example, instead of just saying =int=, one could say =Age=.
+Programs are essentially text files which people (mostly you) will have to read. In order to make our programs as easy to understand for humans, it is often useful to give better names for the values we want to use so they better capture the real world noun they are meant to represent. For example, instead of just saying =Int=, one could say =Age=.
 
-In C++, you can tell the computer to interpet a word as a type via the =using= keyword. The term =keyword= in programming refers to words that have predefined meanings within the given programming language. These keywords cannot be redefiend by the user.
+In Haskell, you can tell the computer to interpet a word as a type via the =type= keyword. The term =keyword= in programming refers to words that have predefined meanings within the given programming language. These keywords cannot be redefiend by the user.
 
-Here we can see examples of =using= usage:
+Here we can see examples of =type= usage:
 
-#+BEGIN_SRC cpp
-using MarbleCount = int;
-using StudentName = string;
-using Discount = float;
-using PlayerSymbol = char;
-...
+#+BEGIN_SRC haskell
+type MarbleCount = Int
+type StudentName = String
+type Discount = Float
+type PlayerSymbol = Char
 #+END_SRC
 
-There are five parts to defining our own name for a =type=. The first part is the =using= keyword which tells the program that we intend to define a new name. The second part is the name we want to use. The third part is the $=$ sign. The fourth is the existing type which the name to the left of the $=$ symbol will actually mean. The final bit of syntax for this kind of statement is the =;=. Any kind of statement or step in a program will end in a semi-colon.  
+There are four parts to defining our own name for a type. The first part is the =type= keyword which tells the program that we intend to define a new name. The second part is the name we want to use. The third part is the $=$ sign. The fourth is the existing type which the name to the left of the $=$ symbol will actually mean.
 
 Note that any names you add into your program cannot have any spaces or strange symbols. The rules for new names are as follows:
 - the name *must* begin with a letter
-- the name can only consist of letters, numbers, or the =_= symbol
+- the name can only consist of letters and numbers
+
+We can define constants like this:
+#+BEGIN_SRC cpp
+marbles :: MarblesCount
+marbles = 100
+
+student :: StudentName
+student = "Mueller"
+
+senior :: Discout 
+senior = 0.25
+
+player :: PlayerSymbol
+player = 'X'
+#+END_SRC
+
+Definitions in Haskell need two parts, the type and the definition. The type tells Haskell *what* kind of thing is being defined and the definition say *which* particular thing the name means. Anywhere we see the symbol =marbles= from now on, we can replace it with the value =100=.
 
 Although, these primitive types can represent quite a bit on their own, they cannot represent *everything* we might want to program. In order to represent more complicated nouns like people or places, we'll need a way to group these values together into a new type.
 
-#+BEGIN_SRC cpp
-// definition of a struct
-struct Person {
-  int age;
-  double height;
-  string first_name;
-  char middle_initial;
-  string last_name;
-  bool employed;
-};
+We can do this with tuples.
 
-// creating a struct value
-Person {30, 5.11, "Captain", 'J', "Sparrow", true}
+#+BEGIN_SRC haskell
+coordinate :: (Float, Float)
+coordinate =  (5.0  , 1.0  )
 #+END_SRC
 
-In the first section of the above code we see a new type of statement. Here the code defines a =struct= or a collection of values. The syntax for =struct= definitions are as folows:
-- the =struct= keyword
-- the name of the new type (typically in upper case).
-- the ={= symbol
-- the different values in the =struct= which follow the pattern =type= then =name= ended with a =;=
+Note that I added the space to better line up the values with the types. This is not actually necessary.
+
+Sometimes we want to be more specific and meaningful with our groupings of types. For these instances we'll want to define a custom product type.
+
+#+BEGIN_SRC haskell
+data Person = MkPerson Int Float String Char String deriving (Show)
+#+END_SRC
+
+The second =MkPerson= is the "value constructor" for the type =Person=. It is short for "make Person". This name can be anything we want, even "Person" so it can match the type, but often this name will be different.
+
+The "deriving (Show)" portion is needed for =Person= values to be displayed in ghci. If that bit was not there, you would get an error when trying to see =Person= values.
+
+We can use =MkPerson= to now create =Person= values by giving it an =Int=, =Float=, =String=, =Char=, and another =String=.
+
+#+BEGIN_SRC haskell
+captainJack :: Person
+captainJack = MkPerson 30 5.11 "Captain" 'J' "Sparrow"
+#+END_SRC
+
+It is common to want access to particular values of a product type, so Haskell lets us define was to access these values by giving them names.
+
+#+BEGIN_SRC haskell
+data Team = MkTeam { teamName :: String, wins :: Int, loses :: Int } deriving (Show)
+#+END_SRC
+
+In the first section of the above code we see a new type of statement. Here the code defines a =record= or a collection of named values. The syntax for =record= definitions are as folows:
+- the =data= keyword
+- the name of the new type (with an uppercase first letter) 
+- the $=$ symbol
+- an opening ={=
+- the different values in the =record= which follow the pattern =name= then =::= ended with the =type= 
 - close the ={= with the =}= symbol
-- semi-colon
 
-The names given to the values within the =struct= are there so you can access the individual parts of a struct later on.
+The names given to the values within the =Team= are there so you can access the individual parts of a record later on.
 
-For example, if we assumed that the name $p$ referred to a =Person= value, we could access its members like this:
+For example:
+#+BEGIN_SRC haskell
+cloud9 :: Team
+cloud9 = MkTeam "Cloud9" 71 14
 
-#+BEGIN_SRC cpp
-p.age
-p.height
-p.first_name
+cloud9Wins :: Int
+cloud9Wins = wins cloud9
+
+cloud9Loses :: Int
+cloud9Loses = loses cloud9
 #+END_SRC
-
-The dot expressions can be read as =p's age= or =p's first_name=. While the dot value =.age= could potentially refer to the age of any =Person=, it has to be paired with a particular =Person= in order to be used.
-
-The second part of the code above defines a constant =Person= value. Constructing a value of any =struct= can be done by giving a value for each of the different members of the type. Note that the order is important, it is the same as they are defined. First the age, which is an =int=, then the hieght, which is a =double=, etc. The ={}= symbols are generally associated with groups of values and are used in both definitions and expressions.
 
 ** Functions 
 
 When a value isn't known ahead of time we can express it as a =function=. Functions are both a less specific version of a constant as well as a way to represent verbs.
 
-In maths, functions represent "mappings" from some domain into some range/co-domain. For our purposes we can think of the "domain" as the types of values that are needed to create the value we want (the co-domain). For example, addition can be thought of as a function that takes two =int= values and creates another =int= value.
-
-\[addition(x,y) = x + y\]
-
-In order to translate this definition into C++ we need to follow these steps:
-- determine what =type= of value you want to construct later on
-- come up with some name for the process of making the value (the function)
-- determine what other values might be needed and their =type=
-- write out an expression that, given all the inputs, will construct the value you want
-
-#+BEGIN_SRC cpp
-int addition(int x, int y) {
-  return x + y;
-}
+Here is a very simple, probably useless, function:
+#+BEGIN_SRC haskell 
+knownLater :: Int -> Int
+knownLater = \x   -> x
 #+END_SRC
 
-The above code is the implementation to the earlier math expression. The first part of the definition is the =type= of the value we'll construct later once we know what the inputs are. The second part is the name of the function so we can refer to our definition later. The third part is a comma seperated list of all the input values needed to make our result. 
+There are two things which are different here than with a cosntant value:
+- The $\rightarrow$ in the type
+- The =\= symbol and $\rightarrow$ in the definition
 
-These parts so far make up the "signature" of the function. This indicates all the information needed to use the function we've defined. It is a good idea first design the signature before trying to come up with the expression for the next part, the implementation.
+Any type a $\rightarrow$ appears in a type signature, it means there is a function. In maths, functions represent "mappings" from some domain into some range/co-domain. For our purposes we can think of the "domain" as the types of values that are needed to create the value we want (the co-domain). For example, addition by one can be thought of as a function that takes an =Int= value and creates another =Int= value.
 
-The implementation of a function is the part surrounded by the curly braces. This section of the function defines the steps needed to construct the result. When the value is constructed we indicate this by using a =return= statement.
+\[Int \rightarrow Int\]
 
-#+BEGIN_SRC cpp
-int plus_five(int x) {
-  return x + 5;
-}
-
-plus_five(10)
+#+BEGIN_SRC haskell
+addOne :: Int -> Int
+addOne = \x   -> x + 1
 #+END_SRC
 
-The above function specifices a way to construct an =int= value from another =int=. Once the value $x$ is known, =plus_five= will construct another =int= by adding five to $x$.
+Once again, I have added the spacing to make the connection between the definition and the type clearer, you shouldn't actually write code like this.
 
-The second part uses the defined function to construct the value =15=. This is refered to as "calling" the function. Note that all which is needed to use the function is its name and a comma seperated list of the inputs.
+The first part of the definition, $\x$, is the value we will recieve later. Remember, functions are more vauge than constants because certain values are not known ahead of time. If the value isn't known we'll have to give it *some* kind of name so we can use it. In this case we picked the symbol $x$. The name for the value can be anything so long as it follows the same rules as naming constants.
 
-#+BEGIN_SRC cpp
-addition(1,2)
+The second part of the definition is $\rightarrow x + 1$ which lines up with the $\rightarrow Int$ from the type signature. This means, given some value of type $Int$, a new $Int$ can be constructed via $x + 1$. Unlike the $knownLater$ function from earlier, the input to the function is actually being used to *construct* a new value. It is in this sense that functions can act like verbs. The process of creating a new value from some other value is the mechanism that makes Haskell programs tick.
+
+Another example:
+
+Normal addition takes two numbers and creates a new one. We can represent two numbers using a tuple.
+
+\[(Float, Float) \rightarrow Float\]
+
+The mathematical definition can almost directly be translated into Haskell.
+
+#+BEGIN_SRC haskell
+addition :: (Float, Float) -> Float 
+addition = \(x, y) -> x + y 
+
+three :: Float
+three = addition 1 2
 #+END_SRC
 
-The above uses our previous defition of addition to construct =3=. The useful thing about functions is that they can work with data that doesn't exist until the program actual runs.
+The above uses our previous defition of addition to construct =3.0=. 
 
 Functions are needed when certain values aren't known ahead of time. These unknown values become the inputs to the functions and the process of constructing these values are how =verbs= are represented in programming. All programs do is construct new values out of other values. For example, games construct images at 60 fps from values like player health, position, camera angles, etc. Many tasks within programming are similar and by defining more abstract expressions with functions we can end up reusing those definitions.
 
-** templates
+** generics
 
-The final level of abstraction in C++ can be achieved with =templates=. These kinds of values are needed when nothing is known about a value except that you need a value. This allows for the definition of very abstract concepts like a pair.
+The final level of abstraction which will be covered in this section is something called a =generic= value. Generics are for those situations where you don't know a specific value ahead of time *and* you don't know it's type. All that is known is that *some* value is needed.
 
-#+BEGIN_SRC cpp
-template <typename A, typename B>
-struct Pair {
-  A first;
-  B second;
-};
+For example, we can generalize the $knownLater$ function from before:
+#+BEGIN_SRC haskell
+knownLater :: Int -> Int
+knownLater = \x -> x
 
-template<typename T>
-T add_pair(Pair<T> p) {
-  return p.first + p.second;
-}
-
+somethingLater :: a -> a
+somethingLater = \x -> x
 #+END_SRC
 
-=template= values can be thought of as functions which take a =type= and return other =types=. In the above code we define a struct =Pair= which can hold a pair of *any* two types.
+All that changed was the type of the input and output. What exactly is a value of =a= though? It could be anything!
 
-There are three parts to a template definition:
-- the keyword =template=
-- a comma seperated list of =types=, with each of the types preceeded by the keyword =typename=
-- the definition that uses the input types
+#+BEGIN_SRC cpp
+hello :: String
+hello = somethingLater "hello"
 
-Templates are often used to define either very abstract concepts or used to make tools for programmers. Most programming languages will have a collection of templated functions and types which save the programmer time by defining concepts beforehand. For example, the =string= type in C++ is actually provided by a library.
+z :: Char
+z = somethingLater 'z'
+
+five :: Int
+five = somethingLater 5
+#+END_SRC
+
+The function $somethingLater$ can construct a value of any type by taking some value and giving it right back to us. This seems like a rather useless function, but it is surpisingly so useful Haskell predefines a function like that for us called $id$, short for identity.
+
+#+BEGIN_SRC cpp
+id :: a -> a
+id = \x -> x
+#+END_SRC
+
+This simple function will pop up many more times as we progress, but it would be prudent to at least show an actually useful case of generics.
+
+#+BEGIN_SRC cpp
+swap :: (a, b) -> (b, a)
+swap = \(x, y) -> (y, x)
+
+fst :: (a, b) -> a
+fst = \(x, y) -> x
+
+snd :: (a,b) -> b
+snd = \(x, y) -> y
+#+END_SRC
+
+These are some tuple functions which are only useful *if* they are generic. Imagine having to write a version of $swap$ for literally every single combination of two types ever! No. Just, no.
+
+Generics are nice when working with more complex types that have more structure than normal values. Tuples have a notion of a "first" and a "second" element, allowing us to extract these values or even swap them. As we progress we'll encounter other types which work well as generics.
 
 ** Summary
 
-The first part of programming is determing how to break down a problem and then deciding how to represent the pieces. Any values which are known ahead of time can be defined with a constant. Any values which can't be constructed until other values are known (possibly when the program is run) can be defined by functions. Any values for which not even the =type= is known ahead of time can be defined by =templates=.
+The first part of programming is determing how to break down a problem and then deciding how to represent the pieces. Any values which are known ahead of time can be defined with a =constant=. Any values which can't be constructed until other values are known (possibly when the program is run) can be defined by a =function=. Any values for which not even the =type= is known ahead of time can be defined by =generics=.
