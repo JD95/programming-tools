@@ -1,0 +1,9 @@
+#+TITLE: File and Console IO
+#+STARTUP: hidestar
+#+STARTUP: indent
+
+# latex options
+#+OPTIONS: toc:nil date:nil author:nil
+#+LATEX_HEADER: \usepackage[margin=1.5in]{geometry}
+#+LATEX_HEADER: \usepackage{apacite}
+#+LATEX_HEADER: \usepackage{setspace}
