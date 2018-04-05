@@ -1,0 +1,152 @@
+#+TITLE: Math Tools
+#+STARTUP: hidestar
+#+STARTUP: indent
+
+# latex options
+#+OPTIONS: author:nil date:nil num:nil 
+#+LATEX_HEADER: \usepackage[margin=1.5in]{geometry}
+#+LATEX_HEADER: \usepackage{apacite}
+#+LATEX_HEADER: \usepackage{setspace}
+  
+** basic math functions
+ | operation      | function |
+ |----------------+----------|
+ | addition       | $+$      |
+ | subtraction    | $-$      |
+ | multiplication | $*$      |
+ | division       | $/$      |
+ | modulus        | $\%$     |
+ |----------------+----------|
+
+ #+REVEAL: split
+ - note that the word "operator" might show up in the place of function at some point.
+ - an operator is just a function with a funny symbol instead of a word for a name.
+ 
+** representing expressions
+
+The following expression can be translated into C++ like so:
+
+\[\frac{2x + 5y}{3z}\]
+
+Because we do not know the values of $x$, $y$, or $z$ we'll have to make a function with those values as inputs.
+
+#+BEGIN_SRC cpp
+??? f(??? x, ??? y, ??? z) {
+  return ???; 
+}
+#+END_SRC
+
+What type should be chosen for the inputs and result? Given that the expression contains division, it would make sense to allow for decimal numbers. Thus, =float= makes the most sense.
+
+#+BEGIN_SRC cpp
+float f(float x, float y, float z) {
+  return ???; 
+}
+#+END_SRC
+
+Using the above table we can write out the expression.
+
+#+BEGIN_SRC cpp
+float f(float x, float y, float z) {
+  return 2*x + 5*y / z;
+}
+#+END_SRC
+
+However, this expression is incorrect because of the standard order of operations:
+1. Parenthesis
+2. Exponents
+3. Multiplication
+4. Division
+5. Addition
+6. Subtraction
+
+If the implicit parenthesis are added back, we get:
+
+#+BEGIN_SRC cpp
+float f(float x, float y, float z) {
+  return (2*x) + ((5*y) / z);
+}
+#+END_SRC
+
+So if left as is, the expression will divide $5y$ by $z$ instead of $2x + 5y$. To correct this we can just add in the parenthesis ourselves to ensure the correct order.
+
+#+BEGIN_SRC cpp
+float f(float x, float y, float z) {
+  return (2*x + 5*y) / z;
+}
+#+END_SRC
+ 
+** cmath 
+
+Not all math operations are defined by default in C++. Many useful math functions need a library to work. For example, in order to represent $x^2$ we'd need the =pow= function from =<cmath>=. 
+
+#+BEGIN_SRC cpp
+#include <iostream>
+#include <cmath>
+using namespace std;
+
+int main() {
+  cout << pow(2, 3);  
+  return 0;
+}
+#+END_SRC
+
+| operation                | function |
+|--------------------------+----------|
+| logorithm                | log      |
+| square root              | sqrt     |
+| sin                      | sin      |
+| cos                      | cos      |
+| tan                      | tan      |
+| round up                 | ceil     |
+| round down               | floor    |
+| round nearest to nearest | trunc    |
+|--------------------------+----------|
+
+There are many more functions defined in =<cmath>=. A complete list can be found at [[http://en.cppreference.com/w/cpp/header/cmath][here]].
+ 
+** char math
+ - remember that characters are represented as numbers in an ascii table
+ - every value of =char= is a number that corresponds to a symbol
+ - because =char= values are secretly numbers, you can actually do math with them
+ #+BEGIN_SRC cpp
+ // This converts a character letter (between 'A-Z') to its lower case
+ // version by adding the difference between 'a' and 'A' since the number
+ // for 'a' is greater than for 'A'
+ char lower_case(char c) {
+   return c + ('a' - 'A');
+ }
+ #+END_SRC
+
+** type conversions
+
+Below is a table of possible conversions for some value $x$. Begin with a row for the starting type and go to the column for the desired type. The conversion $int \rightarrow float$ is not the same as $float \rightarrow int$ . Note that if a conversion isn't possible it will be labeled with NA for "not available".
+
+|              | int        | float     | char | string          |
+|--------------+------------+-----------+------+-----------------|
+| int          | $x$        | $x$       | $x$  | $to\_string(x)$ |
+| float        | $trunc(x)$ | $x$       | NA   | $to\_string(x)$ |
+| char (digit) | $x$        | NA        | $x$  | $string(1, x)$  |
+| string       | $stoi(x)$  | $stof(x)$ | NA   | $x$             |
+|--------------+------------+-----------+------+-----------------|
+
+Several of these conversions, $int \rightarrow float$ for example, will happen automatically. So if we have a function like:
+
+#+BEGIN_SRC cpp
+int add_one(int x) {
+  return x + 1;
+}
+#+END_SRC
+
+Then if we attempt to use it with a =float= value, the float will automatically truncate into an =int=. Another conversion that happens implicitly is the conversion between a =char= and an =int=.
+
+** string math
+ - strings can be combined using =+=
+ #+BEGIN_SRC cpp
+ // combine("pop", "tart") would return "poptart"
+ string combine(string first, string second) {
+   return first + second;
+ }
+ #+END_SRC
+
+ 

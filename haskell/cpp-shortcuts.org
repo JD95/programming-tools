@@ -1,0 +1,970 @@
+#+TITLE: Shortcuts
+#+STARTUP: hidestar
+#+STARTUP: indent
+
+
+# latex options
+#+OPTIONS: toc:nil author:nil date:nil num:nil
+#+LATEX_HEADER: \usepackage[margin=1.5in]{geometry}
+#+LATEX_HEADER: \usepackage{apacite}
+#+LATEX_HEADER: \usepackage{setspace}
+
+While the tools we have covered so far are capable of doing everything we might want, there are certain situations where they make us work harder than need be. The problem isn't necessarily due to a decifiency with the tools, but rather us trying to make a nail out of everything because we have a good hammer. The vector functions like =grow=, =accumulate=, etc. are very well suited for creating and manipulating *existing* vectors, however in certain situations they make us do more work than is necessary.
+
+As a quick review, remember the five pieces to any problem with repeated steps:
+- Checking for a do-nothing input
+- A step for when no more work should be done
+- Breaking off the front of the problem
+- Solving a smaller version of the problem
+- Combining the results from the front and smaller version
+
+This translates into the general format for recursive functions:
+
+[[./images/cpp-shortcuts/recursion-schema.svg]]
+
+For example, we can sum number from 1 to n using this function:
+
+#+BEGIN_SRC cpp
+int sum(int n) {
+  return n > 0 ? n + sum(n-1) : 0;
+}
+#+END_SRC
+
+In this case, recursion leads to a short and concise solution. While recursion *can* solve any problem with repeated steps we might come across, we *shouldn't* reach for it in every situation. Sometimes, most of the time, there are better tools to use.
+
+** while loops 
+
+There is a class of problems where an action is repeated over and over while a condition remains true. For these kinds of problems we can use something called a =while= loop.
+
+[[./images/cpp-shortcuts/while-loop-schema.svg]]
+
+#+BEGIN_SRC cpp
+int sum(int n) {
+  int result = 0;
+  while (n > 0) {
+    int front = n;
+    n = n -1;
+    result = front + result;
+  }
+  return result;
+}
+#+END_SRC
+
+Which can be simplified
+
+#+BEGIN_SRC cpp
+int sum(int n) {
+  int result = 0;
+  while (n > 0) {
+    result = n + result;
+    n = n - 1;
+  }
+  return result;
+}
+#+END_SRC
+
+While this version of =sum= might be a bit more verbose, they actually solve other problems better. For example, we can express our recursion replacements in terms of while loops.
+
+#+BEGIN_SRC cpp
+template<typename B, typename A, typename Expand, typename Check>
+vector<B, allocator<B>> grow(A seed, Check cond, Expand f) {
+  pair<B,A> expand;
+  vector<B, allocator<B>> result;
+  while (cond(seed)) {
+    expand = f(seed);
+    seed = get<1>(expand);
+    result.push_back(get<0>(expand));
+  }
+  return result;
+}
+#+END_SRC
+
+| step                 | code                                      |
+|----------------------+-------------------------------------------|
+| do-nothing input     | !cond(seed)                               |
+| do-nothing step      | return result                             |
+| break off front      | f(seed)                                   |
+| make problem smaller | seed = get<1>(exapnd)                     |
+| combine results      | @@html:result.push_back(get<0>(expand))@@ |
+
+#+BEGIN_SRC cpp
+template <typename B, typename A, typename F>
+B accumulate(vector<A, allocator<A>> nums, B init, F f) {
+  B result = init;
+  while (!num.empty()) {
+    auto front = nums.front();
+    result = f(result, front);
+    nums.erase(0);
+  }
+  return result;
+}
+#+END_SRC
+
+| step                 | code             |
+|----------------------+------------------|
+| do-nothing input     | num.empty()      |
+| do-nothing step      | return result    |
+| break off front      | nums.front()     |
+| make problem smaller | nums.erase(0)    |
+| combine results      | f(result, front) |
+
+** for loops
+
+Another class of problems involve counting. 
+
+#+BEGIN_SRC cpp
+int repeat(string s, int n) {
+  return n > 0 ? s + repeat(s, n-1) : "";
+}
+#+END_SRC
+
+The alternative to writing recursion for problems repeat for some set amount of times is called a =for= loop. These kinds of loops are shortcuts for solving this while a =while= loop.
+
+#+BEGIN_SRC cpp
+int repeat(string s, int n) {
+  string result = s;
+  while (n > 0) {
+    result = result + s;
+    n = n - 1;
+  }
+  return result;
+}
+#+END_SRC
+
+[[./images/cpp-shortcuts/for-loop-schema.svg]]
+
+For example, if we wanted to write a function that will raise a number to the power of five, we *could* try this with normal recursion, but it would mean writing *another* function which actually had an input which we can count with and then calling that function.
+
+#+BEGIN_SRC cpp
+int power_of_five_impl(int base, int n) {
+  return n > 0 ? base * power_of_five_impl(base, n-1) : 1;
+}
+
+int power_of_five(int base) {
+  return power_of_five_impl(base, 5);
+}
+#+END_SRC
+
+That's *way* more work than we should have to do. So we could then reach for a =while= loop:
+#+BEGIN_SRC cpp
+int power_of_five(int base) {
+  int n = 5;
+  int result = base;
+  while (n > 0) {
+    result = result * base; 
+    n = n - 1;
+  }
+  return result;
+}
+#+END_SRC
+
+We didn't have to write another function, but it is still clunky. =for= loops let us express this kind of problem more concisely than a =while= loop because it includes dealing with a counter:
+#+BEGIN_SRC cpp
+int power_of_five(int base) {
+  int result = base;
+  for (int n = 5; n > 0; n--){
+    result = result * base; 
+  }
+  return result;
+}
+#+END_SRC
+
+Much better! The =n--= is also a short cut for =n = n-1=. You can write any kind of assignment statement in that position of the =for= loop but typically it will be =--= or =++=. 
+
+In the case of the function $repeat$, we already have a counter in the input =n= so we don't actually have to include that in the =for= loop. Note that the semi-colon *still* has to be included!
+
+#+BEGIN_SRC cpp
+string repeat(string s, int n){
+  string result = s;
+  for (; n > 0; i--) {
+    result = result + s;
+  }
+  return result;
+}
+#+END_SRC
+
+There is a cousin of normal =for= loops which deals explicitly with collections. The =range-based for= loop allows us to concisely describe performing an action on every element of something like a =vector= or an =array=. 
+
+[[./images/cpp-shortcuts/range-for-schema.svg]]
+
+For example, if we wanted to add up all the elements in an =array<int>=, we *could* use a normal for loop and access every spot in the =array= using the $at$ function:
+
+#+BEGIN_SRC cpp
+int sum_array(array<int, 10> elems) {
+  int result = 0;
+  for (int i = 0; i < 10; i++) {
+    result = result + elems.at(i);
+  }
+  return result;
+}
+#+END_SRC
+
+However, =array= defines =.begin()= and =.end()= which means we can use a =range-based for= loop.
+
+#+BEGIN_SRC cpp
+int sum_array(array<int, 10> elems) {
+  int result = 0;
+  for (int elem : elems) {
+    result = result + elem;
+  }
+  return 0;
+}
+#+END_SRC
+
+This makes problems like defining =accumulate= *much* easier:
+#+BEGIN_SRC cpp
+template <typename B, typename A, typename F>
+B accumulate(vector<A, allocator<A>> elems, B init, F f) {
+  B result = init;
+  for (auto elem : elems) {
+    result = f(result, elem);
+  }
+  return result;
+}
+#+END_SRC
+
+** when to use what
+
+[[./images/cpp-shortcuts/repetition-tool-heirarchy.svg]]
+
+| I need to...                                              | tool               |
+|-----------------------------------------------------------+--------------------|
+| Build a collection out of a single value                  | grow               |
+| Use something simple like + to combine elements           | accumulate         |
+| Remove elements from a collection which don't pass a test | @@html:remove_if@@ |
+| Do something to every element and use the results later   | transform          |
+| Do something for each element of a collection             | range-based for    |
+| Index a collection                                        | for                |
+| Repeat action while condition is true                     | while              |
+| Everything else                                           | recursion          |
+
+** if statements
+
+Another point convenience is an alternative to the (? :) syntax. For small, single conditions the ternary operation does fine, but for lots of nested conditions, it becomes a mess to deal with. 
+
+#+BEGIN_SRC cpp
+return (cond1 ? a : (cond2 ? b : (cond3 ? c : ...)));
+#+END_SRC
+
+A more painful situation is when you need to decide on whether to change variables or not. Because assignment is a statement and not an expression, you can't return that action using (? :). You'd have to create an on-the-spot function to achieve that.
+
+#+BEGIN_SRC cpp
+auto insert = [collection]() {
+  collection.push_back(input);
+  return collection;
+}
+return cond ? insert() : collection;
+#+END_SRC
+
+For these types of situations, it is easier to use an =if statement=. These kinds of statements are much like the (? :) syntax, except you aren't picking between two values, rather you are picking between two actions.
+
+[[./images/cpp-shortcuts/if-statement-schema.svg]]
+
+This solves the first problem by allowing us to write something like:
+
+#+BEGIN_SRC cpp
+if (cond1) { return a; }
+else if (cond2) { return b; }
+else if (cond3) { return c; }
+else ...
+#+END_SRC
+
+In this case, the if statements are clearer than the choice operation. Where the if statement really shines is with our second problem:
+
+#+BEGIN_SRC cpp
+if (cond) {
+  collection.push_back(input);
+}
+
+return collection;
+#+END_SRC
+
+Now you don't have to make a function on the spot in order to conditionally insert elements or otherwise change variables.
+
+** First example 
+
+#+BEGIN_SRC
+Problem: Given a sales price and the amount paid, calculate and display the amount of each type of currency used for the change.
+
+Example:
+
+price = 125.27
+paid = 200.00
+
+Change amount: 74.73
+1 fifty
+1 twenty
+4 ones
+2 quarters
+2 dimes
+3 pennies
+#+END_SRC
+
+| goals                                       | Done? |
+|---------------------------------------------+-------|
+| sales price                                 |       |
+| amount paid                                 |       |
+| the change                                  |       |
+| amounts for each type of coin/dollar used   |       |
+| calculate (the change)                      |       |
+| display (the amount for each currency used) |       |
+
+The obvious choice for representing money would =float= or =double= types, however there are *serious* problems with that approach. For reason I will not go into here, it is advised to *never* use floating point types for money and to instead use two =int= values to represent the dollars and coins.
+
+The following video and [[https://stackoverflow.com/questions/3730019/why-not-use-double-or-float-to-represent-currency/][this stack overflow answer]] cover the reasons why.
+
+#+BEGIN_EXPORT html
+<iframe width="560" height="315" src="https://www.youtube.com/embed/PZRI1IfStY0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+#+END_EXPORT
+
+So we can start by defining a new type =Dollars= which represents the number of dollars and cents in the money.
+
+#+BEGIN_SRC cpp
+struct Dollars {
+  int papers;
+  int coins;
+};
+#+END_SRC
+
+| goals                                       | Done?        |
+|---------------------------------------------+--------------|
+| sales price                                 | $\checkmark$ |
+| amount paid                                 | $\checkmark$ |
+| the change                                  | $\checkmark$ |
+| amounts for each type of coin/dollar used   |              |
+| calculate (the change)                      |              |
+| display (the amount for each currency used) |              |
+
+Since we also need to eventually break apart the change into the various dollar ammounts and coins used, it would be useful to also define a new type to represent a kind of currency.
+
+#+BEGIN_SRC cpp
+struct Currency {
+  string name;
+  Dollars worth;
+};
+#+END_SRC
+
+So what kinds of currency are there? We have dollar bills ranging from the $100 bill to the $1 bill and then several types of coins. For this project, it will be useful to have both the amount and the name for each of these types of currency. We might be tempted to do something like the following:
+
+#+BEGIN_SRC cpp
+const Currency hundreds = { "hundreds", {100, 0} };
+#+END_SRC
+
+Going this route would mean a new variable for each type of currency that we might use in our program. It is a rule of thumb that you want to avoid creating variables if you don't have to, even if they are constants. The reason being is these variables are often not treated separately, but rather belong to a collection. For this task it turns out that writing these currencies in a =vector= will make things easier for us later.
+
+#+BEGIN_SRC cpp
+struct Dollars {
+  int papers;
+  int coins;
+};
+
+struct Currency {
+  string name;
+  Dollars worth;
+};
+
+const vector<Currency> currency = {
+  { "hundreds", {100, 0} },
+  { "fifties", {50, 0} },
+  { "twenties", {20, 0} },
+  { "tens", {10, 0} },
+  { "fives", {5, 0} },
+  { "dollars", {1, 0} },
+  { "quarters", {0, 25} },
+  { "dimes", {0, 10} },
+  { "nickles", {0, 5}},
+  { "pennies", {0, 1} }
+};
+#+END_SRC
+
+How might one know ahead of time which approach to take? It's impossible to say for certain whether variables or a single collection is better, but typically if the values are associated, they should be in a collection.
+
+| goals                                       | Done?        |
+|---------------------------------------------+--------------|
+| sales price                                 | $\checkmark$ |
+| amount paid                                 | $\checkmark$ |
+| the change                                  | $\checkmark$ |
+| amounts for each type of coin/dollar used   | $\checkmark$ |
+| calculate (the change)                      |              |
+| display (the amount for each currency used) |              |
+
+Now that we have our nouns more or less squared away we can start building up the main function. Remember that we have two tasks: calculate the change and break up the change into the different types of coins/dollars used. Let's start with the first one:
+
+#+BEGIN_SRC cpp
+int main() {
+  Dollars price = {125, 27};
+  Dollars paid = {200, 0};
+  Dollars change = paid - price;
+
+  cout << "Price: " << price << "\n";
+  cout << "Paid: " << paid << "\n";
+  cout << "Change: " << change << "\n";
+
+  return 0;
+}
+#+END_SRC
+
+Right off the bat we are struck with two problems. First, there is no defined way to actually subtract to =Dollars= values. Second, cout only prints out the primitive types by default. So we'll have to add those problems to our goals.
+
+| goals                                       | Done?        |
+|---------------------------------------------+--------------|
+| sales price                                 | $\checkmark$ |
+| amount paid                                 | $\checkmark$ |
+| the change                                  | $\checkmark$ |
+| amounts for each type of coin/dollar used   | $\checkmark$ |
+| subtract Dollars values                      |              |
+| display Dollars values                       |              |
+| calculate (the change)                      |              |
+| display (the amount for each currency used) |              |
+
+The simpler of the two new goals is displaying a =Dollars= value, so we'll tackle it first.
+
+\[Dollars \rightarrow ???\]
+
+We need to somehow convert a =Dollars= value into one of the primitive types that =cout= can display. The easiest target (usually) is =string=. Since a =Dollars= value is really just two =int= values so our problem really looks like $(int, int) \rightarrow string$, we can use =to_string= to convert the numbers into =string= values and then add them up while putting the usual dot inbetween. 
+
+#+BEGIN_SRC cpp
+string display_dollars(Dollars x){
+  return to_string(x.papers) + "." + to_string(x.coins);
+}
+#+END_SRC
+
+Now we can comment out the code which wont work yet and test out our =display_dollars= function.
+
+#+BEGIN_SRC cpp
+#include <iostream>
+#include <string>
+using namespace std;
+
+struct Dollars {
+  int papers;
+  int coins;
+};
+
+string display_dollars(Dollars x){
+  return to_string(x.papers) + "." + to_string(x.coins);
+}
+
+int main() {
+  Dollars price = {125, 27};
+  Dollars paid = {200, 0};
+  //Dollars change = paid - price;
+
+  cout << "Price: " << display_dollars(price) << "\n";
+  cout << "Paid: " << display_dollars(paid) << "\n";
+  //cout << "Change: " << change << "\n";
+
+  return 0;
+}
+#+END_SRC
+
+This should display:
+
+#+BEGIN_SRC bash
+Price: 125.27
+Paid: 200.0
+#+END_SRC
+
+| goals                                       | Done?        |
+|---------------------------------------------+--------------|
+| sales price                                 | $\checkmark$ |
+| amount paid                                 | $\checkmark$ |
+| the change                                  | $\checkmark$ |
+| amounts for each type of coin/dollar used   | $\checkmark$ |
+| subtract Dollars values                      |              |
+| display Dollars values                       | $\checkmark$ |
+| calculate (the change)                      |              |
+| display (the amount for each currency used) |              |
+
+Okay, now let's tackle subtracting =Dollars= values. Since we need two =Dollars= values to subtract and get a new one, the outline for this problem looks like this:
+
+\[(Dollars, Dollars) \rightarrow Dollars\]
+
+However, just like before, we can make the problem easier to solve be replacing the =Dollars= type with two =int= values.
+
+\[((int, int), (int, int)) \rightarrow (int, int)\]
+
+So what would we need to do in order to subtract the values properly? A first instinct might be to do something like $subtract (a,b) (c,d) = (a - c, d - b)$, yet there is a problem. What happens if $b > d$? We can test this to see what happens: 
+
+#+BEGIN_SRC cpp
+#include <iostream>
+using namespace std;
+
+struct Dollars {
+  int papers;
+  int coins;
+};
+
+string display_dollars(Dollars x){
+  return to_string(x.papers) + "." + to_string(x.coins);
+}
+
+Dollars minus_dollars(Dollars x, Dollars y) {
+  int ps = x.papers - y.papers;
+  int cs = x.coins - y.coins;
+  return Dollars{ ps, cs }; 
+}
+
+int main() {
+  Dollars a = {10, 5};
+  Dollars b = {5, 10};
+
+  cout << display_dollars(minus_dollars(a, b)) << "\n";
+
+  return 0;
+}
+#+END_SRC
+
+Which displays:
+
+#+BEGIN_SRC bash
+5.-5
+#+END_SRC
+
+The =.coin= value of the =Dollars= would end up negative, which isn't what we want. If it's the case where $b > d$, then we want to subtract a dollar and subtract the coin amount from 100.
+
+#+BEGIN_SRC cpp
+#include <iostream>
+#include <string>
+using namespace std;
+
+struct Dollars {
+  int papers;
+  int coins;
+};
+
+string display_dollars(Dollars x){
+  return to_string(x.papers) + "." + to_string(x.coins);
+}
+
+Dollars minus_dollars(Dollars x, Dollars y) {
+  int ps = x.papers - y.papers;
+  int cs = x.coins - y.coins;
+  return cs >= 0 ? Dollars{ ps, cs } : Dollars{ ps - 1, 100 + cs };
+}
+
+int main() {
+  Dollars price = {125, 27};
+  Dollars paid = {200, 0};
+  Dollars change = minus_dollars(paid, price);
+
+  cout << "Price: " << display_dollars(price) << "\n";
+  cout << "Paid: " << display_dollars(paid) << "\n";
+  cout << "Change: " << display_dollars(change) << "\n";
+
+  return 0;
+}
+#+END_SRC
+
+Which displays
+
+#+BEGIN_SRC bash
+Price: 125.27
+Paid: 200.0
+Change: 74.73
+#+END_SRC
+
+Problem solved!
+
+| goals                                       | Done?        |
+|---------------------------------------------+--------------|
+| sales price                                 | $\checkmark$ |
+| amount paid                                 | $\checkmark$ |
+| the change                                  | $\checkmark$ |
+| amounts for each type of coin/dollar used   | $\checkmark$ |
+| subtract Dollars values                     | $\checkmark$ |
+| display Dollars values                       | $\checkmark$ |
+| calculate (the change)                      | $\checkmark$ |
+| display (the amount for each currency used) |              |
+
+Now we only have one goal left to solve. We need to somehow figure out how many of each type of currency (fifty dollar bill, quarter, dollar, penny, etc) can be used to make up the change.
+
+The algorithm can be described as followed:
+1. If the value is greater than or equal to $100, subtract $100 from the change, record "1 hundred", and go to step 1
+2. If the value is greater than or equal to $50, subtract $50 from the change, record "1 fifty", and go to step 1
+3. If the value is greater than or equal to $20, subtract $20 from the change, record "1 twenty", and go to step 1 
+4. If the value is greater than or equal to $10, subtract $10 from the change, record "1 ten", and go to step 1 
+5. If the value is greater than or equal to $5, subtract $5 from the change, record "1 five", and go to step 1 
+6. If the value is greater than or equal to $1, subtract $1 from the change, record "1 one" and go to step 1  
+7. If the value is greater than or equal to $0.25, subtract $0.25 from the change, record "1 quarter" and go to step 1 
+8. If the value is greater than or equal to $0.10, subtract $0.10 from the change, record "1 dime", and go to step 1 
+9. If the value is greater than or equal to $0.05, subtract $0.05 from the change, record "1 nickle", and go to step 1 
+10. If the value is greater than or equal to $0.01, subtract $0.01 from the change, record "1 penny", and go to step 1
+11. Done!
+
+If that seems horribly tedious and repetitive, that's because it is. Imagine what the code might look like if we tried to just directly write this out! As always, lets try to generalize and break this down into smaller pieces. First, notice the parts of the algorithm which are exactly the same for every step:
+
+#+BEGIN_SRC bash
+If the value is greater than or equal to X, subtract X, from the change and record Y, and go to step 1
+#+END_SRC
+
+This screams a function! So what do we need? We need some =Dollars= amount for $X$ and some =string= for $Y$. Remember how we eneded up defining our currency?
+
+#+BEGIN_SRC cpp
+struct Currency {
+  string name;
+  Dollars worth;
+};
+#+END_SRC
+
+It is *exactly* the type we need for this! That alone doesn't do too much for us though. This algorithm assumes that we have some way of recording which values we see. How would this be done in real life? Probably by just writing down that you've used a certain type of coin? In the end you might get a list like:
+
+#+BEGIN_SRC bash
+1 hundred
+1 dollar
+1 quarter
+1 penny
+1 penny
+#+END_SRC
+
+This is just a collection of stuff, so we can use a =vector= to represent it and since we already figured out that our =Currency= type matches up with what we need to record, might as well just make it a =vector<Currency>=. So each step of our algorithm looks a bit like this:
+
+\[(Dollars, vector(Currency)) \rightarrow (Dollars, vector(Currency))\]
+
+Each step the change gets smaller and the record is updated, so the result is both new values. However, where are we going to get the values to check for at each step? One step has to be $100, then $50, and so on. Remember when we made that =vector<Currency>= earlier?
+
+#+BEGIN_SRC cpp
+const vector<Currency> currency = {
+  { "hundreds", {100, 0} },
+  { "fifties", {50, 0} },
+  { "twenties", {20, 0} },
+  { "tens", {10, 0} },
+  { "fives", {5, 0} },
+  { "dollars", {1, 0} },
+  { "quarters", {0, 25} },
+  { "dimes", {0, 10} },
+  { "nickles", {0, 5}},
+  { "pennies", {0, 1} }
+};
+#+END_SRC
+
+So our problem outline will look like this:
+
+\[vector(Currency) \rightarrow (Dollars, vector(Currency))\]
+
+That's a pattern for accumulate! That being said, accumulate isn't the only solution here. We *could* use a loop for this as well. Looping over the =vector= and updating variables is the same as using =accumulate=. In either case, the steps are similar.
+- We should stop when there is no more change left, so the do-nothing input is $0.0
+- When it's done we should just return our record
+- Breaking off the front is just applying our generalized step until it's greater than the change
+- To solve the smaller part of the problem we can just repeat the steps using our result from the front
+- No real need to combine results, just return the solution
+
+Translated more into code we get:
+| steps                | value                  |
+|----------------------+------------------------|
+| do-nothing input     | change == Dollars{0,0} |
+| do-nothing step      | record                 |
+| break off the front  | step(change, record)   |
+| make problem smaller | used(change, record)   |
+| combine results      | used(change, record)   |
+
+Fair enough, but which tool should we use for this? Since there isn't a clear meaning for adding our starting value with an element from the list we'd have to jump through hoops to get accumulate to work with this. That means a loop is probably our best bet. Since we don't know how many times this loop will have to run, we'll use a =while= loop.
+
+So let's begin with what we know so far:
+#+BEGIN_SRC cpp
+vector<Currency> record_coins(Dollarss change) {
+  vector<Currency> record;
+  while (change.papers > 0 || change.coins > 0) {
+    ???
+  }
+
+  return record;
+}
+#+END_SRC
+
+We know from our do nothing check that we should stop when the change is $0.0, which means the loop should continue while either there are some dollars or some coins left. Since we need to record our values, we create a =vector<Currency>= and name it appropiately. Since we don't actually care about the change when we finish, we can just return the record.
+
+Now we can use our =currency= collection to implement the steps of the algorithm. In this case, we know exactly how many times we need to loop, since =vector= values always know their own size, we can use a =for= loop. Since we want to end up using the whole collection, we can use a =range-based for loop=.
+
+#+BEGIN_SRC cpp
+vector<Currency> record_coins(Dollars change) {
+  vector<Currency> curr_used;
+  while (change.papers > 0 || change.coins > 0) {
+    for (auto c : currency) {
+      ???
+    }
+  }
+
+  return curr_used;
+}
+#+END_SRC
+
+Almost there! The =for= loop will capture doing all the steps and the =while= loop will capture repeating those steps. Now we need to implement the single step for our algorithm. 
+
+#+BEGIN_SRC bash
+If the value is greater than or equal to X, subtract X, from the change and record Y, and go to step 1
+#+END_SRC
+
+First, we check if the current $change$ is greater than some =Currency= $c$.
+
+#+BEGIN_SRC cpp
+vector<Currency> record_coins(Dollars change) {
+  vector<Currency> curr_used;
+  while (change.papers > 0 || change.coins > 0) {
+    for (auto c : currency) {
+        if (change.papers >= c.worth.papers && change.coins >= c.worth.coins) {
+          ???
+        }
+    }
+  }
+
+  return curr_used;
+}
+#+END_SRC
+
+If it is, we can subtract $c$ from $change$ and record $c$ by pushing it into $record$.
+
+#+BEGIN_SRC cpp
+vector<Currency> record_coins(Dollars change) {
+  vector<Currency> curr_used;
+  while (change.papers > 0 || change.coins > 0) {
+    for (auto c : currency) {
+        if (change.papers >= c.worth.papers && change.coins >= c.worth.coins) {
+          change = minus_dollars(change, c.worth);
+          curr_used.push_back(c);
+        }
+    }
+  }
+
+  return curr_used;
+}
+#+END_SRC
+
+That almost covers everything except the "and go to step 1" part. How can we simulate this? Well, since our =while= loop represents repeating all the steps, if we just ending the =for= loop early via $break$ we could emulate "go to step 1".
+
+#+BEGIN_SRC cpp
+vector<Currency> record_coins(Dollars change) {
+  vector<Currency> curr_used;
+  while (change.papers > 0 || change.coins > 0) {
+    for (auto c : currency) {
+        if (change.papers >= c.worth.papers && change.coins >= c.worth.coins) {
+          change = minus_dollars(change, c.worth);
+          curr_used.push_back(c);
+          break;
+        }
+    }
+  }
+
+  return curr_used;
+}
+#+END_SRC
+
+Now we can test this out!
+
+#+BEGIN_SRC bash
+Price: 125.27
+Paid: 200.0
+Change: 74.73
+fifties
+twenties
+dollars
+dollars
+dollars
+dollars
+quarters
+quarters
+dimes
+dimes
+pennies
+pennies
+pennies
+#+END_SRC
+
+That looks about right!
+
+Now we just need to count how many of each type of currency exists in the record.
+
+We need to take our record =vector<Currency>= and get another collection which has each type of currency and a count of how many there were in the collection.
+
+Abstractly our problem looks like this:
+
+\[vector(Currency) \rightarrow vector((Currency, int))\]
+
+Because our problem has a shape like $vector(A) -> vector(B)$ we could use transform for this. But which collection are we transforming? If we transform $record$, then we won't have access to the other elements so we can't count their occurences. In this case it actually makes more sense to use $currency$ and for each item use $record$ to count the occurences.
+
+So our step per element looks like this:
+\[(vector(Currency), string) \rightarrow int\]
+
+We need $record$ and what type of currency we're looking for. So how exactly can we count repeated items in a collection? Given that $record$ will contain all the items we want to count, we could just remove all the elements which are not a penny for example and take the length of $record$ afterwards.
+
+#+BEGIN_SRC cpp
+vector<Currency> filter_coins(vector<Currency> change, string name) {
+  auto new_end = remove_if(change.begin(), change.end(),
+    [name](Currency c) { return c.name != name; });
+  change.erase(new_end, change.end());
+  return change;
+}
+#+END_SRC
+
+We can use =remove_if= to filter out everything that isn't what we're looking for and return a new collection with only that type of currency. Counting them is simply a matter of getting the size of the result.
+
+#+BEGIN_SRC cpp
+int count_coins(vector<Currency> change, string name) {
+  return filter_coins(change, name).size();
+}
+#+END_SRC
+
+Alright, now the question is what to use to do the "transform" step. Remember that transform is useful when we actually need to use the results later. So if we used transform we end up creating a new =vector= of =pair= values only to loop through it and deconstruct those pairs to print out the values.
+
+#+BEGIN_SRC cpp
+int main() {
+  Dollars price = {125, 27};
+  Dollars paid = {200, 0};
+  Dollars change = minus_dollars(paid, price); 
+
+  cout << "Price: " << display_dollars(price) << "\n";
+  cout << "Paid: " << display_dollars(paid) << "\n";
+  cout << "Change: " << display_dollars(change) << "\n";
+
+  vector<Currency> record = record_coins(change);
+
+  vector<pair<Currency, int>> counts;
+
+  transform(currency.begin(), currency.end(), back_inserter(counts),
+    [record](Currency c) { return make_pair(c, count_coins(record, c.name)); });
+
+  for (auto pair : counts) {
+    Currency c = get<0>(pair);
+    int count = get<1>(pair);
+    if (count > 0) {
+      cout << c.name << ": " << count << "\n";
+    }
+  }
+
+  return 0;
+}
+#+END_SRC
+
+While this could work, it creates more clutter than necessary. In this case it is less cognative load to simply loop over $currency$ and then get and print the count without creating the pairs and extra collection.
+
+#+BEGIN_SRC cpp
+for (auto c : currency) {
+  int count = count_coins(record, c.name);
+  if (count > 0) {
+    cout << c.name << ": " << count << "\n";
+  }
+}
+#+END_SRC
+
+Putting everything together we get:
+
+#+BEGIN_SRC cpp
+#include <iostream>
+#include <string>
+#include <vector>
+#include <numeric>
+#include <algorithm>
+using namespace std;
+
+struct Dollars {
+  int papers;
+  int coins;
+};
+
+struct Currency {
+  string name;
+  Dollars worth;
+};
+
+const vector<Currency> currency = {
+  { "hundreds", {100, 0} },
+  { "fifties", {50, 0} },
+  { "twenties", {20, 0} },
+  { "tens", {10, 0} },
+  { "fives", {5, 0} },
+  { "dollars", {1, 0} },
+  { "quarters", {0, 25} },
+  { "dimes", {0, 10} },
+  { "nickles", {0, 5}},
+  { "pennies", {0, 1} }
+};
+
+Dollars minus_dollars(Dollars x, Dollars y) {
+  int ps = x.papers - y.papers;
+  int cs = x.coins - y.coins;
+
+  return cs >= 0 ? Dollars{ ps, cs } : Dollars{ ps - 1, 100 + cs };
+}
+
+string display_dollars(Dollars x){
+  return to_string(x.papers) + "." + to_string(x.coins);
+}
+
+vector<Currency> record_coins(Dollars change) {
+  vector<Currency> record;
+  while (change.papers > 0 || change.coins > 0) {
+    for (auto c : currency) {
+        if (change.papers >= c.worth.papers && change.coins >= c.worth.coins) {
+          change = minus_dollars(change, c.worth);
+          record.push_back(c);
+          break;
+        }
+    }
+  }
+
+  return record;
+}
+
+vector<Currency> filter_coins(vector<Currency> change, string name) {
+  auto new_end = remove_if(change.begin(), change.end(),
+    [name](Currency c) { return c.name != name; });
+  change.erase(new_end, change.end());
+  return change;
+}
+
+int count_coins(vector<Currency> change, string name) {
+  return filter_coins(change, name).size();
+}
+
+int main() {
+  Dollars price = {125, 27};
+  Dollars paid = {200, 0};
+  Dollars change = minus_dollars(paid, price); 
+
+  cout << "Price: " << display_dollars(price) << "\n";
+  cout << "Paid: " << display_dollars(paid) << "\n";
+  cout << "Change: " << display_dollars(change) << "\n";
+
+  vector<Currency> record = record_coins(change);
+  
+  for (auto c : currency) {
+    int count = count_coins(record, c.name);
+    if (count > 0) {
+      cout << c.name << ": " << count << "\n";
+    }
+  }
+
+  return 0;
+}
+#+END_SRC
+
+Which displays:
+
+#+BEGIN_SRC bash
+Price: 125.27
+Paid: 200.0
+Change: 74.73
+fifties: 1
+twenties: 1
+dollars: 4
+quarters: 2
+dimes: 2
+pennies: 3
+#+END_SRC
+
+| goals                                       | Done?        |
+|---------------------------------------------+--------------|
+| sales price                                 | $\checkmark$ |
+| amount paid                                 | $\checkmark$ |
+| the change                                  | $\checkmark$ |
+| amounts for each type of coin/dollar used   | $\checkmark$ |
+| subtract Dollars values                     | $\checkmark$ |
+| display Dollars values                      | $\checkmark$ |
+| calculate (the change)                      | $\checkmark$ |
+| display (the amount for each currency used) | $\checkmark$ |
+
+Done!
+
+** Summary
+
+The choice of how to represent data is important and impact what tools you can use to solve a problem. While some tools like recursion may be powerful, not everything is a nail. Using the wrong tools ends up creating clutter and unecessary complexity in the problem. As we program it is always important to periodically ask ourselves if we can do better with our solutions. The change making problem could be solved in qute a few ways, but some of those ways are either tedious or to mentally stressful to be viable.

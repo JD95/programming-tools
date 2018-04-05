@@ -1,0 +1,120 @@
+#+TITLE: Array Introduction
+#+STARTUP: hidestar
+#+STARTUP: indent
+
+# latex options
+#+OPTIONS: author:nil date:nil num:nil 
+#+LATEX_HEADER: \usepackage[margin=1.5in]{geometry}
+#+LATEX_HEADER: \usepackage{apacite}
+#+LATEX_HEADER: \usepackage{setspace}
+
+
+in C++, arrays represent fixed length collections
+
+#+REVEAL: split
+#+BEGIN_SRC cpp
+char letters[5] = {'a','b','c','d','e'};
+#+END_SRC
+
+[[./images/array-introduction/array-in-memory.png]]
+
+#+REVEAL: split
+Previously, if we wanted to talk about a collecction, we'd have to make a big struct
+#+BEGIN_SRC cpp
+
+using Age = int;
+using Name = string;
+struct Person { Age age; Name name; };
+
+using TeamName = string;
+struct Team { 
+  TeamName name; 
+  Person coach;
+  Person quater_back;
+  Person wide_reciever;
+  ...
+};
+#+END_SRC
+
+#+REVEAL: split
+Now we can represent collections with arrays
+#+BEGIN_SRC cpp
+
+using Age = int;
+using Name = string;
+struct Person { Age age; Name name; };
+
+using TeamName = string;
+struct Team { 
+  TeamName name; 
+  Person captain;
+
+  // instead of having a value for each player
+  // use an array to represent the team
+  Person players[11];
+};
+#+END_SRC
+
+** accessing array elements
+
+#+BEGIN_SRC cpp
+template <typename T>
+T first_of_five(T stuff[5]) {
+  return stuff[0];
+}
+
+template <typename T>
+T second_of_five(T stuff[5]) {
+  return stuff[1];
+}
+
+int numbers[5] = { 1,2,3,4,5 };
+first_of_five(numbers); // 1
+
+int truths[5] = { true, false, true, true, false };
+second_of_five(truths); // false
+#+END_SRC
+
+- arrays start from 0
+- the index represents spaces from the start
+
+#+REVEAL: split
+[[./images/array-introduction/array-assignment-1.png]]
+#+REVEAL: split
+[[./images/array-introduction/array-assignment-2.png]]
+#+REVEAL: split
+[[./images/array-introduction/array-assignment-3.png]]
+
+** modifying array elements
+#+BEGIN_SRC cpp
+char letters[5] = {'a', 'b', 'c', 'd', 'e'};
+int i = 0;
+int j = 3;
+letters[i] = letters[j];
+#+END_SRC
+
+#+REVEAL: split
+[[./images/array-introduction/modifying-array-1.png]]
+#+REVEAL: split
+[[./images/array-introduction/modifying-array-2.png]]
+#+REVEAL: split
+[[./images/array-introduction/modifying-array-3.png]]
+#+REVEAL: split
+[[./images/array-introduction/modifying-array-4.png]]
+
+** warning
+- arrays are always passed by reference
+- there is no way to return a raw array
+- cannot use == to compare arrays
+
+** Better array type
+#+BEGIN_SRC cpp
+#include <array>
+
+std::array<int, 5> numbers = { 1,2,3,4,5 };
+#+END_SRC
+
+- Can return std::array from functions
+- Has lots of nice functions like .front, .back, and works with comparison operations
+
+But how can we use all of the elements of a vector?

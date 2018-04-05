@@ -1,0 +1,326 @@
+#+STARTUP: hidestar
+#+STARTUP: indent
+
+# latex options
+#+OPTIONS: date:nil timestamp:nil num:nil html-postamble:nil
+#+LATEX_HEADER: \usepackage[margin=1.5in]{geometry}
+#+LATEX_HEADER: \usepackage{apacite}
+#+LATEX_HEADER: \usepackage{setspace}
+
+
+There are five steps for recursion:
+
+1. Find the "do nothing" input 
+2. Find the "do nothing" step 
+3. Break off the front
+4. Make the problem smaller
+5. Combine results
+
+** Finding the do-nothing step and input
+
+Although we're solving problems with steps that repeat, eventually there is a point where the problem is solved and no more work needs to be done.
+
+Consider the problem of adding up all the numbers from some integer *10* to *1*. When written out this is what we want to happen:
+
+#+BEGIN_SRC cpp
+int sum_10_to_1(){
+  return 10 + 9 + 8 + 7 + 6 + 5 + 4 + 3 + 2 + 1;
+}
+#+END_SRC
+
+If we zoom in on the front of the problem we see something like this:
+
+#+BEGIN_SRC cpp
+10 + ...
+#+END_SRC
+
+The integer *10* plus some other stuff. We are looking for a place where more work is needed so we'll have to go to the other end of the expression:
+
+#+BEGIN_SRC cpp
+... 1
+#+END_SRC
+
+Here we have nothing more to add and conveniently we've also found our do-nothing input. If the problem was add all the numbers from *1* to *1*, then the result would just be *1*. Nothing happens. So how can we simulate doing nothing with additon? Well, adding 0 to any number does nothing, so in this case plus 0 is our do-nothing step.
+
+So how can we generalize this to adding up all the numbers from some integer *n* to *1*? Well when written out we see something similar to what we had last time:
+
+#+BEGIN_SRC cpp
+int sum(int n) {
+  return n + (n-1) + (n-2) + ... + 1;
+}
+#+END_SRC
+
+Only, in this case, we don't know exactly how many terms we need to add up. That being said, we can see our do-nothing step has not changed. When we are uncertain of how many steps we need to actually repeat we'll have to come up with some kind of check to tell when we've reached the do-nothing step.
+
+In this case our check could be:
+
+#+BEGIN_SRC cpp
+n == 1
+#+END_SRC
+
+Common do-nothing inputs are:
+| type    | input  | check          |
+|---------+--------+----------------|
+| numbers | 0 or 1 | @@html:==@@ 0  |
+| string  | ""     | @@html:==@@ "" |
+| vector  | {}     | .empty()       |
+
+
+Once we've established when no more work has to be done and what the result should be in that case, we can move on to actually doing some of the work.
+
+** Breaking off the front
+
+Because we cannot always know ahead of time how much work has to be done, like in the case of adding all the numbers from *n* to *1*, we need to find some way of breaking off a piece of the problem so we only need to program one step at a time.
+
+Let's say we wanted to take some =string=, say *"hello"* and make it all captials, *"HELLO"*. This problem as it is cannot be solved using the tools we know so far, however we do know how to make a =char= upper case using =toupper()=.
+
+In this case, breaking off the front can be taken literally, grab the first character of the =string= using =.front()=.
+
+#+BEGIN_SRC cpp
+string("hello").front()
+#+END_SRC
+
+Now that we have a character to work with, we can simply apply =toupper()= to get the first value of our desired result *'H'*.
+
+#+BEGIN_SRC cpp
+toupper(string("hello").front())
+#+END_SRC
+
+This can easily be generalized to any string by replace the literal *"hello"* with a variable, lets say *s*:
+
+#+BEGIN_SRC cpp
+toupper(s.front())
+#+END_SRC
+
+If we return to the problem of adding numbers from *n* to *1* we can see a similar process is used, although it is not as obvious. In this case we aren't literally breaking off the front of the number, instead we are breaking off the front of the expression we want in the end:
+
+#+BEGIN_SRC cpp
+n | + (n-1) + (n-2) + ... + 1
+#+END_SRC
+
+Here, after we break off the front we get the number *n* all by itself. Sometimes, breaking off the front doesn't have another step as with making the *char* into uppercase. This is fine because it still helps with the next step.
+
+** Making the problem smaller
+
+The trick to recursion is to solve a piece of the problem, and then make use of the results for a smaller version of the problem. We've already seen how to do the small step by breaking off the front, but we also need to figure out how to make the problem as a whole smaller.
+
+For example, when adding up numbers after breaking off the front, we automatically get a smaller version of the problem:
+
+#+BEGIN_SRC cpp
+int sum(int n) {
+  int front = n;
+  int smaller = (n-1) + (n-2) + ... + 1;
+  return front + smaller;
+}
+#+END_SRC
+
+In order to solve =sum(n)= we need to figure out how to solve =(n-1) + (n-2) + ...=, however notice that it has almost exactly the same shape as our original problem. To make this more apparent, we can give a new name to =(n-1)=.
+
+#+BEGIN_SRC haskell 
+step 1: assume sum(x) = x + (x - 1) + (x - 2) + (x - 3) + ... + 1
+step 2: given (n - 1) + (n - 2) + (n - 3) + ... + 1
+step 3: (n - 1) + (n - 1 - 1) + (n - 1 - 2) + ... + 1
+step 4: let m = n - 1
+step 5: m + (m - 1) + (m - 2) + (m - 3) + ... + 1
+step 6: using step 1 => sum(m) = m + (m - 1) + (m - 2) + (m - 3) + ... + 1
+step 7: using step 4 => sum(m) = sum(n-1)
+#+END_SRC
+
+If we replace =(n-1)= with =m= we can see that our smaller problem has exactly the same shape as our orignal problem! Which means if the solution to =n + (n-1) + (n-2) + ... + 1= is =sum(n)= then the solution to =(n-1) + (n-2) + (n-3) + ... + 1= should be =sum(n-1)=.
+
+*This* is the key to recursion! Because the steps we need to do are repeated, a smaller version of the problem can be solved in *exactly* the same way. So the solution of =(n-1) + (n-2) + ...= is simply =sum(n-1)=!
+
+#+BEGIN_SRC cpp
+int sum(int n) {
+  int front = n;
+  int smaller = sum(n-1);
+  return front + smaller;
+}
+#+END_SRC
+
+However, there is a problem if we stop here. Notice that happens if we do =sum(1)=, our do-nothing input from before:
+
+#+BEGIN_SRC cpp
+int sum(1) {
+  int front = 1;
+  int smaller = sum(1-1);
+  return front + smaller;
+}
+#+END_SRC
+
+What is the result of =sum(0)=? We could plug in *0* for *n* and find out:
+
+#+BEGIN_SRC cpp
+int sum(0) {
+  int front = 0;
+  int smaller = sum(0-1);
+  return front + smaller;
+}
+#+END_SRC
+
+This isn't good. The smaller version of the problem keeps dropping off towards negative infinity. Instead of getting =... + 3 + 2 + 1= we get =... + 3 + 2 + 1 + 0 + -1 + -2 + ...=. Luckily we already figured out how to check for when we've hit the do-nothing step and we can simply use =?:= to either return our 0 to make it =n+1= (our do-nothing step) or our smaller version of the problem.
+
+#+BEGIN_SRC cpp
+int sum(int n) {
+  int front = n;
+  int smaller = n <= 1 ? 0 : sum(n-1);
+  return front + smaller;
+}
+#+END_SRC
+
+Now our function will stop when we reach the do nothing case and simply return our do-nothing input! Conveniently for =sum= our combine step is obvious, we just need to add our front to our smaller version of the problem, however this isn't always so obvious.
+
+Let's go back to the problem of capitalizing the letters of a string.
+
+First we have to find the do-nothing step and input. Unlike numbers, the end of work isn't as clear, but think about it, what is the "zero" value of a string? It's the empty string "", the string with no characters in it. This makes sense because when we broke off the front for *"hello"* we got a character, and we cannot break off the front for *""* so that must be our do-nothing input.
+
+Knowing this, we can start to fill in the function:
+
+#+BEGIN_SRC cpp
+string all_caps(string s){
+  char front = toupper(s.front());
+  string smaller = s == "" ? "" : all_caps(A?);
+  return B?;
+}
+#+END_SRC
+
+First, we need to fill hole =A?=. To do this we need to do the inverse of our breaking off the front step. Instead of trying to grab the first character from the string, we need all the character after the front. In otherwords we need the substring of =s= from position 1 to the end:
+
+#+BEGIN_SRC cpp
+s.substr(1, s.length()-1)
+#+END_SRC 
+
+However, there is a problem. What happens if our string is only one character long? For example, in the string ="A"=, there is no position *1* and substr would crash our program trying to grab a character that doesn't exist. Moreover, if *s* is the empty string, then *.front()* will crash the program as well! This means we'll have to adjust what our do-nothing input is. Since we have to stop when there is only one character left, we can simply adjust our check to test for a string of at most length *1*.
+
+#+BEGIN_SRC cpp
+string all_caps(string s){
+  char front = toupper(s.front());
+  string smaller = s.length() <= 1 ? "" : all_caps(s.substr(1, s.length()-1));
+  return B?;
+}
+#+END_SRC
+
+We can test this by simulating several strings: 
+
+#+BEGIN_SRC cpp
+string all_caps("hi"){
+  char front = toupper("hi".front());
+  string smaller = "hi".length() <= 1 ? "" : all_caps("hi".substr(1, "hi".length()-1));
+  return B?;
+}
+
+string all_caps("hi"){
+  char front = 'H';
+  string smaller = false ? "" : all_caps("i");
+  return B?;
+}
+#+END_SRC
+
+Strings greater than one seem to work!
+
+#+BEGIN_SRC cpp
+string all_caps("A"){
+  char front = toupper("A".front());
+  string smaller = "A".length() <= 1 ? "" : all_caps("A".substr(1, "A".length()-1));
+  return B?;
+}
+
+string all_caps("A"){
+  char front = 'A';
+  string smaller = true ? "" : all_caps(...);
+  return B?;
+}
+#+END_SRC
+
+Strings of size one work! Now we just have to fill in the hole B?.
+
+** Combining Results
+
+How can we combine a *char* value with a *string*? You can't, but converting a *char* into a *string* is straightforward. Just wrap the character with =string(1, ...)=. This will construct a new string with length *1* using the provided character.
+
+#+BEGIN_SRC cpp
+string all_caps(string s){
+  string front = string(1, toupper(s.front()));
+  string smaller = s.length() <= 1 ? s : all_caps(s.substr(1, s.length()-1));
+  return B?;
+}
+#+END_SRC
+
+Now that we have two strings we can simply add them together!
+
+#+BEGIN_SRC cpp
+string all_caps(string s){
+  string front = string(1, toupper(s.front()));
+  string smaller = s.length() <= 1 ? s : all_caps(s.substr(1, s.length()-1));
+  return front + smaller;
+}
+#+END_SRC
+
+This looks like the correct answer, but just to be safe, lets test it with the empty string =""=.
+
+#+BEGIN_SRC cpp
+string all_caps(""){
+  string front = string(1, toupper("".front()));
+  string smaller = "".length() <= 1 ? "" : all_caps("".substr(1, "".length()-1));
+  return front + smaller;
+}
+
+string all_caps(""){
+  char front = toupper("".front());
+  string smaller = "".length() <= 1 ? "" : all_caps("".substr(1, "".length()-1));
+  return front + smaller;
+}
+
+...
+#+END_SRC
+
+Hopefully you've already spotted the problem. ="".front()= will crash the program, even though we have a check for strings of length *1* in the smaller step. This isn't world ending, but it means we can't separate the *front* and *smaller* values into variables for ease of reading and we'll have to change our do-nothing step.
+
+#+BEGIN_SRC cpp
+string all_caps(string s){
+  return s.length() <= 1 ? "" : 
+    (string(1, toupper(s.front())) + all_caps(s.substr(1, s.length()-1)));
+}
+#+END_SRC
+
+If we simply move the values from variables directly into the =return=, we'll accidentally drop the last character of the string. If the input is a string of length *1* it will return =""= and not the upper case version of it that we want. To solve this, we'll change the *false* path of the choice into a duplicate of the front.
+
+#+BEGIN_SRC cpp
+string all_caps(string s){
+  return s.length() <= 1 ? string(1, toupper(s.front())) : 
+    (string(1, toupper(s.front())) + all_caps(s.substr(1, s.length()-1)));
+}
+#+END_SRC
+
+But this is ugly, we've duplicated code, *and* we've reintroduced the problem of calling =.front()= on an empty string, so lets pull out the step of converting a character into an uppercase string into an on-the-spot function.
+
+#+BEGIN_SRC cpp
+string all_caps(string s){
+  auto f = [](string x) { 
+    return string(1, toupper(x.front())); 
+  };
+  return s.length() <= 1 ? f(s) : 
+    (f(s) + all_caps(s.substr(1, s.length()-1)));
+}
+#+END_SRC
+
+Now that we've pulled out that step, we can add a check in *f* to make sure we don't call =.front()= on an empty string.
+
+#+BEGIN_SRC cpp
+string all_caps(string s){
+  auto f = [](string x) { 
+    return x == "" ? "" : string(1, toupper(x.front())); 
+  };
+  return s.length() <= 1 ? f(s) : 
+    (f(s) + all_caps(s.substr(1, s.length()-1)));
+}
+#+END_SRC
+
+It won't win any beautiful code awards, but it's definitely more robust than before.
+
+** Summary 
+
+As you have seen, while going through the steps for writing a recursive function you might have to alter your function to actually cover all of the cases. It is an iterative process where you discover more about the problem as you go, but in general, all recursive problems can be solved this way.
+
+There is *always* some kind of do-nothing input or inputs for which your function either does no work or a single step of the work. Drill the function for small, easy to work with numbers until you find the do-nothing input. Once that is taken care of, we can write a check the inputs to the function for when we reach that do-nothing step. Then we can break off the front of the problem so we only have to do a single step of the problem and then later combine the front result with the solution to a smaller version of the problem.
+
