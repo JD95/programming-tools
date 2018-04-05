@@ -41,7 +41,7 @@ Each of these different categories of values are called a =Type=. Types help tel
 
 The first of these types =Int= represents positive and negative numbers and can be expressed in a program like this:
 
-#+BEGIN_SRC cpp
+#+BEGIN_SRC haskell
 0
 -1
 4
@@ -53,7 +53,7 @@ The first of these types =Int= represents positive and negative numbers and can 
 
 The next category of values are =Float= values. These values represent decimal numbers and can be expressed like this:
 
-#+BEGIN_SRC cpp
+#+BEGIN_SRC haskell
 0.0
 .05
 -1.214253235
@@ -64,7 +64,7 @@ The next category of values are =Float= values. These values represent decimal n
 
 Numbers are not the only values which can be represented on a computer. Any symbol on your keyboard can be represented using the =Char= type. Typically, =Char= values are used to represent letters and single digits. Any symbol surrounded by single quotes is a =Char=. For example:
 
-#+BEGIN_SRC cpp
+#+BEGIN_SRC haskell
 'a'
 '9'
 '$'
@@ -74,7 +74,7 @@ Numbers are not the only values which can be represented on a computer. Any symb
 
 By grouping =Char= values together we can make a =String=. The =String= type allows us to represent any amount of text within our programs. Names, addresses, dates, etc. are typically represented using this type. You can express a =String= by wrapping the text in double quotes like so:
 
-#+BEGIN_SRC cpp
+#+BEGIN_SRC haskell
 "Hello there fellow humans!"
 "cost: 50, tax:96%, discount:0.5"
 "<(-.-)>  (@_o)!!!"
@@ -102,7 +102,7 @@ Note that any names you add into your program cannot have any spaces or strange 
 - the name can only consist of letters and numbers
 
 We can define constants like this:
-#+BEGIN_SRC cpp
+#+BEGIN_SRC haskell
 marbles :: MarblesCount
 marbles = 100
 
@@ -265,7 +265,7 @@ swap = \(x, y) -> (y, x)
 fst :: (a, b) -> a
 fst = \(x, y) -> x
 
-snd :: (a,b) -> b
+snd :: (a, b) -> b
 snd = \(x, y) -> y
 #+END_SRC
 
