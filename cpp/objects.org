@@ -1,0 +1,163 @@
+#+TITLE: Objects
+#+STARTUP: hidestar
+#+STARTUP: indent
+
+# latex options
+#+OPTIONS: toc:nil author:nil date:nil
+#+LATEX_HEADER: \usepackage[margin=1.5in]{geometry}
+#+LATEX_HEADER: \usepackage{apacite}
+#+LATEX_HEADER: \usepackage{setspace}
+
+** Making an object
+
+#+BEGIN_SRC cpp
+struct Person {
+  string name;
+  int dollars;
+}
+
+Person mk_person(string name, int dollars){
+  return Person { name, age };
+}
+
+Person mk_default_person() {
+  return Person { "", 0 };
+}
+
+#+END_SRC
+
+#+BEGIN_SRC cpp
+struct Person {
+  string name;
+  int dollars;
+
+  Person (string n, int d)
+    : name(n), dollars(d) {}
+   
+  Person()
+    : name(""), dollars(0) {}
+}
+#+END_SRC
+
+** Dot functions
+
+#+BEGIN_SRC cpp
+struct Person {
+  string name;
+  int dollars;
+  function<void(int)> pay;
+
+  Person (string n, int d)
+    : name(n), dollars(d) 
+  {
+    pay = [this](int amount) {
+      dollars = dollars + amount;
+    };
+  }
+   
+  Person()
+    : name(""), dollars(0)
+  {
+    pay = [this](int amount) {
+      dollars = dollars + amount;
+    };
+  }
+}
+#+END_SRC
+
+
+Full example:
+#+BEGIN_SRC cpp
+#include <iostream>
+#include <functional>
+#include <string>
+using namespace std;
+
+struct Person {
+  string name;
+  int dollars;
+  
+  Person(string n, int d)
+  	: name(name), dollars(d)
+  {
+    pay = [this](int amount) {
+      dollars = dollars + amount;
+    };
+  }
+  
+  Person()
+    : name(""), dollars(0)
+  {
+    pay = [this](int amount) {
+      dollars = dollars + amount;
+    };
+  }
+};
+
+int main() {
+  Person p("Iron Man", 1000000);
+  cout << p.name << " is worth " << p.dollars << "\n";
+  
+  p.pay(10);
+  cout << p.name << " got paid!\n";
+  cout << p.name << " is now worth " << p.dollars << "\n";
+  
+  system("pause");
+  return 0;
+}
+#+END_SRC
+
+This can be short handed via:
+#+BEGIN_SRC cpp
+struct Person {
+  string name;
+  int dollars;
+  function<void(int)> pay;
+
+  Person (string n, int d)
+    : name(name), dollars(d) {}
+
+  Person()
+    : name(""), dollars(0) {}
+    
+  void pay(int amount) {
+    dollars = dollars + amount;
+  }
+}
+#+END_SRC
+
+Full example:
+#+BEGIN_SRC cpp
+#include <iostream>
+#include <functional>
+#include <string>
+using namespace std;
+
+struct Person {
+  string name;
+  int dollars;
+  
+  Person(string n, int d)
+  	: name(n), dollars(d) {}
+  
+  Person()
+    : name(""), dollars(0)
+  {}
+  
+  void pay (int amount) {
+    dollars = dollars + amount;
+  };
+};
+
+int main() {
+  Person p("Iron Man", 1000000);
+  cout << p.name << " is worth " << p.dollars << "\n";
+  
+  p.pay(10);
+  cout << p.name << " got paid!\n";
+  cout << p.name << " is now worth " << p.dollars << "\n";
+  
+  system("pause");
+  return 0;
+}
+#+END_SRC
