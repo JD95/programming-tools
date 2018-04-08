@@ -1,0 +1,87 @@
+#+TITLE: Collections of Any Length
+#+STARTUP: hidestar
+#+STARTUP: indent
+
+# latex options
+#+OPTIONS: author:nil date:nil num:nil 
+#+LATEX_HEADER: \usepackage[margin=1.5in]{geometry}
+#+LATEX_HEADER: \usepackage{apacite}
+#+LATEX_HEADER: \usepackage{setspace}
+
+** vectors
+
+#+BEGIN_SRC cpp
+#include <vector>
+using namespace std;
+
+using Age = int;
+using Name = string;
+struct Person { Age age; Name name; };
+
+using TeamName = string;
+struct Team { 
+  TeamName name; 
+  Person captain;
+
+  // instead of having a value for each player
+  // use an array to represent the team
+  vector<Person> players;
+};
+#+END_SRC
+
+** what can vectors do
+
+*** the familiar
+- .find
+- .front
+- .back
+- .size
+*** the new
+- .empty
+- .erase
+- .begin
+- .end
+- =.push_back=
+- =.pop_back=
+
+*** empty
+
+checks if the vector is empty or not
+
+*** erase
+
+- the opposite of insert, removes the element at the specified location
+- note, you cannot use numbers for positions while inserting or erasing with a vector
+- vectors require something called an "iterator"
+
+*** beging and end
+
+- .begin and .end return iterators to the beginning and end of the vector
+- to convert a position into an iterator add or subtract it from either
+
+#+BEGIN_SRC cpp
+vector<int> numbers = { 1,2,3 };
+numbers.erase(numbers.begin() + 1);
+
+// numbers = { 1, 3 };
+#+END_SRC
+
+*** push back
+
+inserts an element at the end of the vector
+
+#+BEGIN_SRC cpp
+vector<int> ns = { 1,2,3,4 };
+ns.push_back(5); // 1, 2, 3, 4, 5
+#+END_SRC
+
+*** pop back
+
+removes the element at the end of a vector
+
+#+BEGIN_SRC cpp
+vector<int> ns = { 1,2,3,4,5 };
+ns.pop_back(5); // 1, 2, 3, 4
+#+END_SRC
+
+

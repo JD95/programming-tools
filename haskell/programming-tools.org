@@ -43,7 +43,3 @@
 #+INCLUDE: "./recursion-with-vectors.org" :lines "10-"
 * C++ Shortcuts
 #+INCLUDE: "./cpp-shortcuts.org" :lines "10-"
-* File + Console I/O
-#+INCLUDE: "./file-console-io.org" :lines "10-"
-* Objects
-#+INCLUDE: "./objects.org" :lines "10-"

@@ -6027,6 +6027,187 @@ The choice of how to represent data is important and impact what tools you can u
 </div>
 </div>
 </div>
+<div id="outline-container-sec-13" class="outline-2">
+<h2 id="sec-13"><span class="section-number-2">13</span> Objects</h2>
+<div class="outline-text-2" id="text-13">
+</div><div id="outline-container-sec-13-1" class="outline-3">
+<h3 id="sec-13-1"><span class="section-number-3">13.1</span> Making an object</h3>
+<div class="outline-text-3" id="text-13-1">
+<div class="org-src-container">
+
+<pre class="src src-cpp"><span style="color: #195466; font-weight: bold;">struct</span> <span style="color: #d26937;">Person</span> {
+  <span style="color: #d26937;">string</span> <span style="color: #599cab;">name</span>;
+  <span style="color: #d26937;">int</span> <span style="color: #599cab;">dollars</span>;
+}
+
+<span style="color: #d26937;">Person</span> <span style="color: #599cab;">mk_person</span>(<span style="color: #d26937;">string</span> <span style="color: #599cab;">name</span>, <span style="color: #d26937;">int</span> <span style="color: #599cab;">dollars</span>){
+  <span style="color: #195466; font-weight: bold;">return</span> Person { name, age };
+}
+
+<span style="color: #d26937;">Person</span> <span style="color: #599cab;">mk_default_person</span>() {
+  <span style="color: #195466; font-weight: bold;">return</span> Person { <span style="color: #2aa889;">""</span>, 0 };
+}
+
+</pre>
+</div>
+
+<div class="org-src-container">
+
+<pre class="src src-cpp"><span style="color: #195466; font-weight: bold;">struct</span> <span style="color: #d26937;">Person</span> {
+  <span style="color: #d26937;">string</span> <span style="color: #599cab;">name</span>;
+  <span style="color: #d26937;">int</span> <span style="color: #599cab;">dollars</span>;
+
+  <span style="color: #599cab;">Person</span> (<span style="color: #d26937;">string</span> <span style="color: #599cab;">n</span>, <span style="color: #d26937;">int</span> <span style="color: #599cab;">d</span>)
+    : name(n), <span style="color: #d26937;">dollars</span>(<span style="color: #599cab;">d</span>) {}
+
+  <span style="color: #599cab;">Person</span>()
+    : name(<span style="color: #2aa889;">""</span>), dollars(0) {}
+}
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-13-2" class="outline-3">
+<h3 id="sec-13-2"><span class="section-number-3">13.2</span> Dot functions</h3>
+<div class="outline-text-3" id="text-13-2">
+<div class="org-src-container">
+
+<pre class="src src-cpp"><span style="color: #195466; font-weight: bold;">struct</span> <span style="color: #d26937;">Person</span> {
+  <span style="color: #d26937;">string</span> <span style="color: #599cab;">name</span>;
+  <span style="color: #d26937;">int</span> <span style="color: #599cab;">dollars</span>;
+  <span style="color: #d26937;">function</span>&lt;<span style="color: #d26937;">void</span>(<span style="color: #d26937;">int</span>)&gt; <span style="color: #599cab;">pay</span>;
+
+  <span style="color: #599cab;">Person</span> (<span style="color: #d26937;">string</span> <span style="color: #599cab;">n</span>, <span style="color: #d26937;">int</span> <span style="color: #599cab;">d</span>)
+    : name(n), <span style="color: #d26937;">dollars</span>(<span style="color: #599cab;">d</span>) 
+  {
+    pay = [<span style="color: #195466; font-weight: bold;">this</span>](<span style="color: #d26937;">int</span> <span style="color: #599cab;">amount</span>) {
+      dollars = dollars + amount;
+    };
+  }
+
+  <span style="color: #599cab;">Person</span>()
+    : name(<span style="color: #2aa889;">""</span>), dollars(0)
+  {
+    pay = [<span style="color: #195466; font-weight: bold;">this</span>](<span style="color: #d26937;">int</span> <span style="color: #599cab;">amount</span>) {
+      dollars = dollars + amount;
+    };
+  }
+}
+</pre>
+</div>
+
+
+<p>
+Full example:
+</p>
+<div class="org-src-container">
+
+<pre class="src src-cpp"><span style="color: #c23127;">#include</span> <span style="color: #2aa889;">&lt;iostream&gt;</span>
+<span style="color: #c23127;">#include</span> <span style="color: #2aa889;">&lt;functional&gt;</span>
+<span style="color: #c23127;">#include</span> <span style="color: #2aa889;">&lt;string&gt;</span>
+<span style="color: #195466; font-weight: bold;">using</span> <span style="color: #195466; font-weight: bold;">namespace</span> <span style="color: #33859e; font-weight: bold;">std</span>;
+
+<span style="color: #195466; font-weight: bold;">struct</span> <span style="color: #d26937;">Person</span> {
+  <span style="color: #d26937;">string</span> <span style="color: #599cab;">name</span>;
+  <span style="color: #d26937;">int</span> <span style="color: #599cab;">dollars</span>;
+
+  <span style="color: #599cab;">Person</span>(<span style="color: #d26937;">string</span> <span style="color: #599cab;">n</span>, <span style="color: #d26937;">int</span> <span style="color: #599cab;">d</span>)
+        : name(name), <span style="color: #d26937;">dollars</span>(<span style="color: #599cab;">d</span>)
+  {
+    pay = [<span style="color: #195466; font-weight: bold;">this</span>](<span style="color: #d26937;">int</span> <span style="color: #599cab;">amount</span>) {
+      dollars = dollars + amount;
+    };
+  }
+
+  <span style="color: #599cab;">Person</span>()
+    : name(<span style="color: #2aa889;">""</span>), dollars(0)
+  {
+    pay = [<span style="color: #195466; font-weight: bold;">this</span>](<span style="color: #d26937;">int</span> <span style="color: #599cab;">amount</span>) {
+      dollars = dollars + amount;
+    };
+  }
+};
+
+<span style="color: #d26937;">int</span> <span style="color: #599cab;">main</span>() {
+  <span style="color: #d26937;">Person</span> <span style="color: #599cab;">p</span>(<span style="color: #2aa889;">"Iron Man"</span>, 1000000);
+  cout &lt;&lt; p.name &lt;&lt; <span style="color: #2aa889;">" is worth "</span> &lt;&lt; p.dollars &lt;&lt; <span style="color: #2aa889;">"\n"</span>;
+
+  p.pay(10);
+  cout &lt;&lt; p.name &lt;&lt; <span style="color: #2aa889;">" got paid!\n"</span>;
+  cout &lt;&lt; p.name &lt;&lt; <span style="color: #2aa889;">" is now worth "</span> &lt;&lt; p.dollars &lt;&lt; <span style="color: #2aa889;">"\n"</span>;
+
+  system(<span style="color: #2aa889;">"pause"</span>);
+  <span style="color: #195466; font-weight: bold;">return</span> 0;
+}
+</pre>
+</div>
+
+<p>
+This can be short handed via:
+</p>
+<div class="org-src-container">
+
+<pre class="src src-cpp"><span style="color: #195466; font-weight: bold;">struct</span> <span style="color: #d26937;">Person</span> {
+  <span style="color: #d26937;">string</span> <span style="color: #599cab;">name</span>;
+  <span style="color: #d26937;">int</span> <span style="color: #599cab;">dollars</span>;
+  <span style="color: #d26937;">function</span>&lt;<span style="color: #d26937;">void</span>(<span style="color: #d26937;">int</span>)&gt; <span style="color: #599cab;">pay</span>;
+
+  <span style="color: #599cab;">Person</span> (<span style="color: #d26937;">string</span> <span style="color: #599cab;">n</span>, <span style="color: #d26937;">int</span> <span style="color: #599cab;">d</span>)
+    : name(name), <span style="color: #d26937;">dollars</span>(<span style="color: #599cab;">d</span>) {}
+
+  <span style="color: #599cab;">Person</span>()
+    : name(<span style="color: #2aa889;">""</span>), dollars(0) {}
+
+  <span style="color: #d26937;">void</span> <span style="color: #599cab;">pay</span>(<span style="color: #d26937;">int</span> <span style="color: #599cab;">amount</span>) {
+    dollars = dollars + amount;
+  }
+}
+</pre>
+</div>
+
+<p>
+Full example:
+</p>
+<div class="org-src-container">
+
+<pre class="src src-cpp"><span style="color: #c23127;">#include</span> <span style="color: #2aa889;">&lt;iostream&gt;</span>
+<span style="color: #c23127;">#include</span> <span style="color: #2aa889;">&lt;functional&gt;</span>
+<span style="color: #c23127;">#include</span> <span style="color: #2aa889;">&lt;string&gt;</span>
+<span style="color: #195466; font-weight: bold;">using</span> <span style="color: #195466; font-weight: bold;">namespace</span> <span style="color: #33859e; font-weight: bold;">std</span>;
+
+<span style="color: #195466; font-weight: bold;">struct</span> <span style="color: #d26937;">Person</span> {
+  <span style="color: #d26937;">string</span> <span style="color: #599cab;">name</span>;
+  <span style="color: #d26937;">int</span> <span style="color: #599cab;">dollars</span>;
+
+  <span style="color: #599cab;">Person</span>(<span style="color: #d26937;">string</span> <span style="color: #599cab;">n</span>, <span style="color: #d26937;">int</span> <span style="color: #599cab;">d</span>)
+        : name(n), <span style="color: #d26937;">dollars</span>(<span style="color: #599cab;">d</span>) {}
+
+  <span style="color: #599cab;">Person</span>()
+    : name(<span style="color: #2aa889;">""</span>), dollars(0)
+  {}
+
+  <span style="color: #d26937;">void</span> <span style="color: #599cab;">pay</span> (<span style="color: #d26937;">int</span> <span style="color: #599cab;">amount</span>) {
+    dollars = dollars + amount;
+  };
+};
+
+<span style="color: #d26937;">int</span> <span style="color: #599cab;">main</span>() {
+  <span style="color: #d26937;">Person</span> <span style="color: #599cab;">p</span>(<span style="color: #2aa889;">"Iron Man"</span>, 1000000);
+  cout &lt;&lt; p.name &lt;&lt; <span style="color: #2aa889;">" is worth "</span> &lt;&lt; p.dollars &lt;&lt; <span style="color: #2aa889;">"\n"</span>;
+
+  p.pay(10);
+  cout &lt;&lt; p.name &lt;&lt; <span style="color: #2aa889;">" got paid!\n"</span>;
+  cout &lt;&lt; p.name &lt;&lt; <span style="color: #2aa889;">" is now worth "</span> &lt;&lt; p.dollars &lt;&lt; <span style="color: #2aa889;">"\n"</span>;
+
+  system(<span style="color: #2aa889;">"pause"</span>);
+  <span style="color: #195466; font-weight: bold;">return</span> 0;
+}
+</pre>
+</div>
+</div>
+</div>
+</div>
 </div><div class="col-md-3"><nav id="table-of-contents">
 <div id="text-table-of-contents" class="bs-docs-sidebar">
 <ul class="nav">
@@ -6135,6 +6316,12 @@ The choice of how to represent data is important and impact what tools you can u
 <li><a href="#sec-12-4">12.4. if statements</a></li>
 <li><a href="#sec-12-5">12.5. First example</a></li>
 <li><a href="#sec-12-6">12.6. Summary</a></li>
+</ul>
+</li>
+<li><a href="#sec-13">13. Objects</a>
+<ul class="nav">
+<li><a href="#sec-13-1">13.1. Making an object</a></li>
+<li><a href="#sec-13-2">13.2. Dot functions</a></li>
 </ul>
 </li>
 </ul>

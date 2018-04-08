@@ -1,0 +1,278 @@
+#+TITLE: Representing Data
+#+STARTUP: hidestar
+#+STARTUP: indent
+
+# latex options
+#+OPTIONS: author:nil date:nil num:nil 
+#+LATEX_HEADER: \usepackage[margin=1.5in]{geometry}
+#+LATEX_HEADER: \usepackage{apacite}
+#+LATEX_HEADER: \usepackage{setspace}
+
+Programming is the process of breaking down problems into pieces that a computer can understand. The most challenging aspect of this process is changing the way we thinking about problems and, on a more philosophical note, the world around us. Computers have no concept of what a tree is or how to render a webpage until we as the programmers define what these terms mean. In many ways, this is similar to translating from your native language into another, more formal, one.
+
+At its most basic level, programming can be summed up in two questions: how can we represent the problem's nouns and how can we represent the problem's verbs? Nouns tell us *what* we're working with. Verbs tell us *what to do* with the nouns or how to make them.
+
+More generally, there are quite a few useful similarities between langauge and programming:
+ 
+|-----------+-----------------------|
+| language  | programming           |
+|-----------+-----------------------|
+| noun      | data                  |
+| verb      | function              |
+| adverb    | higher order function |
+| pronoun   | object                |
+| adjective | interface             |
+|-----------+-----------------------|
+
+** Constants 
+
+In programming nouns can take several forms depending on how much you know about the noun beforehand. If a value already known ahead of time, it can be represented with a constant. Constants are specific values like the number =5= or the word ="Hello"=. These are directly stated as part of the program and are the most constrained form of a noun.
+
+Most programming languages, including Haskell, categorize different values in the following way:
+
+| real world | Haskell type |
+|------------+--------------|
+| numbers    | Int          |
+| decimals   | Float        |
+| letters    | Char         |
+| text/words | String       |
+
+Each of these different categories of values are called a =Type=. Types help tell the program what can and cannot be done with certain values. It wouldn't make sense for a person to try and send a text message with a bicycle and we'd like the same to be true in our programs as well. The four types listed above are not the only types we can work with while programming, but they are some the most primitive. Many other types are built out of these simpler ones.
+
+The first of these types =Int= represents positive and negative numbers and can be expressed in a program like this:
+
+#+BEGIN_SRC haskell
+0
+-1
+4
+239458459823459246
+-123493952395923592359
+#+END_SRC
+
+=Int= values are great for counting things or representing amounts. A few examples of real world =Int= values are: ages, years, stars in a movie review, students in a classroom, etc.
+
+The next category of values are =Float= values. These values represent decimal numbers and can be expressed like this:
+
+#+BEGIN_SRC haskell
+0.0
+.05
+-1.214253235
+12435.234
+#+END_SRC
+
+=Float= values are great for representing percentages, positions, fractions, etc. Concepts like height and discounts can be representing with this type.
+
+Numbers are not the only values which can be represented on a computer. Any symbol on your keyboard can be represented using the =Char= type. Typically, =Char= values are used to represent letters and single digits. Any symbol surrounded by single quotes is a =Char=. For example:
+
+#+BEGIN_SRC haskell
+'a'
+'9'
+'$'
+'>'
+':'
+#+END_SRC
+
+By grouping =Char= values together we can make a =String=. The =String= type allows us to represent any amount of text within our programs. Names, addresses, dates, etc. are typically represented using this type. You can express a =String= by wrapping the text in double quotes like so:
+
+#+BEGIN_SRC haskell
+"Hello there fellow humans!"
+"cost: 50, tax:96%, discount:0.5"
+"<(-.-)>  (@_o)!!!"
+#+END_SRC
+
+Strings have a special value to represent no text, otherwise known as the "empty string" or =""=. There is no space between the quotes and is the same as an empty chat dialogue box or an empty searchbar.
+
+Programs are essentially text files which people (mostly you) will have to read. In order to make our programs as easy to understand for humans, it is often useful to give better names for the values we want to use so they better capture the real world noun they are meant to represent. For example, instead of just saying =Int=, one could say =Age=.
+
+In Haskell, you can tell the computer to interpet a word as a type via the =type= keyword. The term =keyword= in programming refers to words that have predefined meanings within the given programming language. These keywords cannot be redefiend by the user.
+
+Here we can see examples of =type= usage:
+
+#+BEGIN_SRC haskell
+type MarbleCount = Int
+type StudentName = String
+type Discount = Float
+type PlayerSymbol = Char
+#+END_SRC
+
+There are four parts to defining our own name for a type. The first part is the =type= keyword which tells the program that we intend to define a new name. The second part is the name we want to use. The third part is the $=$ sign. The fourth is the existing type which the name to the left of the $=$ symbol will actually mean.
+
+Note that any names you add into your program cannot have any spaces or strange symbols. The rules for new names are as follows:
+- the name *must* begin with a letter
+- the name can only consist of letters and numbers
+
+We can define constants like this:
+#+BEGIN_SRC haskell
+marbles :: MarblesCount
+marbles = 100
+
+student :: StudentName
+student = "Mueller"
+
+senior :: Discout 
+senior = 0.25
+
+player :: PlayerSymbol
+player = 'X'
+#+END_SRC
+
+Definitions in Haskell need two parts, the type and the definition. The type tells Haskell *what* kind of thing is being defined and the definition say *which* particular thing the name means. Anywhere we see the symbol =marbles= from now on, we can replace it with the value =100=.
+
+Although, these primitive types can represent quite a bit on their own, they cannot represent *everything* we might want to program. In order to represent more complicated nouns like people or places, we'll need a way to group these values together into a new type.
+
+We can do this with tuples.
+
+#+BEGIN_SRC haskell
+coordinate :: (Float, Float)
+coordinate =  (5.0  , 1.0  )
+#+END_SRC
+
+Note that I added the space to better line up the values with the types. This is not actually necessary.
+
+Sometimes we want to be more specific and meaningful with our groupings of types. For these instances we'll want to define a custom product type.
+
+#+BEGIN_SRC haskell
+data Person = MkPerson Int Float String Char String deriving (Show)
+#+END_SRC
+
+The second =MkPerson= is the "value constructor" for the type =Person=. It is short for "make Person". This name can be anything we want, even "Person" so it can match the type, but often this name will be different.
+
+The "deriving (Show)" portion is needed for =Person= values to be displayed in ghci. If that bit was not there, you would get an error when trying to see =Person= values.
+
+We can use =MkPerson= to now create =Person= values by giving it an =Int=, =Float=, =String=, =Char=, and another =String=.
+
+#+BEGIN_SRC haskell
+captainJack :: Person
+captainJack = MkPerson 30 5.11 "Captain" 'J' "Sparrow"
+#+END_SRC
+
+It is common to want access to particular values of a product type, so Haskell lets us define was to access these values by giving them names.
+
+#+BEGIN_SRC haskell
+data Team = MkTeam { teamName :: String, wins :: Int, loses :: Int } deriving (Show)
+#+END_SRC
+
+In the first section of the above code we see a new type of statement. Here the code defines a =record= or a collection of named values. The syntax for =record= definitions are as folows:
+- the =data= keyword
+- the name of the new type (with an uppercase first letter) 
+- the $=$ symbol
+- an opening ={=
+- the different values in the =record= which follow the pattern =name= then =::= ended with the =type= 
+- close the ={= with the =}= symbol
+
+The names given to the values within the =Team= are there so you can access the individual parts of a record later on.
+
+For example:
+#+BEGIN_SRC haskell
+cloud9 :: Team
+cloud9 = MkTeam "Cloud9" 71 14
+
+cloud9Wins :: Int
+cloud9Wins = wins cloud9
+
+cloud9Loses :: Int
+cloud9Loses = loses cloud9
+#+END_SRC
+
+** Functions 
+
+When a value isn't known ahead of time we can express it as a =function=. Functions are both a less specific version of a constant as well as a way to represent verbs.
+
+Here is a very simple, probably useless, function:
+#+BEGIN_SRC haskell 
+knownLater :: Int -> Int
+knownLater = \x   -> x
+#+END_SRC
+
+There are two things which are different here than with a cosntant value:
+- The $\rightarrow$ in the type
+- The =\= symbol and $\rightarrow$ in the definition
+
+Any type a $\rightarrow$ appears in a type signature, it means there is a function. In maths, functions represent "mappings" from some domain into some range/co-domain. For our purposes we can think of the "domain" as the types of values that are needed to create the value we want (the co-domain). For example, addition by one can be thought of as a function that takes an =Int= value and creates another =Int= value.
+
+\[Int \rightarrow Int\]
+
+#+BEGIN_SRC haskell
+addOne :: Int -> Int
+addOne = \x   -> x + 1
+#+END_SRC
+
+Once again, I have added the spacing to make the connection between the definition and the type clearer, you shouldn't actually write code like this.
+
+The first part of the definition, $\x$, is the value we will recieve later. Remember, functions are more vauge than constants because certain values are not known ahead of time. If the value isn't known we'll have to give it *some* kind of name so we can use it. In this case we picked the symbol $x$. The name for the value can be anything so long as it follows the same rules as naming constants.
+
+The second part of the definition is $\rightarrow x + 1$ which lines up with the $\rightarrow Int$ from the type signature. This means, given some value of type $Int$, a new $Int$ can be constructed via $x + 1$. Unlike the $knownLater$ function from earlier, the input to the function is actually being used to *construct* a new value. It is in this sense that functions can act like verbs. The process of creating a new value from some other value is the mechanism that makes Haskell programs tick.
+
+Another example:
+
+Normal addition takes two numbers and creates a new one. We can represent two numbers using a tuple.
+
+\[(Float, Float) \rightarrow Float\]
+
+The mathematical definition can almost directly be translated into Haskell.
+
+#+BEGIN_SRC haskell
+addition :: (Float, Float) -> Float 
+addition = \(x, y) -> x + y 
+
+three :: Float
+three = addition 1 2
+#+END_SRC
+
+The above uses our previous defition of addition to construct =3.0=. 
+
+Functions are needed when certain values aren't known ahead of time. These unknown values become the inputs to the functions and the process of constructing these values are how =verbs= are represented in programming. All programs do is construct new values out of other values. For example, games construct images at 60 fps from values like player health, position, camera angles, etc. Many tasks within programming are similar and by defining more abstract expressions with functions we can end up reusing those definitions.
+
+** generics
+
+The final level of abstraction which will be covered in this section is something called a =generic= value. Generics are for those situations where you don't know a specific value ahead of time *and* you don't know it's type. All that is known is that *some* value is needed.
+
+For example, we can generalize the $knownLater$ function from before:
+#+BEGIN_SRC haskell
+knownLater :: Int -> Int
+knownLater = \x -> x
+
+somethingLater :: a -> a
+somethingLater = \x -> x
+#+END_SRC
+
+All that changed was the type of the input and output. What exactly is a value of =a= though? It could be anything!
+
+#+BEGIN_SRC haskell
+hello :: String
+hello = somethingLater "hello"
+
+z :: Char
+z = somethingLater 'z'
+
+five :: Int
+five = somethingLater 5
+#+END_SRC
+
+The function $somethingLater$ can construct a value of any type by taking some value and giving it right back to us. This seems like a rather useless function, but it is surpisingly so useful Haskell predefines a function like that for us called $id$, short for identity.
+
+#+BEGIN_SRC haskell
+id :: a -> a
+id = \x -> x
+#+END_SRC
+
+This simple function will pop up many more times as we progress, but it would be prudent to at least show an actually useful case of generics.
+
+#+BEGIN_SRC haskell
+swap :: (a, b) -> (b, a)
+swap = \(x, y) -> (y, x)
+
+fst :: (a, b) -> a
+fst = \(x, y) -> x
+
+snd :: (a, b) -> b
+snd = \(x, y) -> y
+#+END_SRC
+
+These are some tuple functions which are only useful *if* they are generic. Imagine having to write a version of $swap$ for literally every single combination of two types ever! No. Just, no.
+
+Generics are nice when working with more complex types that have more structure than normal values. Tuples have a notion of a "first" and a "second" element, allowing us to extract these values or even swap them. As we progress we'll encounter other types which work well as generics.
+
+** Summary
+
+The first part of programming is determing how to break down a problem and then deciding how to represent the pieces. Any values which are known ahead of time can be defined with a =constant=. Any values which can't be constructed until other values are known (possibly when the program is run) can be defined by a =function=. Any values for which not even the =type= is known ahead of time can be defined by =generics=.

@@ -1,0 +1,850 @@
+#+TITLE: Recursion with Vectors
+#+STARTUP: hidestar
+#+STARTUP: indent
+
+# latex options
+#+OPTIONS: author:nil date:nil num:nil 
+#+LATEX_HEADER: \usepackage[margin=1.5in]{geometry}
+#+LATEX_HEADER: \usepackage{apacite}
+#+LATEX_HEADER: \usepackage{setspace}
+
+- Recursion is hard
+- It's complicated
+- Can we do better?
+
+** Examining Past Problems
+
+#+REVEAL: split
+#+BEGIN_SRC cpp
+int sum(vector<int> nums) {
+  auto combine = [nums]() mutable {
+   int n = nums.front();
+   nums.erase(nums.begin());
+   return n + sum(nums);
+  };
+  return !nums.empty() ? combine() : 0;
+}
+#+END_SRC
+
+#+BEGIN_SRC cpp
+int product(vector<int> nums) mutable {
+  auto combine = [nums]() {
+   int n = nums.front();
+   nums.erase(nums.begin());
+   return n * sum(nums);
+  };
+  return !nums.empty() ? combine() : 0;
+}
+#+END_SRC
+
+#+REVEAL: split
+The functions only differ by the operation that combines the elements of the collection.
+
+#+REVEAL: split
+Can this be generalized?
+
+** Generalizing Sum
+
+This is the original
+#+BEGIN_SRC cpp
+int sum(vector<int> nums) {
+  auto combine = [nums]() mutable {
+   int n = nums.front();
+   nums.erase(nums.begin());
+   return n + sum(nums);
+  };
+  return !nums.empty() ? combine() : 0;
+}
+#+END_SRC
+
+Following from the five steps for recursion:
+|----------------------+--------------------------|
+| do-nothing input     | nums.empty()             |
+| do-nothing step      | + 0                      |
+| break off the front  | nums.front()             |
+| make problem smaller | nums.erase(nums.begin()) |
+| combine results      | n + sum(nums)            |
+|----------------------+--------------------------|
+
+Because our breaking off the front requires modifying =nums=, we need to use a =mutable= on-the-spot function for it.
+
+The first thing that can be generalized in =sum= is the operation used to actually combine all of the =int= values. If we allow for the function to be passed in rather than hard coded, =sum= can be used for more cases. To pull out the function we can add a template parameter =F= to represent the function and replace calls to =+= with =f=.
+
+#+REVEAL: split
+#+BEGIN_SRC cpp
+template <typename F>
+int sum(vector<int> nums, F f) {
+  auto combine = [nums, f]() mutable {
+   int n = nums.front();
+   nums.erase(nums.begin());
+   return f(n, sum(nums, f));
+  };
+  return !nums.empty() ? combine() : 0;
+}
+#+END_SRC
+
+Now our recursion steps look like this:
+|----------------------+--------------------------|
+| do-nothing input     | nums.empty()             |
+| do-nothing step      | f(n, 0)                  |
+| break off the front  | nums.front()             |
+| make problem smaller | nums.erase(nums.begin()) |
+| combine results      | f(n, sum(nums))          |
+|----------------------+--------------------------|
+
+If we wanted to use this for a product of numbers instead of a summation, we'll have to change what the default value is, since anything times =0= is zero. Instead, we can just make that value an input as well.
+
+#+REVEAL: split
+#+BEGIN_SRC cpp
+template <typename F>
+int sum(vector<int> nums, int init, F f) {
+  auto combine = [nums, f]() mutable {
+   int n = nums.front();
+   nums.erase(nums.begin());
+   return sum(nums, f(n, init), f));
+  };
+  return !nums.empty() ? combine() : init;
+}
+#+END_SRC
+
+By making the default value an input we can actually use that input to "accumulate" our result rather than having to wait until the rest of the vector has been processed before combinging results. In some langauges this can allow for faster and less memory intensive code, but unfortunately C++ doesn't make that optimization. However, it's a good habit to get into the practice of.
+
+Now our recursion steps look like this:
+|----------------------+--------------------------|
+| do-nothing input     | nums.empty()             |
+| do-nothing step      | init                     |
+| break off the front  | nums.front()             |
+| make problem smaller | nums.erase(nums.begin()) |
+| combine results      | f(n, int)                |
+|----------------------+--------------------------|
+
+The next bit of generalizing possible is allowing for the "sum" of types other than only =int=. There are lots of times when a collection might need to be combined into a single value.
+
+#+REVEAL: split
+#+BEGIN_SRC cpp
+template <typename A, typename F>
+A sum(vector<A, allocator<A>> nums, A init, F f) {
+  auto combine = [nums]() {
+   A n = nums.front();
+   nums.erase(nums.begin());
+   return sum(nums, f(n, init), f));
+  };
+  return !nums.empty() ? combine() : init;
+}
+
+#+END_SRC
+
+Note the ugly =vector<A, allocator<A>>= type now being used. This is another unfortunate wart of C++. Allocators are a complicated topic, but just know that when you want to generalize over the type of a vector, you'll have to add in the =allocator= business.
+
+What we have so far is fairly general. It can use a function to combine all the elements of a vetor of any type by accumulating results in the =init= input. However, there is one last generalization that can be made here. What if we want the accumulated result to be a different type than what was initially in the collection? Imagine that you have a =vector<int>= and want to create a comma seperated =string= of all the numbers. In that case we'd want to accumulate the results into a =string= rather than an =int=. We can accomplish this by adding one more type parameter to =sum=.
+
+#+REVEAL: split
+#+BEGIN_SRC cpp
+template <typename B, typename A, typename F>
+B sum(vector<A, allocator<A>> nums, B init, F f) {
+  auto combine = [nums, init, f]() mutable {
+   A n = nums.front();
+   nums.erase(nums.begin());
+   return sum(nums, f(n, init), f);
+  };
+  return !nums.empty() ? combine() : init;
+}
+#+END_SRC
+
+There we go! From our initial definition, we now have a recursive function which can combine the elements of any vector into some accumulated value! Infact, the name "sum" doesn't really do justice to what's going on here. In C++, there is actually a version of this function called accumulate.
+
+** Accumulate
+
+#+BEGIN_SRC cpp
+#include <numeric>
+using namespace std;
+
+int main(){
+  vector<int> numbers = {1,2,3,4,5};
+  
+  cout << accumulate(numbers.begin(), numbers.end(), 0,
+    [](int x, int y) { return x + y });
+  
+  cout << "\n";
+  return 0;
+}
+#+END_SRC
+
+The above code would output "15". The difference between our derived version of accumulate and C++'s version is that =std::accumulate= can actually accumulate chunks of the vector rather than the whole collection. The chunk is specified through the first two inputs. Normally, though, we want to accumulate the whole collection so =.begin()= and =.end()= are used.
+
+** Range
+#+BEGIN_SRC cpp
+vector<int> range(int start, int stop) {
+	auto continue_range = [start, stop]() {
+
+		// Calculate the rest of the range
+		auto rest = range(start + 1, stop);
+
+		// Insert the current number before
+		// the rest
+		rest.insert(rest.begin(), start);
+
+		return rest;
+	};
+
+	return start < stop ? continue_range() : vector<int> {start};
+}
+#+END_SRC
+
+Start with the function and it's inputs.
+[[./images/recursion-with-vectors/range-example/range-example-1.png]]
+Replace the function call with its definition and swap out the variables with the given inputs.
+[[./images/recursion-with-vectors/range-example/range-example-2.png]]
+Evaluate the choice on =1 < 3=. Its true so pick the first value.
+[[./images/recursion-with-vectors/range-example/range-example-3.png]]
+Replace the next call to =range= with its definition and the variables swapped out.
+[[./images/recursion-with-vectors/range-example/range-example-4.png]]
+Evaluate the choice on =2 < 3=. Its true, so pick the first value.
+[[./images/recursion-with-vectors/range-example/range-example-5.png]]
+Replace the next call to =range= with its definition and the variables swapped out.
+[[./images/recursion-with-vectors/range-example/range-example-6.png]]
+Evaluate the choice on =3 < 3=. Its false, so pick the second value, the vector with only 3 as an element.
+[[./images/recursion-with-vectors/range-example/range-example-7.png]]
+Evaluate the second insert, resulting in the vector ={2, 3}=.
+[[./images/recursion-with-vectors/range-example/range-example-8.png]]
+Evluate the first insert, resulting in the vector ={1, 2, 3}=. 
+[[./images/recursion-with-vectors/range-example/range-example-9.png]]
+
+As we can see, range is more of less the opposite of =sum= from before. Instead of combining all numbers in a vector down to a single result, we use a "seed" value =start= to grow a vector of =int= values while some condition is true.
+
+** Generalizing Range
+
+Given our success with generalizing =sum= into the function =accumulate=, it stands to reason that we can do the same for this function as well.
+
+#+BEGIN_SRC cpp
+vector<int> range(int start, int stop) {
+	auto continue_range = [start, stop]() {
+
+		// Calculate the rest of the range
+		auto rest = range(start + 1, stop);
+
+		// Insert the current number before
+		// the rest
+		rest.insert(rest.begin(), start);
+
+		return rest;
+	};
+
+	return start < stop ? continue_range() : vector<int> {start};
+}
+#+END_SRC
+
+In range, the first thing to generalize is the check for when to stop growing out the list. Note that =range= only builds lists in the positive direction. If the check is pulled out as a paramter, then it would be possible to use it to grow descending lists as well.
+
+#+BEGIN_SRC cpp
+template <typename Check>
+vector<int> range(Check cond, int start, int stop) {
+	auto continue_range = [start, stop]() {
+
+		// Calculate the rest of the range
+		auto rest = range(start + 1, stop);
+
+		// Insert the current number before
+		// the rest
+		rest.insert(rest.begin(), start);
+
+		return rest;
+	};
+
+	return cond(start, stop) ? continue_range() : vector<int> {start};
+}
+#+END_SRC
+
+Notice that the stop value is never actually used in any part of =range= except for the check. This implies that we don't actually need to pass it in and can instead assume that =cond= will already know when it should stop.
+
+#+BEGIN_SRC cpp
+template <typename Check>
+vector<int> range(Check cond, int start) {
+	auto continue_range = [cond, start]() {
+
+		// Calculate the rest of the range
+		auto rest = range(start + 1);
+
+		// Insert the current number before
+		// the rest
+		rest.insert(rest.begin(), start);
+
+		return rest;
+	};
+
+	return cond(start) ? continue_range() : vector<int> {start};
+}
+#+END_SRC
+
+#+BEGIN_SRC cpp
+template <typename Check>
+vector<int> range(Check cond, int start) {
+	auto continue_range = [cond, start]() {
+
+            int next_start = start + 1;
+            
+		// Calculate the rest of the range
+		auto rest = range(cond, next_start);
+
+		// Insert the current number before
+		// the rest
+		rest.insert(rest.begin(), start);
+
+		return rest;
+	};
+
+	return cond(start) ? continue_range() : vector<int> {start};
+}
+#+END_SRC
+
+In order to make things clearer for the next step, lets pull out creating the next input for =start= into its own step. Since we don't *always* want to use =+1= to generate the next value for =start=, we should pull out that step as another function.
+
+#+BEGIN_SRC cpp
+template <typename Expand, typename Check>
+vector<int> range(Expand f, Check cond, int start) {
+	auto continue_range = [f, cond, start]() {
+
+            int next_start = f(start);
+            
+		// Calculate the rest of the range
+		auto rest = range(cond, next_start);
+
+		// Insert the current number before
+		// the rest
+		rest.insert(rest.begin(), start);
+
+		return rest;
+	};
+
+	return cond(start) ? continue_range() : vector<int> {start};
+}
+#+END_SRC
+
+Next, we can generalize over the type inside the =vector=. Just like last time, we need to add on the bit for =allocator<A>=.
+
+#+BEGIN_SRC cpp
+template <typename A, typename Expand, typename Check>
+vector<A, allocator<A>> range(Expand f, Check cond, A start) {
+	auto continue_range = [f, cond, start]() {
+
+            A next_start = f(start);
+            
+		// Calculate the rest of the range
+		auto rest = range(f, cond, next_start);
+
+		// Insert the current A before
+		// the rest
+		rest.insert(rest.begin(), start);
+
+		return rest;
+	};
+
+	return cond(start) ? continue_range() : 
+        vector<A, allocator<A>> {start};
+}
+#+END_SRC
+
+In order to make =range= as general as possible we'll need to allow it to grow values of a different type than the original seed given. Just like how accumulate can reduce a collection into a different type, the same capability is useful when growing collections. However, this is a bit more complicated than with accumulate in that, our function for generating the next value for the collection would now have to return *two* values.
+
+For example, if we wanted to generate a list of strings with numbers like ={"1", "2", "3", "4"}=, we'd want our starting value to be an =int= value. Given the start though, we'd have to generate a string via =to_string()= in order to make the next element for the list, but we can't then pass that =string= as the next input for start, because it must be an =int=. This implies that our expand step needs to generate *both* a new value for the collection *and* the next start/seed value.
+
+In order to capture both values we can use the =pair= type from the standard library. You can make values into a pair by using the function =make_pair()=. It is a templated function that will take any two values and turn them into a pair. We can then use the =get()= function from the standard library to access the parts of the pair. =get()= is templated over the position of the item you want in the pair and is used like this:
+
+#+BEGIN_SRC cpp
+int main() {
+  pair<int, string> p = make_pair(5, "five");
+  cout << "The first item was the int " << get<0>(p) << "\n";
+  cout << "The second item was the string " << get<1>(p) << "\n";
+  return 0;
+}
+#+END_SRC
+
+Note that positions for =get()= work the same as all other positions, they start from 0. Knowing this, we can modify =range=.
+
+#+BEGIN_SRC cpp
+template <typename B, typename A, typename Expand, typename Check>
+vector<B, allocator<B>> range(Expand f, Check cond, A start) {
+	auto continue_range = [f, cond, start]() {
+
+            pair<B,A> next_start = f(start);
+            
+		// Calculate the rest of the range
+		auto rest = range<B>(f, cond, get<1>(next_start));
+
+		// Insert the current B before
+		// the rest
+		rest.insert(rest.begin(), get<0>(next_start));
+
+		return rest;
+	};
+
+	return cond(start) ? continue_range() : 
+        vector<B, allocator<B>> {start};
+}
+#+END_SRC
+
+Unfortunately, there is no equivalent of this generalized range function in the C++ standard library. As such we'll give our own name to the function in order to better reflect what it actually does.
+
+** Grow
+
+#+BEGIN_SRC cpp
+template<typename B, typename A, typename Expand, typename Check>
+vector<B, allocator<B>> grow(A seed, Check cond, Expand f) {
+	auto expand = [f, cond, seed]() {
+		pair<B, A> result = f(seed);
+		auto rest = grow<B>(get<1>(result), cond, f);
+		rest.insert(rest.begin(), get<0>(result));
+		return rest;
+	};
+	return cond(seed) ? expand() : 
+        vector<B, allocator<B>>{};
+}
+#+END_SRC
+
+To summarize what =grow= does, it geneates a =vector= using some starting "seed" value. It accomplishes this by constantly checking if the seed can continue to grow using =cond=. If the seed can still be grown it will use the expanding function =f= to generate a new value for the collection and the new seed for the next step. This process will continue until =cond= fails, in which case it will stop and return a =vector= of what ever values it grew so far.
+
+#+BEGIN_SRC cpp
+vector<int> range = unfold<int>(1,
+  [](int x) { return x <= 10; },
+  [](int x) { return make_pair(x, x+1); });
+
+// 1  2  3  4  5  6  7  8  9  10 
+for_each(range.begin(), range.end(),
+  [](auto e) { cout << e << " "; });
+#+END_SRC
+
+** No More Recursion
+
+These two functions, =accumulate= and =grow=, open the doors to something that wasn't quite possible before. Namely, they allow us to complete *avoid* having to write recursive functions ourselves in most cases. In fact, when used together, the pattern of growing out a vector and then accumulating it into a result can capture a huge chunk of problems. 
+
+For example, if we wanted to sum all of the numbers from some start to some stop, we could accomplish this entirely without writing the recursion ourselves:
+
+#+BEGIN_SRC cpp
+int main() {
+  int start = -5;
+  int stop = 100;
+  
+  auto numbers = grow<int>(start,
+    [stop](int seed) { return seed <= stop; },
+    [](int seed) { return make_pair(seed, stop); });
+
+  cout << accumulate(numbers.begin(), numbers.end(), 0,
+    [](int result, int next) { return result + next; });
+  cout << "\n";
+
+  return 0;
+}
+#+END_SRC
+
+While perhaps a bit more verbose that the normal recursive solution would have been, this technique scales well into more complicated problems. In general, we can simply look at the expected type of our problem and pick which functions to use.
+
+If we see something of the form:
+
+\[T \rightarrow vector(T)\]
+
+We can solve it using =grow=. Likewise, if we see a problem which looks like:
+
+\[vector(T) \rightarrow T\]
+
+We can solve it with accumulate.
+
+** Problem Solving with Grow and Accumulate 
+
+Lets say that we had some file which specified what contents needed to be on a webpage. An example of the contents of this file might be:
+
+#+BEGIN_SRC 
+title: My Website
+heading: My Friends
+list: Abe, Bill, Clarice, Danica, Edgar
+image: https://thumbs.dreamstime.com/b/united-two-friends-guys-28277063.jpg
+#+END_SRC
+
+In this case we'd want to translate the lines into the following html:
+#+BEGIN_SRC html
+<html>
+<header>
+ <title> My Website </title>
+</header>
+<body>
+  <h1> My Website </h1>
+  <ul> <li>Abe</li><li>Bill</li><li>Clarice</li><li>Danica</li><li>Edgar</li></ul>
+  <img src="https://thumbs.dreamstime.com/b/united-two-friends-guys-28277063.jpg" />
+</body>
+</html>
+#+END_SRC
+
+It is important to note that there many be any number of lines with any order of what kind of html to generate. The results *cannot* be hard coded before hand. How can we even begin to tackle this problem?
+
+The first step is to look at it from a birds eye view. If we had a function which did the conversion for us, what would its type look like?
+
+Since we begin with the contents of a file, it has to be a =string= for the input. Because we need to also output html to a file, the result must also be a =string=, but to be clear in our planning we can alias =string= with =html=. So we can shorthand what happens in the function like this:
+
+\[string \rightarrow html\]
+
+We start with a =string= and end up with =html= (which is really =string=). Since we can't tackle the entire problem all at once, let's break it down. Its true that we get the contents of the file as a single string, but what we really care about are the *lines* of the file. In other words, the string is technically not a single value, it is many values separated by newline characters ="\n"=. So *if* we had a way to break up the initial value into lines, we could more accurately express the problem as:
+
+\[string \rightarrow vector(string) \rightarrow html\]
+
+Once we have the lines as a collection we could then think about them individually. How could we take a single line from the file and convert it into the proper html? Assuming we could, our program could now resemble something like:
+
+\[string \rightarrow vector(string) \rightarrow vector(html) \rightarrow html\]
+
+Notice that the two halves of our program match exactly with our recursion replacements! $string \rightarrow vector(string)$ can be solved using =grow= and $vector(html) \rightarrow html$ can be solved using accumulate. This leaves only the middle step from $vector(string) \rightarrow vector(html)$ as a complete mystery. 
+
+#+BEGIN_SRC cpp
+#include <numeric>
+
+using html = string;
+
+vector<string> lines(string spec) {
+  return grow<string>(???);
+}
+
+vector<html> to_html(vector<string> ls) {
+  return ???;
+}
+
+html combine_html(vector<html> elems) {
+  return accumulate(???);
+}
+
+html website(string spec) {
+  auto spec_lines = lines(spec); 
+  auto html_lines = to_html(spec_lines);
+  return combine_html(html_lines);
+}
+#+END_SRC
+
+First, let's fill out the =lines= function. Remember that =grow= needs three inputs:
+- a starting =seed= value from which to grow the collection
+- a function which can check the =seed= to determine if it can still grow
+- a function which expands the =seed= into an element for the collection and a new =seed=
+
+#+BEGIN_SRC cpp
+vector<string> lines(string spec) {
+  return grow<string>(???, ???, ???);
+}
+#+END_SRC
+
+Obviously we need to start with =spec= as there are no other inputs. 
+
+#+BEGIN_SRC cpp
+vector<string> lines(string spec) {
+  return grow<string>(spec, ???, ???);
+}
+#+END_SRC
+
+We know that the file has separate lines and thus, every line inside of the string is separated by ="\n"=. Just like with normal recursion, it is useful to figure out the do-nothing input. In terms of grow, the do-nothing input will be what seed stops the growing. Our check then should be something along the lines of "if we are not at the do-nothing value".
+
+#+BEGIN_SRC cpp
+vector<string> lines(string spec) {
+  return grow<string>(spec,
+    [](string seed) { return ???; },
+    ???);
+}
+#+END_SRC
+
+So the question is, when should we stop growing the collection? Well, remember that =spec= will contain all of the lines from the file. If there are no more lines in =spec=, then we shouldn't do any more work. However, with grow we actually want that last line to be included in the collection. If we make our check only for the existence of a ="\n"=, then it will stop when it hits the last line and not actually include it. To remedy this, we can make our check for the empty string.
+
+#+BEGIN_SRC cpp
+vector<string> lines(string spec) {
+  return grow<string>(spec,
+    [](string seed) { return !seed.empty(); },
+    ???);
+}
+#+END_SRC
+
+Remember that the check is to see whether the seed should *continue* to grow, not whether it should stop. For this reason we negate the result of =empty= using the =!= operation.
+
+The final input for grow has to be our expand function. This function will take a seed value and generate a pair of a new element for the collection and a new seed value. This process is similar to the normal recursion steps of breaking off the front and making the problem smaller. The element for the list is the front while the next seed is the smaller input to the function.
+
+#+BEGIN_SRC cpp
+vector<string> lines(string spec) {
+  return grow<string>(spec,
+    [](string seed) { return !seed.empty(); },
+    [](string seed) { return make_pair(Elem?, Next?); });
+}
+#+END_SRC
+
+Now we have two objectives: =Elem?= and =Next?=. We can turn them into functions and solve them separately. For our element, we want only the portion of the string up until the first ="\n"= or the end of the string if there are none. For the next seed we want the inverse, where everything up to the next ="\n"= is dropped.
+
+#+BEGIN_SRC cpp
+string take_line(string line) {
+  return ???;
+}
+
+string drop_line(string line) {
+  return ???;
+} 
+
+vector<string> lines(string spec) {
+  return grow<string>(spec,
+    [](string seed) { return !seed.empty(); },
+    [](string seed) { return make_pair(take_line(seed), drop_line(seed)); });
+}
+#+END_SRC
+
+We can now just fill in the take and drop functions like so:
+
+#+BEGIN_SRC cpp
+string take_line(string line) {
+  int new_line = line.find("\n");
+  return new_line == -1 ? line :
+    line.substr(0, new_line);
+}
+
+string drop_line(string line) {
+  int new_line = line.find("\n");
+  return new_line == -1 ? "" :
+    line.substr(new_line + 1, line.length()-1);
+} 
+
+vector<string> lines(string spec) {
+  return grow<string>(spec,
+    [](string seed) { return !seed.empty(); },
+    [](string seed) { return make_pair(take_line(seed), drop_line(seed)); });
+}
+#+END_SRC
+
+And with that we've solved the first third of the program! The accumulate step is much simpler than the grow step in this case. =accumulate()= needs four inputs: 
+- where in the collection to begin 
+- where in the collection to end 
+- a starting accumulation value (same type as the desired result)
+- a function which takes the result so far and an element from the collection and combines them into a new result
+
+Typically we'll always want to accumulate from =.begin()= to =.end()=.
+
+#+BEGIN_SRC cpp
+html combine_html(vector<html> elems) {
+  return accumulate(elems.begin(), elems.end(), ???, ???);
+}
+#+END_SRC
+
+Since we are accumulating some =html= (remember its actually just a =string=), we can begin with the empty string. Note that C++ is dumb and can't figure out that by =""= you want a string and not a =char[]= in this case, so write the empty string as =string("")= to fix this.
+
+#+BEGIN_SRC cpp
+html combine_html(vector<html> elems) {
+  return accumulate(elems.begin(), elems.end(), string(""), ???);
+}
+#+END_SRC
+
+That leaves us with the combination function.
+
+#+BEGIN_SRC cpp
+html combine_html(vector<html> elems) {
+  return accumulate(elems.begin(), elems.end(), string(""), 
+    [](html result, html e) { return ???; });
+}
+#+END_SRC
+
+And in this case, we can just add up the result so far with the element!
+
+#+BEGIN_SRC cpp
+html combine_html(vector<html> elems) {
+  return accumulate(elems.begin(), elems.end(), string(""), 
+    [](html result, html e) { return result + e; });
+}
+#+END_SRC
+
+So we have now solved two thirds of the problem by using =grow= and =accumulate=. We can split up the initial spec string into all of it's lines and once we have all of the correct html elements which correspond to the lines, we can just add them back up into the final result. This means that most of the work from our problem is actually in the $vector(string) \rightarrow vector(html)$ step. 
+
+#+BEGIN_SRC cpp
+#include <numeric>
+
+using html = string;
+
+string take_line(string line) {
+  int new_line = line.find("\n");
+  return new_line == -1 ? line :
+    line.substr(0, new_line);
+}
+
+string drop_line(string line) {
+  int new_line = line.find("\n");
+  return new_line == -1 ? "" :
+    line.substr(new_line + 1, line.length()-1);
+} 
+
+vector<string> lines(string spec) {
+  return grow<string>(spec,
+    [](string seed) { return !seed.empty(); },
+    [](string seed) { return make_pair(take_line(seed), drop_line(seed)); });
+}
+
+vector<html> to_html(vector<string> ls) {
+  return ???;
+}
+
+html combine_html(vector<html> elems) {
+  return accumulate(elems.begin(), elems.end(), string(""), 
+    [](html result, html e) { return result + e; });
+}
+
+html website(string spec) {
+  auto spec_lines = lines(spec); 
+  auto html_lines = to_html(spec_lines);
+  return combine_html(html_lines);
+}
+#+END_SRC
+
+** Transform
+
+The last piece of the puzzle is the =to_html= function. So far we haven't encountered any tools which would let use take a collection and return a collection. Luckily there is a cousin of =accumulate= called =transform= which solves exactly this problem.
+
+=transform= needs four things:
+- where in some collection to start transforming
+- where in some collection to stop transforming
+- a place to put the transformed values
+- a function to transform one element
+
+As an example, lets try to convert a collection of numbers into a collection of strings.
+
+#+BEGIN_SRC cpp
+#include <iostream>
+#include <string>
+#include <algorithm>
+using namespace std;
+
+int main() {
+  vector<int> nums = {1,2,3,4,5};
+  vector<string> strs;
+
+  transform(???, ???, ???, ???);
+
+  foreach(strs.begin(), strs.end(),
+    [](auto e) { cout << e << " "; });
+  cout << "\n";
+  
+  return 0;
+}
+#+END_SRC
+
+As usual, we'll transform the whole collection from =.begin()= to =.end()=.
+
+#+BEGIN_SRC cpp
+#include <iostream>
+#include <string>
+#include <algorithm>
+using namespace std;
+
+int main() {
+  vector<int> nums = {1,2,3,4,5};
+  vector<string> strs;
+
+  transform(nums.begin(), nums.end(), ???, ???);
+
+  foreach(strs.begin(), strs.end(),
+    [](auto e) { cout << e << " "; });
+  cout << "\n";
+  
+  return 0;
+}
+#+END_SRC
+
+We want to put our results into the new vector =strs=, however, to make the elements in =strs= have the same order as in =nums=, we'll need to use the function =back_inserter= to tell =transform= this.
+
+#+BEGIN_SRC cpp
+#include <iostream>
+#include <string>
+#include <algorithm>
+using namespace std;
+
+int main() {
+  vector<int> nums = {1,2,3,4,5};
+  vector<string> strs;
+
+  transform(nums.begin(), nums.end(), 
+    back_inserter(strs), 
+    ???);
+
+  foreach(strs.begin(), strs.end(),
+    [](auto e) { cout << e << " "; });
+  cout << "\n";
+  
+  return 0;
+}
+#+END_SRC
+
+Now we simply need to provide the function that converts a single =int= value into a single =string= value. =transform= will take this function and run it on every element in the range we specified and collect the results in the location provided. In this way, =transform= lets us reduce the problem of transforming an entire collection of =int= and =string= values and instead solve a single step of the problem.
+
+#+BEGIN_SRC cpp
+#include <iostream>
+#include <string>
+#include <algorithm>
+using namespace std;
+
+int main() {
+  vector<int> nums = {1,2,3,4,5};
+  vector<string> strs;
+
+  transform(nums.begin(), nums.end(), 
+    back_inserter(strs), 
+    [](int n) { return to_string(n); });
+
+  foreach(strs.begin(), strs.end(),
+    [](auto e) { cout << e << " "; });
+  cout << "\n";
+  
+  return 0;
+}
+#+END_SRC
+
+More generally, =transform= lets us solve any problem with the form $vector(A) \rightarrow vector(B)$ by only solving the problem of $A \rightarrow B$. In this case we just needed a function that did $int \rightarrow string$. How can this be applied to the previous problem of converting the lines from the spec file into html? In the same way that we only needed to solve the simpler case when converting numbers into strings, using transform only need to solve the problem of converting a single line into the proper html.
+
+#+BEGIN_SRC cpp
+#include <numeric>
+
+using html = string;
+
+string take_line(string line) {
+  int new_line = line.find("\n");
+  return new_line == -1 ? line :
+    line.substr(0, new_line);
+}
+
+string drop_line(string line) {
+  int new_line = line.find("\n");
+  return new_line == -1 ? "" :
+    line.substr(new_line + 1, line.length()-1);
+} 
+
+vector<string> lines(string spec) {
+  return grow<string>(spec,
+    [](string seed) { return !seed.empty(); },
+    [](string seed) { return make_pair(take_line(seed), drop_line(seed)); });
+}
+
+html to_html(string line) {
+  return ???;
+}
+
+html combine_html(vector<html> elems) {
+  return accumulate(elems.begin(), elems.end(), string(""), 
+    [](html result, html e) { return result + e; });
+}
+
+html website(string spec) {
+  auto spec_lines = lines(spec);
+ 
+  transform(spec_lines.begin(), spec_lines.end(),
+    spec_lines.begin(),
+    [](string line) { return to_html(line); });
+
+  return combine_html(spec_lines);
+}
+#+END_SRC
+
+We can new redefine =to_html= to only handle a single line from the spec file, rather than the entire collection of lines and replace the creation of a new collection in =main= with a statement where we use =transform= on =spec_lines=. Note that because we aren't technically transforming the collection into a new type, we can just reuse =spec_lines= as the destination for our transform results.
+
+With that taken care of, the only part left to solve is converting a single line of the file, which is left as an exercise to the reader. You'll have to do something similar to this process again for list items, whose elements must be separated out and transformed individually before combining them back into the final html for that line.
+
+** Summary
+
+Recursion is a powerful technique, but sometimes writing the recursive functions ourselves can be confusing and tedious. Luckily, C++ is expressive enough to let us generalize over certain types of recursive problems and solve them by only providing the necessary pieces. It turns out that most problems will break down into the pattern of =grow= then =transform= then =accumulate=. There are other such functions which cover different cases, but as a start, these functions can be used to plan out larger tasks that involve collections and reduce the actual code we need to write as programmers to the simple cases that only handle one or two elements from the collections at a time.
+
+| Problem                           | Function   |
+|-----------------------------------+------------|
+| $T \rightarrow vector(T)$         | grow       |
+| $vector(A) \rightarrow vector(B)$ | transform  |
+| $vector(T) \rightarrow T$         | accumulate |
+|-----------------------------------+------------|
